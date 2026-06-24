@@ -29,9 +29,9 @@
 
   let state = {
     isSelecting: false, hoveredEl: null, markedElements: [],
-    addedElements: [],
     toolbarEl: null, inspectorEl: null, currentEditId: null,
-    isVisualEditing: false, wakeBtn: null
+    isVisualEditing: false, wakeBtn: null,
+    inspectorPos: null
   };
 
   function uid() { return 'm_' + Math.random().toString(36).slice(2, 10); }
@@ -40,38 +40,21 @@
 
   function saveState() {
     try {
-      const markedData = state.markedElements.map(m => ({
+      const data = state.markedElements.map(m => ({
         id: m.id, selector: m.selector, tag: m.tag || '',
-        note: m.note || '', originalHTML: m.originalHTML, modifiedHTML: m.modifiedHTML || null,
+        note: m.note || '', description: m.description || '',
+        originalHTML: m.originalHTML, modifiedHTML: m.modifiedHTML || null,
         modifiedStyles: m.modifiedStyles || {},
         originalHref: m.originalHref !== undefined ? m.originalHref : undefined,
-        modifiedHref: m.modifiedHref !== undefined ? m.modifiedHref : undefined,
-        isAdded: !!m._isAdded
+        modifiedHref: m.modifiedHref !== undefined ? m.modifiedHref : undefined
       }));
-      const addedData = state.addedElements.map(a => ({
-        id: a.id,
-        parentSelector: a.parentSelector,
-        nextSiblingSelector: a.nextSiblingSelector || null,
-        outerHTML: a.outerHTML,
-        originalMarkedId: a.originalMarkedId || null
-      }));
-      const data = { marked: markedData, added: addedData };
       sessionStorage.setItem(STATE_KEY, JSON.stringify(data));
     } catch(e) {}
   }
   function loadState() {
     try {
       const raw = sessionStorage.getItem(STATE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          state.markedElements = parsed;
-          state.addedElements = [];
-        } else {
-          state.markedElements = parsed.marked || [];
-          state.addedElements = parsed.added || [];
-        }
-      }
+      if (raw) state.markedElements = JSON.parse(raw);
     } catch(e) {}
   }
   function buildSelector(el) {
@@ -561,13 +544,38 @@
       const t = e.target;
       if (t && t.classList && (t.classList.contains('html-diff-marker-badge') || t.classList.contains('html-diff-marker-resize-handle') || t.classList.contains('html-diff-marker-remove-badge'))) return;
       e.preventDefault(); e.stopPropagation();
+      const clickX = e.clientX;
+      const clickY = e.clientY;
       const savedHtml = el.innerHTML;
       stripMarkerChildren(el);
-      const cleanedHtml = el.innerHTML;
       el.contentEditable = 'true';
       el.style.outline = '2px dashed #3b82f6';
-      el.focus();
-      // 不自动全选文本，用户点击定位光标位置编辑
+      // 将光标放置在用户双击的精确位置（避免全选文本）
+      try {
+        let range = null;
+        if (document.caretRangeFromPoint) {
+          range = document.caretRangeFromPoint(clickX, clickY);
+        }
+        if (!range && document.caretPositionFromPoint) {
+          const pos = document.caretPositionFromPoint(clickX, clickY);
+          if (pos && pos.offsetNode) {
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+            range.collapse(true);
+          }
+        }
+        if (range && el.contains(range.startContainer)) {
+          const sel = window.getSelection();
+          if (sel) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        } else {
+          el.focus();
+        }
+      } catch(err) {
+        el.focus();
+      }
 
       function onKeyDown(ev) {
         if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); finishEdit(false); }
@@ -582,7 +590,6 @@
         document.removeEventListener('keydown', onKeyDown, true);
         document.removeEventListener('click', onClickOut, true);
         if (save) {
-          const newHtml = el.innerHTML;
           const newOuter = getOuterHTML(el);
           if (newOuter !== entry.originalHTML) {
             entry.modifiedHTML = newOuter;
@@ -590,13 +597,11 @@
           }
           saveState();
           if (state.currentEditId === entry.id) openInspector(entry.id);
-          // 重新应用标记（恢复徽章）
           entry._dragEnabled = false; entry._resizeEnabled = false;
           entry._wheelEnabled = false; entry._textEditEnabled = false;
           applyMarkVisual(entry);
         } else {
           el.innerHTML = savedHtml;
-          // 恢复徽章
           entry._dragEnabled = false; entry._resizeEnabled = false;
           entry._wheelEnabled = false; entry._textEditEnabled = false;
           applyMarkVisual(entry);
@@ -607,103 +612,24 @@
     }, true);
   }
 
-  // ---------- 复制元素 ----------
-  function duplicateElement(id) {
-    const entry = state.markedElements.find(m => m.id === id);
-    if (!entry) return null;
-    const el = entry._el || document.querySelector(entry.selector);
-    if (!el) return null;
-    const parent = el.parentNode;
-    if (!parent) return null;
-    const clone = el.cloneNode(true);
-    stripMarkerChildren(clone);
-    const nextSibling = el.nextElementSibling;
-    if (nextSibling) parent.insertBefore(clone, nextSibling);
-    else parent.appendChild(clone);
-    const addedId = 'a_' + Math.random().toString(36).slice(2, 10);
-    const parentSelector = buildSelector(parent);
-    const nextSiblingSelector = nextSibling ? buildSelector(nextSibling) : null;
-    const addedEntry = {
-      id: addedId,
-      parentSelector: parentSelector,
-      nextSiblingSelector: nextSiblingSelector,
-      outerHTML: clone.outerHTML,
-      originalMarkedId: id
-    };
-    state.addedElements.push(addedEntry);
-    const newEntry = {
-      id: uid(),
-      selector: buildSelector(clone),
-      tag: clone.tagName.toLowerCase(),
-      note: (entry.note || elementInfo(clone)) + ' (副本)',
-      originalHTML: getOuterHTML(clone),
-      modifiedHTML: null,
-      originalStyles: null,
-      modifiedStyles: {},
-      originalHref: clone.tagName === 'A' ? clone.getAttribute('href') : undefined,
-      modifiedHref: undefined,
-      _el: clone,
-      _isAdded: true,
-      _addedId: addedId
-    };
-    state.markedElements.push(newEntry);
-    applyMarkVisual(newEntry);
-    saveState();
-    if (!state.toolbarEl) renderToolbar(); else updateToolbarCounts();
-    openInspector(newEntry.id);
-    return newEntry;
-  }
-
-  function rebuildAddedElements() {
-    const rebuilt = [];
-    state.addedElements.forEach(added => {
-      try {
-        const parent = document.querySelector(added.parentSelector);
-        if (!parent) return;
-        const template = document.createElement('template');
-        template.innerHTML = added.outerHTML.trim();
-        const el = template.content.firstElementChild;
-        if (!el) return;
-        let nextSibling = null;
-        if (added.nextSiblingSelector) {
-          nextSibling = parent.querySelector(added.nextSiblingSelector);
-        }
-        if (nextSibling) parent.insertBefore(el, nextSibling);
-        else parent.appendChild(el);
-        rebuilt.push({ id: added.id, el: el });
-      } catch(e) {}
-    });
-    return rebuilt;
-  }
-
   // ---------- 删除标记 ----------
   function removeMark(id) {
     const idx = state.markedElements.findIndex(m => m.id === id);
     if (idx < 0) return;
     const entry = state.markedElements[idx];
     const el = entry._el || document.querySelector(entry.selector);
-    const isAdded = entry._isAdded;
-    const addedId = entry._addedId;
     if (el) {
-      if (isAdded) {
-        el.remove();
-      } else {
-        el.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-visual-edit');
-        if (entry.originalStyles) {
-          Object.keys(entry.modifiedStyles || {}).forEach(prop => {
-            el.style.removeProperty(cssProp(prop));
-          });
-        }
-        if (entry.tag === 'a') {
-          if (entry.originalHref !== undefined && entry.originalHref !== null) el.setAttribute('href', entry.originalHref);
-          else el.removeAttribute('href');
-        }
-        stripMarkerChildren(el);
+      el.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-visual-edit');
+      if (entry.originalStyles) {
+        Object.keys(entry.modifiedStyles || {}).forEach(prop => {
+          el.style.removeProperty(cssProp(prop));
+        });
       }
-    }
-    if (isAdded && addedId) {
-      const aIdx = state.addedElements.findIndex(a => a.id === addedId);
-      if (aIdx >= 0) state.addedElements.splice(aIdx, 1);
+      if (entry.tag === 'a') {
+        if (entry.originalHref !== undefined && entry.originalHref !== null) el.setAttribute('href', entry.originalHref);
+        else el.removeAttribute('href');
+      }
+      stripMarkerChildren(el);
     }
     state.markedElements.splice(idx, 1);
     saveState();
@@ -714,6 +640,108 @@
     const ids = state.markedElements.map(m => m.id);
     ids.forEach(id => removeMark(id));
     sessionStorage.removeItem(STATE_KEY);
+    updateToolbarCounts();
+  }
+
+  // ---------- 元素操作（复制、添加、删除） ----------
+  function getCurrentEntry() {
+    if (state.currentEditId) {
+      return state.markedElements.find(m => m.id === state.currentEditId);
+    }
+    return null;
+  }
+
+  function duplicateSelectedElement() {
+    const entry = getCurrentEntry();
+    if (!entry || !entry._el) {
+      alert('请先在编辑面板中选择一个组件');
+      return;
+    }
+    const el = entry._el;
+    try {
+      const clone = el.cloneNode(true);
+      // 清除 clone 上的标记样式
+      clone.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
+      stripMarkerChildren(clone);
+      // 插入到原元素后面
+      if (el.parentNode) {
+        el.parentNode.insertBefore(clone, el.nextSibling);
+      } else {
+        document.body.appendChild(clone);
+      }
+      // 将新创建的元素标记为新组件
+      const newEntry = {
+        id: uid(), selector: buildSelector(clone), tag: clone.tagName.toLowerCase(),
+        note: (entry.note || '') + '（复制）',
+        description: entry.description || '',
+        originalHTML: getOuterHTML(clone), modifiedHTML: null,
+        originalStyles: null, modifiedStyles: {},
+        originalHref: clone.tagName === 'A' ? clone.getAttribute('href') : undefined,
+        modifiedHref: undefined,
+        _el: clone
+      };
+      state.markedElements.push(newEntry);
+      applyMarkVisual(newEntry);
+      saveState();
+      updateToolbarCounts();
+      alert('已复制该组件，新组件已标记');
+    } catch(e) {
+      alert('复制失败：' + e.message);
+    }
+  }
+
+  function addNewElement() {
+    const html = prompt('请输入要插入的 HTML 代码（如 <div class="card">新卡片</div>）：', '<div>新组件</div>');
+    if (!html) return;
+    try {
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      const newEl = container.firstElementChild;
+      if (!newEl) { alert('请输入有效的 HTML 代码'); return; }
+      // 如果有当前编辑的元素，插入到它后面；否则插入 body 末尾
+      const referenceEntry = getCurrentEntry();
+      const refEl = referenceEntry && referenceEntry._el ? referenceEntry._el : null;
+      if (refEl && refEl.parentNode) {
+        refEl.parentNode.insertBefore(newEl, refEl.nextSibling);
+      } else {
+        document.body.appendChild(newEl);
+      }
+      // 标记新元素
+      const entry = {
+        id: uid(), selector: buildSelector(newEl), tag: newEl.tagName.toLowerCase(),
+        note: '新添加的组件',
+        description: '',
+        originalHTML: getOuterHTML(newEl), modifiedHTML: null,
+        originalStyles: null, modifiedStyles: {},
+        originalHref: newEl.tagName === 'A' ? newEl.getAttribute('href') : undefined,
+        modifiedHref: undefined,
+        _el: newEl
+      };
+      state.markedElements.push(entry);
+      applyMarkVisual(entry);
+      saveState();
+      if (!state.toolbarEl) renderToolbar(); else updateToolbarCounts();
+      openInspector(entry.id);
+    } catch(e) {
+      alert('添加失败：' + e.message);
+    }
+  }
+
+  function deleteSelectedElement() {
+    const entry = getCurrentEntry();
+    if (!entry || !entry._el) {
+      alert('请先在编辑面板中选择一个组件');
+      return;
+    }
+    if (!confirm('确定删除此组件及其 DOM 元素吗？（删除后不可恢复）')) return;
+    const el = entry._el;
+    // 先从标记中移除
+    const id = entry.id;
+    state.markedElements = state.markedElements.filter(m => m.id !== id);
+    // 移除 DOM 元素
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+    if (state.currentEditId === id) closeInspector();
+    saveState();
     updateToolbarCounts();
   }
 
@@ -746,6 +774,11 @@
     if (state.toolbarEl) state.toolbarEl.remove();
     const bar = document.createElement('div');
     bar.className = 'html-diff-marker-toolbar';
+    // 清除 CSS 默认 top/right，防止与 JS 位置冲突
+    bar.style.top = '';
+    bar.style.right = '';
+    bar.style.left = '';
+    bar.style.bottom = '';
     // 标题栏（可拖拽）
     const header = document.createElement('div');
     header.className = 'html-diff-marker-toolbar-header';
@@ -753,7 +786,7 @@
     const closeBtn = document.createElement('button');
     closeBtn.className = 'html-diff-marker-toolbar-close';
     closeBtn.innerHTML = '×';
-    closeBtn.setAttribute('title', '隐藏工具栏');
+    closeBtn.setAttribute('title', '隐藏工具栏（快捷键 Ctrl+Shift+E）');
     closeBtn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
       showWakeOnly();
@@ -763,15 +796,16 @@
     // Body 区域
     const body = document.createElement('div');
     body.className = 'html-diff-marker-toolbar-body';
-    // 按钮行
-    const btnRow = document.createElement('div');
-    btnRow.style.cssText = 'display:flex; gap:8px; margin-bottom:8px;';
-    const buttons = [
-      { action: 'select', label: '选择元素', cls: 'html-diff-marker-btn-primary' },
-      { action: 'clear', label: '清空', cls: 'html-diff-marker-btn-secondary' },
-      { action: 'export', label: '导出 Diff', cls: 'html-diff-marker-btn-success' }
+    // 第一行按钮：选择/复制/添加/删除
+    const btnRow1 = document.createElement('div');
+    btnRow1.style.cssText = 'display:flex; gap:6px; margin-bottom:8px;';
+    const buttons1 = [
+      { action: 'select', label: '🎯 选择元素', cls: 'html-diff-marker-btn-primary' },
+      { action: 'duplicate', label: '📋 复制当前', cls: 'html-diff-marker-btn-secondary' },
+      { action: 'add', label: '➕ 添加元素', cls: 'html-diff-marker-btn-secondary' },
+      { action: 'delete', label: '🗑 删除当前', cls: 'html-diff-marker-btn-danger' }
     ];
-    buttons.forEach(b => {
+    buttons1.forEach(b => {
       const btn = document.createElement('button');
       btn.className = 'html-diff-marker-toolbar-btn ' + b.cls;
       btn.textContent = b.label;
@@ -780,30 +814,73 @@
         e.preventDefault(); e.stopPropagation();
         const action = this.getAttribute('data-action');
         if (action === 'select') state.isSelecting ? stopSelecting() : startSelecting();
-        else if (action === 'clear') { if (confirm('确定清除所有标记吗？')) clearAll(); }
+        else if (action === 'duplicate') duplicateSelectedElement();
+        else if (action === 'add') addNewElement();
+        else if (action === 'delete') deleteSelectedElement();
+      }, true);
+      btnRow1.appendChild(btn);
+    });
+    body.appendChild(btnRow1);
+    // 第二行按钮：清空/导出
+    const btnRow2 = document.createElement('div');
+    btnRow2.style.cssText = 'display:flex; gap:6px; margin-bottom:8px;';
+    const buttons2 = [
+      { action: 'clear', label: '🗑 清空所有', cls: 'html-diff-marker-btn-secondary' },
+      { action: 'export', label: '📄 导出 Diff', cls: 'html-diff-marker-btn-success' }
+    ];
+    buttons2.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'html-diff-marker-toolbar-btn ' + b.cls;
+      btn.textContent = b.label;
+      btn.setAttribute('data-action', b.action);
+      btn.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        const action = this.getAttribute('data-action');
+        if (action === 'clear') { if (confirm('确定清除所有标记吗？')) clearAll(); }
         else if (action === 'export') exportDiffMessage();
       }, true);
-      btnRow.appendChild(btn);
+      btnRow2.appendChild(btn);
     });
-    body.appendChild(btnRow);
+    body.appendChild(btnRow2);
     // 计数/提示行
     const infoRow = document.createElement('div');
     infoRow.style.cssText = 'display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.7);';
-    infoRow.innerHTML = '<span class="html-diff-marker-count">0 标记</span><span class="html-diff-marker-modified-count">0 修改</span><span style="font-size:10px;">提示:点击标记元素可编辑</span>';
+    infoRow.innerHTML = '<span class="html-diff-marker-count">0 标记</span><span class="html-diff-marker-modified-count">0 修改</span><span style="font-size:10px;">快捷键 Ctrl+Shift+E</span>';
     body.appendChild(infoRow);
     bar.appendChild(body);
 
     document.body.appendChild(bar);
     state.toolbarEl = bar;
+    // 恢复位置（先应用保存的位置，确保 JS 样式覆盖 CSS 默认样式）
+    let hasSavedPos = false;
+    try {
+      const pos = JSON.parse(sessionStorage.getItem(POS_KEY) || '{}');
+      if (pos && pos.left !== undefined && pos.top !== undefined) {
+        bar.style.left = pos.left + 'px';
+        bar.style.top = pos.top + 'px';
+        bar.style.right = 'auto';
+        bar.style.bottom = 'auto';
+        hasSavedPos = true;
+      }
+    } catch(e) {}
+    // 如果没有保存的位置，使用默认：右上角（与唤醒按钮一致）
+    if (!hasSavedPos) {
+      const defaultRight = 20;
+      const defaultTop = 20;
+      // 使用 left = window.innerWidth - width - right
+      setTimeout(function() {
+        if (!bar || !bar.parentNode) return;
+        const barRect = bar.getBoundingClientRect();
+        const leftPos = Math.max(0, window.innerWidth - barRect.width - defaultRight);
+        bar.style.left = leftPos + 'px';
+        bar.style.top = defaultTop + 'px';
+        bar.style.right = 'auto';
+        bar.style.bottom = 'auto';
+      }, 10);
+    }
     makeDraggable(bar, header, function(l, t) {
       try { sessionStorage.setItem(POS_KEY, JSON.stringify({ left: l, top: t })); } catch(e) {}
     });
-    // 恢复位置
-    try {
-      const pos = JSON.parse(sessionStorage.getItem(POS_KEY) || '{}');
-      if (pos.left) bar.style.left = pos.left + 'px';
-      if (pos.top) bar.style.top = pos.top + 'px';
-    } catch(e) {}
     updateToolbarCounts();
   }
 
@@ -826,11 +903,19 @@
 
   // ---------- 编辑面板 ----------
   function closeInspector() {
-    if (state.inspectorEl) { state.inspectorEl.remove(); state.inspectorEl = null; }
+    if (state.inspectorEl) {
+      const rect = state.inspectorEl.getBoundingClientRect();
+      if (rect && rect.left > 0 && rect.top > 0) {
+        state.inspectorPos = { left: rect.left, top: rect.top };
+      }
+      state.inspectorEl.remove();
+      state.inspectorEl = null;
+    }
     state.currentEditId = null;
   }
 
   function openInspector(id) {
+    const savedPos = state.inspectorPos;
     closeInspector();
     const entry = state.markedElements.find(m => m.id === id);
     if (!entry) return;
@@ -866,11 +951,11 @@
     infoBox.textContent = elementInfo(el) + ' | selector: ' + entry.selector;
     body.appendChild(infoBox);
 
-    // 备注标签
+    // 组件标签
     const noteWrap = document.createElement('div');
     noteWrap.className = 'html-diff-marker-field-row';
     const noteLabel = document.createElement('label');
-    noteLabel.textContent = '组件标签 / 备注';
+    noteLabel.textContent = '组件标签';
     noteWrap.appendChild(noteLabel);
     const noteInput = document.createElement('input');
     noteInput.type = 'text';
@@ -879,6 +964,21 @@
     noteInput.addEventListener('input', function() { entry.note = this.value; saveState(); });
     noteWrap.appendChild(noteInput);
     body.appendChild(noteWrap);
+
+    // 修改说明（给 AI Agent 看）
+    const descWrap = document.createElement('div');
+    descWrap.className = 'html-diff-marker-field-row';
+    const descLabel = document.createElement('label');
+    descLabel.textContent = '修改说明（给 AI Agent 看）';
+    descWrap.appendChild(descLabel);
+    const descTa = document.createElement('textarea');
+    descTa.rows = 3;
+    descTa.className = 'html-diff-marker-textarea';
+    descTa.placeholder = '请描述这次修改的目的、设计意图或具体变更内容，便于 AI Agent 理解并应用相同风格的修改...';
+    descTa.value = entry.description || '';
+    descTa.addEventListener('input', function() { entry.description = this.value; saveState(); });
+    descWrap.appendChild(descTa);
+    body.appendChild(descWrap);
 
     // 链接 href 编辑（仅对 <a> 元素显示）
     if (entry.tag === 'a') {
@@ -1160,15 +1260,6 @@
     // Footer
     const footer = document.createElement('div');
     footer.className = 'html-diff-marker-inspector-actions';
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'html-diff-marker-btn-primary';
-    copyBtn.textContent = '📋 复制';
-    copyBtn.setAttribute('title', '复制此元素并插入到它后面');
-    copyBtn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      duplicateElement(entry.id);
-    }, true);
-    footer.appendChild(copyBtn);
     const removeBtn = document.createElement('button');
     removeBtn.className = 'html-diff-marker-btn-danger';
     removeBtn.textContent = '🗑 删除';
@@ -1192,8 +1283,22 @@
     document.body.appendChild(panel);
     state.inspectorEl = panel;
 
-    // 面板可拖拽
-    makeDraggable(panel, header, null);
+    // 恢复之前拖拽的位置（先清除 CSS 默认定位）
+    if (savedPos && savedPos.left !== undefined && savedPos.top !== undefined) {
+      panel.style.position = 'fixed';
+      panel.style.left = savedPos.left + 'px';
+      panel.style.top = savedPos.top + 'px';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    } else {
+      panel.style.right = '';
+      panel.style.bottom = '';
+    }
+
+    // 面板可拖拽（拖拽时保存位置到 state.inspectorPos）
+    makeDraggable(panel, header, function(l, t) {
+      state.inspectorPos = { left: l, top: t };
+    });
     // 阻止点击面板冒泡到 document（使用 bubble 阶段，让内部按钮事件先触发）
     panel.addEventListener('click', function(e) { e.stopPropagation(); }, false);
   }
@@ -1237,6 +1342,7 @@
         index: i + 1, tag: m.tag || '', selector: m.selector,
         element: m._el ? elementInfo(m._el) : '',
         note: m.note || '',
+        description: m.description || '',
         originalHTML: m.originalHTML,
         modifiedHTML: m.modifiedHTML || ((hasStyleChanges(m) || hasHrefChange) ? currentOuter : null),
         styleChanges: m.modifiedStyles || {},
@@ -1265,7 +1371,8 @@
       out += '- **元素**: ' + item.element + '\n';
       out += '- **CSS 选择器**: `' + item.selector + '`\n';
       out += '- **状态**: ' + (item.hasChange ? '**已修改**' : '仅标记，无修改') + '\n';
-      if (item.note) out += '- **修改说明**: ' + item.note + '\n';
+      if (item.note) out += '- **组件标签**: ' + item.note + '\n';
+      if (item.description) out += '- **修改说明（给 AI Agent 看）**: ' + item.description + '\n';
       if (item.hrefChange && item.hrefChange.modified !== undefined && item.hrefChange.modified !== item.hrefChange.original) {
         out += '- **href 变更**: `' + (item.hrefChange.original || '(空)') + '` → `' + item.hrefChange.modified + '`\n';
       }
@@ -1322,20 +1429,7 @@
   function onMessage(msg, sender, sendResponse) {
     if (!msg) return;
     if (msg.type === 'TOGGLE_WAKE') {
-      // 三态切换：隐藏 -> 唤醒按钮 -> 完整工具栏 -> 隐藏
-      if (!state.toolbarEl && !state.wakeBtn) {
-        // 隐藏态 -> 显示唤醒按钮
-        showWakeOnly();
-      } else if (state.wakeBtn) {
-        // 唤醒按钮态 -> 显示完整工具栏
-        state.wakeBtn.remove();
-        state.wakeBtn = null;
-        renderToolbar();
-      } else {
-        // 工具栏态 -> 隐藏
-        if (state.toolbarEl) { state.toolbarEl.remove(); state.toolbarEl = null; }
-        if (state.inspectorEl) { state.inspectorEl.remove(); state.inspectorEl = null; }
-      }
+      toggleThreeState();
       sendResponse({ ok: true });
       return true;
     }
@@ -1353,27 +1447,40 @@
     return true;
   }
 
+  // ---------- 三态切换（快捷键 & 扩展图标） ----------
+  function toggleThreeState() {
+    if (!state.toolbarEl && !state.wakeBtn) {
+      showWakeOnly();
+    } else if (state.wakeBtn) {
+      state.wakeBtn.remove();
+      state.wakeBtn = null;
+      renderToolbar();
+    } else {
+      if (state.toolbarEl) { state.toolbarEl.remove(); state.toolbarEl = null; }
+      if (state.inspectorEl) { state.inspectorEl.remove(); state.inspectorEl = null; }
+    }
+  }
+
   // ---------- 初始化 ----------
   function init() {
     if (window.__htmlDiffMarkerLoaded) return;
     window.__htmlDiffMarkerLoaded = true;
     loadState();
-    // 先重建新增的元素（复制的元素）
-    const rebuiltEls = rebuildAddedElements();
-    const rebuiltMap = {};
-    rebuiltEls.forEach(r => { rebuiltMap[r.id] = r.el; });
-    // 恢复标记元素的视觉样式
+    // 恢复标记元素的视觉样式（但不自动显示工具栏）
     state.markedElements.forEach(m => {
-      let el = null;
-      if (m._isAdded && m._addedId && rebuiltMap[m._addedId]) {
-        el = rebuiltMap[m._addedId];
-      } else {
-        el = document.querySelector(m.selector);
-      }
+      const el = document.querySelector(m.selector);
       if (el) { m._el = el; recordOriginalStyles(m); applyMarkVisual(m); }
     });
     // 不自动显示工具栏，点击扩展图标 -> 显示唤醒按钮 -> 显示工具栏
     chrome.runtime.onMessage.addListener(onMessage);
+    // 快捷键：Ctrl+Shift+E / Cmd+Shift+E 切换三态
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleThreeState();
+      }
+    }, true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

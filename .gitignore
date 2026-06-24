@@ -1,32 +1,9 @@
-# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# 编辑器 / IDE
+node_modules/
+*.log
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# 临时文件
 *.tmp
 *.bak
-*.log
-
-# 代码生成器（项目规范禁止）
-generate_*.py
-*_generator_*.js
-*.gen.*
-
-# 历史版本文件（项目规范禁止）
-v1_*
-old_*
-backup_*
-
-# 构建产物
 dist/
 build/
-*.zip

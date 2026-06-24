@@ -101,7 +101,8 @@ function buildMarkdown(d) {
     out += '- **元素**: ' + (item.element || '') + '\n';
     out += '- **CSS 选择器**: `' + (item.selector || '') + '`\n';
     out += '- **状态**: ' + (item.hasChange ? '**已修改**' : '仅标记，无修改') + '\n';
-    if (item.note) out += '- **修改说明**: ' + item.note + '\n';
+    if (item.note) out += '- **组件标签**: ' + item.note + '\n';
+    if (item.description) out += '- **修改说明（给 AI Agent 看）**: ' + item.description + '\n';
     out += '\n';
     if (item.hasChange) {
       out += '### 原始 HTML\n\n```html\n' + (item.originalHTML || '') + '\n```\n\n';
