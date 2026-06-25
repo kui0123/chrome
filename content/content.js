@@ -5,11 +5,43 @@
   'use strict';
   const STATE_KEY = 'htmlDiffMarker_' + location.href;
   const POS_KEY = 'htmlDiffMarkerPos_' + location.href;
+  const FONT_OPTIONS = [
+    { value: '', label: '(默认字体)' },
+    { value: '', label: '── 中文字体 ──', disabled: true },
+    { value: '"Microsoft YaHei", "微软雅黑", sans-serif', label: '微软雅黑 - 经典商务' },
+    { value: '"PingFang SC", "苹方", sans-serif', label: '苹方 - 现代简约' },
+    { value: '"Source Han Sans CN", "思源黑体", sans-serif', label: '思源黑体 - 开源专业' },
+    { value: '"SimSun", "宋体", serif', label: '宋体 - 传统正式' },
+    { value: '"SimHei", "黑体", sans-serif', label: '黑体 - 醒目有力' },
+    { value: '"KaiTi", "楷体", serif', label: '楷体 - 优雅手写' },
+    { value: '"YouYuan", "幼圆", sans-serif', label: '幼圆 - 圆润亲和' },
+    { value: '"STXihei", "华文细黑", sans-serif', label: '华文细黑 - 精致细腻' },
+    { value: '"LiSu", "隶书", serif', label: '隶书 - 古典韵味' },
+    { value: '"FZShuTi", "方正舒体", cursive', label: '方正舒体 - 艺术风格' },
+    { value: '', label: '── 英文字体 ──', disabled: true },
+    { value: 'Arial, sans-serif', label: 'Arial - 经典商务' },
+    { value: 'Helvetica, sans-serif', label: 'Helvetica - 现代极简' },
+    { value: 'Georgia, serif', label: 'Georgia - 优雅衬线' },
+    { value: 'Roboto, sans-serif', label: 'Roboto - Material 设计' },
+    { value: 'Inter, sans-serif', label: 'Inter - 屏幕优化' }
+  ];
+
+  const FONT_WEIGHT_OPTIONS = [
+    { value: '', label: '(默认)' },
+    { value: '300', label: '300 - 细体 (Light)' },
+    { value: '400', label: '400 - 常规 (Normal)' },
+    { value: '500', label: '500 - 中等 (Medium)' },
+    { value: '600', label: '600 - 半粗 (Semibold)' },
+    { value: '700', label: '700 - 粗体 (Bold)' },
+    { value: '800', label: '800 - 特粗 (ExtraBold)' }
+  ];
+
   const STYLE_PROPS = [
     { key: 'backgroundColor', type: 'color', label: '背景颜色' },
     { key: 'color', type: 'color', label: '文本颜色' },
+    { key: 'fontFamily', type: 'select', options: FONT_OPTIONS, label: '字体' },
+    { key: 'fontWeight', type: 'select', options: FONT_WEIGHT_OPTIONS, label: '字体粗细' },
     { key: 'fontSize', type: 'text', label: '字体大小 (如 14px)' },
-    { key: 'fontWeight', type: 'text', label: '字体粗细 (400-700)' },
     { key: 'padding', type: 'text', label: '内边距 (如 10px 20px)' },
     { key: 'margin', type: 'text', label: '外边距 (如 5px 10px)' },
     { key: 'borderRadius', type: 'text', label: '圆角 (如 8px)' },
@@ -31,7 +63,8 @@
     isSelecting: false, hoveredEl: null, markedElements: [],
     toolbarEl: null, inspectorEl: null, currentEditId: null,
     isVisualEditing: false, wakeBtn: null,
-    inspectorPos: null
+    inspectorPos: null, inspectorSize: null,
+    domChanges: []
   };
 
   function uid() { return 'm_' + Math.random().toString(36).slice(2, 10); }
@@ -40,7 +73,7 @@
 
   function saveState() {
     try {
-      const data = state.markedElements.map(m => ({
+      const markedElements = state.markedElements.map(m => ({
         id: m.id, selector: m.selector, tag: m.tag || '',
         note: m.note || '', description: m.description || '',
         originalHTML: m.originalHTML, modifiedHTML: m.modifiedHTML || null,
@@ -48,13 +81,22 @@
         originalHref: m.originalHref !== undefined ? m.originalHref : undefined,
         modifiedHref: m.modifiedHref !== undefined ? m.modifiedHref : undefined
       }));
+      const data = { markedElements: markedElements, domChanges: state.domChanges || [] };
       sessionStorage.setItem(STATE_KEY, JSON.stringify(data));
     } catch(e) {}
   }
   function loadState() {
     try {
       const raw = sessionStorage.getItem(STATE_KEY);
-      if (raw) state.markedElements = JSON.parse(raw);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        state.markedElements = parsed;
+        state.domChanges = [];
+      } else {
+        state.markedElements = parsed.markedElements || [];
+        state.domChanges = parsed.domChanges || [];
+      }
     } catch(e) {}
   }
   function buildSelector(el) {
@@ -660,16 +702,15 @@
     const el = entry._el;
     try {
       const clone = el.cloneNode(true);
-      // 清除 clone 上的标记样式
       clone.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
       stripMarkerChildren(clone);
-      // 插入到原元素后面
       if (el.parentNode) {
         el.parentNode.insertBefore(clone, el.nextSibling);
       } else {
         document.body.appendChild(clone);
       }
-      // 将新创建的元素标记为新组件
+      const cloneHTML = clone.outerHTML;
+      const targetSelector = buildSelector(el);
       const newEntry = {
         id: uid(), selector: buildSelector(clone), tag: clone.tagName.toLowerCase(),
         note: (entry.note || '') + '（复制）',
@@ -681,6 +722,7 @@
         _el: clone
       };
       state.markedElements.push(newEntry);
+      state.domChanges.push({ type: 'duplicate', targetSelector: targetSelector, cloneHTML: cloneHTML });
       applyMarkVisual(newEntry);
       saveState();
       updateToolbarCounts();
@@ -698,15 +740,15 @@
       container.innerHTML = html;
       const newEl = container.firstElementChild;
       if (!newEl) { alert('请输入有效的 HTML 代码'); return; }
-      // 如果有当前编辑的元素，插入到它后面；否则插入 body 末尾
       const referenceEntry = getCurrentEntry();
       const refEl = referenceEntry && referenceEntry._el ? referenceEntry._el : null;
+      let afterSelector = null;
       if (refEl && refEl.parentNode) {
+        afterSelector = buildSelector(refEl);
         refEl.parentNode.insertBefore(newEl, refEl.nextSibling);
       } else {
         document.body.appendChild(newEl);
       }
-      // 标记新元素
       const entry = {
         id: uid(), selector: buildSelector(newEl), tag: newEl.tagName.toLowerCase(),
         note: '新添加的组件',
@@ -718,6 +760,7 @@
         _el: newEl
       };
       state.markedElements.push(entry);
+      state.domChanges.push({ type: 'add', html: html, afterSelector: afterSelector });
       applyMarkVisual(entry);
       saveState();
       if (!state.toolbarEl) renderToolbar(); else updateToolbarCounts();
@@ -735,14 +778,55 @@
     }
     if (!confirm('确定删除此组件及其 DOM 元素吗？（删除后不可恢复）')) return;
     const el = entry._el;
-    // 先从标记中移除
+    const selector = entry.selector;
     const id = entry.id;
     state.markedElements = state.markedElements.filter(m => m.id !== id);
-    // 移除 DOM 元素
+    state.domChanges.push({ type: 'delete', selector: selector });
     if (el && el.parentNode) el.parentNode.removeChild(el);
     if (state.currentEditId === id) closeInspector();
     saveState();
     updateToolbarCounts();
+  }
+
+  function replayDomChanges() {
+    if (!state.domChanges || state.domChanges.length === 0) return;
+    for (let i = 0; i < state.domChanges.length; i++) {
+      const change = state.domChanges[i];
+      try {
+        if (change.type === 'delete') {
+          const el = document.querySelector(change.selector);
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        } else if (change.type === 'duplicate') {
+          const target = document.querySelector(change.targetSelector);
+          if (target && target.parentNode) {
+            const container = document.createElement('div');
+            container.innerHTML = change.cloneHTML;
+            const clone = container.firstElementChild;
+            if (clone) {
+              target.parentNode.insertBefore(clone, target.nextSibling);
+            }
+          }
+        } else if (change.type === 'add') {
+          const container = document.createElement('div');
+          container.innerHTML = change.html;
+          const newEl = container.firstElementChild;
+          if (newEl) {
+            if (change.afterSelector) {
+              const ref = document.querySelector(change.afterSelector);
+              if (ref && ref.parentNode) {
+                ref.parentNode.insertBefore(newEl, ref.nextSibling);
+              } else {
+                document.body.appendChild(newEl);
+              }
+            } else {
+              document.body.appendChild(newEl);
+            }
+          }
+        }
+      } catch(e) {
+        console.warn('replayDomChanges error:', change.type, e);
+      }
+    }
   }
 
   // ---------- 样式编辑辅助 ----------
@@ -933,12 +1017,25 @@
     const title = document.createElement('span');
     title.textContent = '编辑组件 #' + (state.markedElements.indexOf(entry) + 1) + ' (' + entry.tag + ')';
     header.appendChild(title);
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'html-diff-marker-header-btns';
+    const collapseBtn = document.createElement('button');
+    collapseBtn.className = 'html-diff-marker-collapse-btn';
+    collapseBtn.innerHTML = '−';
+    collapseBtn.setAttribute('title', '最小化');
+    collapseBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      panel.classList.toggle('html-diff-marker-collapsed');
+      collapseBtn.innerHTML = panel.classList.contains('html-diff-marker-collapsed') ? '+' : '−';
+    }, true);
+    btnGroup.appendChild(collapseBtn);
     const closeBtn = document.createElement('button');
     closeBtn.className = 'html-diff-marker-close-btn';
     closeBtn.innerHTML = '×';
     closeBtn.setAttribute('title', '关闭');
     closeBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeInspector(); }, true);
-    header.appendChild(closeBtn);
+    btnGroup.appendChild(closeBtn);
+    header.appendChild(btnGroup);
     panel.appendChild(header);
 
     // Body
@@ -1072,6 +1169,13 @@
     const sizeLabel = document.createElement('label');
     sizeLabel.textContent = '📐 大小调整';
     sizeHeader.appendChild(sizeLabel);
+    const sizeResetRow = document.createElement('div');
+    sizeResetRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
+    const unitToggleBtn = document.createElement('button');
+    unitToggleBtn.className = 'html-diff-marker-style-reset-all';
+    unitToggleBtn.textContent = 'px';
+    unitToggleBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
+    unitToggleBtn.setAttribute('title', '切换单位 px / %');
     const sizeReset = document.createElement('button');
     sizeReset.className = 'html-diff-marker-style-reset-all';
     sizeReset.textContent = '↺ 重置';
@@ -1081,15 +1185,61 @@
       applyStyleChange(entry, 'height', '');
       openInspector(entry.id);
     }, true);
-    sizeHeader.appendChild(sizeReset);
+    sizeResetRow.appendChild(unitToggleBtn);
+    sizeResetRow.appendChild(sizeReset);
+    sizeHeader.appendChild(sizeResetRow);
     sizeSection.appendChild(sizeHeader);
 
     const curWidth = entry.modifiedStyles.width !== undefined ? entry.modifiedStyles.width : (parseFloat(entry.originalStyles.width) || el.getBoundingClientRect().width) + 'px';
     const curHeight = entry.modifiedStyles.height !== undefined ? entry.modifiedStyles.height : (parseFloat(entry.originalStyles.height) || el.getBoundingClientRect().height) + 'px';
 
+    function getParentSize() {
+      const parent = el && el.parentNode ? el.parentNode : null;
+      if (!parent || parent.nodeType !== 1) return { w: window.innerWidth, h: window.innerHeight };
+      const r = parent.getBoundingClientRect();
+      return { w: r.width, h: r.height };
+    }
+    function isPctVal(v) { return typeof v === 'string' && v.indexOf('%') >= 0; }
+    function pxToPct(px, base) { return base > 0 ? ((parseFloat(px) / base) * 100) : 0; }
+    function pctToPx(pct, base) { return (parseFloat(pct) / 100) * base; }
+    function toDisplayVal(val, base, usePct) {
+      if (!val) return usePct ? '0%' : '0px';
+      if (usePct) {
+        if (isPctVal(val)) return val;
+        return pxToPct(val, base).toFixed(2) + '%';
+      } else {
+        if (isPctVal(val)) return pctToPx(val, base).toFixed(0) + 'px';
+        return val;
+      }
+    }
+    function fromDisplayVal(displayVal, base, usePct) {
+      if (!displayVal) return '';
+      const num = parseFloat(displayVal);
+      if (isNaN(num)) return displayVal;
+      if (usePct) return num + '%';
+      return num + 'px';
+    }
+
+    let displayUnitPx = !isPctVal(curWidth);
+    unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
+    unitToggleBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      displayUnitPx = !displayUnitPx;
+      unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
+      refreshSizeInputs();
+    });
+
+    function refreshSizeInputs() {
+      const ps = getParentSize();
+      const wInputs = sizeSection.querySelectorAll('.html-diff-marker-size-width-input');
+      const hInputs = sizeSection.querySelectorAll('.html-diff-marker-size-height-input');
+      if (wInputs.length) wInputs[0].value = toDisplayVal(entry.modifiedStyles.width !== undefined ? entry.modifiedStyles.width : curWidth, ps.w, !displayUnitPx);
+      if (hInputs.length) hInputs[0].value = toDisplayVal(entry.modifiedStyles.height !== undefined ? entry.modifiedStyles.height : curHeight, ps.h, !displayUnitPx);
+    }
+
     const sizeRows = [
-      { label: '宽度', prop: 'width', val: curWidth, nudges: [-10, -1, 1, 10] },
-      { label: '高度', prop: 'height', val: curHeight, nudges: [-10, -1, 1, 10] }
+      { label: '宽度', prop: 'width', val: curWidth, inputClass: 'html-diff-marker-size-width-input', nudges: [-10, -1, 1, 10] },
+      { label: '高度', prop: 'height', val: curHeight, inputClass: 'html-diff-marker-size-height-input', nudges: [-10, -1, 1, 10] }
     ];
     sizeRows.forEach(sr => {
       const row = document.createElement('div');
@@ -1102,10 +1252,17 @@
       inpWrap.className = 'html-diff-marker-style-input-wrap';
       const inp = document.createElement('input');
       inp.type = 'text';
-      inp.className = 'html-diff-marker-style-input';
+      inp.className = 'html-diff-marker-style-input ' + sr.inputClass;
       inp.setAttribute('data-prop', sr.prop);
-      inp.value = sr.val;
-      inp.addEventListener('input', function() { applyStyleChange(entry, this.getAttribute('data-prop'), this.value); });
+      const ps = getParentSize();
+      const base = sr.prop === 'width' ? ps.w : ps.h;
+      inp.value = toDisplayVal(sr.val, base, !displayUnitPx);
+      inp.addEventListener('input', function() {
+        const ps2 = getParentSize();
+        const base2 = sr.prop === 'width' ? ps2.w : ps2.h;
+        const newVal = fromDisplayVal(this.value, base2, !displayUnitPx);
+        applyStyleChange(entry, this.getAttribute('data-prop'), newVal);
+      });
       inpWrap.appendChild(inp);
       sr.nudges.forEach(n => {
         const nb = document.createElement('button');
@@ -1113,8 +1270,19 @@
         nb.textContent = (n > 0 ? '+' : '') + n;
         nb.addEventListener('click', function(e) {
           e.preventDefault(); e.stopPropagation();
-          let curPx = parseFloat(entry.modifiedStyles[sr.prop]) || parseFloat(sr.val) || 0;
-          const newVal = (curPx + n) + 'px';
+          const ps3 = getParentSize();
+          const base3 = sr.prop === 'width' ? ps3.w : ps3.h;
+          let curVal = entry.modifiedStyles[sr.prop];
+          if (curVal === undefined || curVal === '') curVal = sr.val;
+          let newVal;
+          if (isPctVal(curVal) || !displayUnitPx) {
+            const curPct = isPctVal(curVal) ? parseFloat(curVal) : pxToPct(curVal, base3);
+            const step = n > 0 ? 0.1 : -0.1;
+            newVal = (curPct + (n * 0.1)) + '%';
+          } else {
+            const curPx = parseFloat(curVal) || 0;
+            newVal = (curPx + n) + 'px';
+          }
           applyStyleChange(entry, sr.prop, newVal);
           openInspector(entry.id);
         }, true);
@@ -1192,8 +1360,15 @@
           const o = document.createElement('option');
           const optVal = typeof opt === 'object' ? opt.value : opt;
           const optLabel = typeof opt === 'object' ? opt.label : (opt || '(默认)');
+          const optDisabled = typeof opt === 'object' && opt.disabled;
           o.value = optVal;
           o.textContent = optLabel;
+          if (optDisabled) {
+            o.disabled = true;
+            o.style.color = '#888';
+            o.style.fontWeight = '600';
+            o.style.background = '#f5f5f5';
+          }
           if (val === optVal) o.selected = true;
           sel.appendChild(o);
         });
@@ -1280,6 +1455,42 @@
     footer.appendChild(saveBtn);
     panel.appendChild(footer);
 
+    // 右下角拖拽调整大小把手
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'html-diff-marker-resize-handle-se';
+    resizeHandle.setAttribute('title', '拖拽调整面板大小');
+    let resizing = false, rStartX = 0, rStartY = 0, rStartW = 0, rStartH = 0;
+    resizeHandle.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (e.button !== 0) return;
+      resizing = true;
+      rStartX = e.clientX; rStartY = e.clientY;
+      const rect = panel.getBoundingClientRect();
+      rStartW = rect.width; rStartH = rect.height;
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'nwse-resize';
+    }, true);
+    document.addEventListener('mousemove', function(e) {
+      if (!resizing) return;
+      e.preventDefault(); e.stopPropagation();
+      const newW = Math.max(300, rStartW + (e.clientX - rStartX));
+      const newH = Math.max(120, rStartH + (e.clientY - rStartY));
+      panel.style.width = newW + 'px';
+      panel.style.height = newH + 'px';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    }, true);
+    document.addEventListener('mouseup', function() {
+      if (resizing) {
+        resizing = false;
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        const rect = panel.getBoundingClientRect();
+        state.inspectorSize = { width: rect.width, height: rect.height };
+      }
+    }, true);
+    panel.appendChild(resizeHandle);
+
     document.body.appendChild(panel);
     state.inspectorEl = panel;
 
@@ -1293,6 +1504,14 @@
     } else {
       panel.style.right = '';
       panel.style.bottom = '';
+    }
+
+    // 恢复面板大小
+    if (state.inspectorSize && state.inspectorSize.width && state.inspectorSize.height) {
+      panel.style.width = state.inspectorSize.width + 'px';
+      panel.style.height = state.inspectorSize.height + 'px';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
     }
 
     // 面板可拖拽（拖拽时保存位置到 state.inspectorPos）
@@ -1466,6 +1685,8 @@
     if (window.__htmlDiffMarkerLoaded) return;
     window.__htmlDiffMarkerLoaded = true;
     loadState();
+    // 先重放 DOM 结构变更（删除/复制/添加）
+    replayDomChanges();
     // 恢复标记元素的视觉样式（但不自动显示工具栏）
     state.markedElements.forEach(m => {
       const el = document.querySelector(m.selector);

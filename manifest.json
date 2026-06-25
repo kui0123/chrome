@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HTML Diff Marker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "在Chrome中标记HTML组件的修改，并生成diff文件供AI Agent迭代使用",
   "permissions": [
     "activeTab",

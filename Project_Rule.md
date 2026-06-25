@@ -15,7 +15,7 @@
 ☐ 清楚 Rule 0: Edit/Write 前必须先 Read
 ☐ 清楚本项目的工具使用规范（第三章）
 ☐ 清楚代码-文档一致性原则（第四章）
-☐ 清楚发布前检查清单（第九章）
+☐ 清楚发布前检查清单（第十章）
 ```
 
 > **无论任务描述有多简单，都必须先完成以上自检。**
@@ -63,9 +63,6 @@
 ├── content/
 │   ├── content.js         ← 页面内核心脚本
 │   └── content.css        ← 页面内样式
-├── popup/
-│   ├── popup.html         ← 弹窗 HTML
-│   └── popup.js           ← 弹窗逻辑
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
@@ -84,7 +81,7 @@
 - ❌ `v1_`、`old_`、`backup_` 等前缀的历史版本文件
 
 **核心原则**：以下文件必须是**直接手写的源文件**，不是由任何脚本生成的产物：
-`manifest.json`、`content/content.js`、`content/content.css`、`background/background.js`、`popup/popup.html`、`popup/popup.js`、`README.md`
+`manifest.json`、`content/content.js`、`content/content.css`、`background/background.js`、`README.md`
 
 ### 1.3 允许的文件类型（区分脚本种类很重要）
 
@@ -116,7 +113,7 @@
 
 | 规则        | 要求                                                             |
 | --------- | -------------------------------------------------------------- |
-| **作用域隔离** | content.js 和 popup.js 必须用 `(function() { ... })();` 包裹         |
+| **作用域隔离** | content.js 必须用 `(function() { ... })();` 包裹         |
 | **严格模式**  | 文件开头加 `'use strict';`                                          |
 | **防重复注入** | content.js 开头必须检查：`if (window.__htmlDiffMarkerLoaded) return;` |
 | **函数命名**  | 驼峰式 `camelCase`，动词开头，如 `markElement`、`applyStyleChange`        |
@@ -322,11 +319,11 @@
 
 | 消息类型             | 发送方 → 接收方                  | 数据格式                                      | 返回                                                  |
 | ---------------- | -------------------------- | ----------------------------------------- | --------------------------------------------------- |
-| `TOGGLE_SELECT`  | popup/background → content | `{ type: 'TOGGLE_SELECT' }`               | -                                                   |
-| `CLEAR_ALL`      | popup/background → content | `{ type: 'CLEAR_ALL' }`                   | -                                                   |
-| `EXPORT_NOW`     | popup/background → content | `{ type: 'EXPORT_NOW' }`                  | -                                                   |
-| `TOGGLE_TOOLBAR` | popup/background → content | `{ type: 'TOGGLE_TOOLBAR' }`              | -                                                   |
-| `GET_STATUS`     | popup → content            | `{ type: 'GET_STATUS' }`                  | `{ total, modified, isSelecting, isToolbarHidden }` |
+| `TOGGLE_SELECT`  | background → content | `{ type: 'TOGGLE_SELECT' }`               | -                                                   |
+| `CLEAR_ALL`      | background → content | `{ type: 'CLEAR_ALL' }`                   | -                                                   |
+| `EXPORT_NOW`     | background → content | `{ type: 'EXPORT_NOW' }`                  | -                                                   |
+| `TOGGLE_TOOLBAR` | background → content | `{ type: 'TOGGLE_TOOLBAR' }`              | -                                                   |
+| `GET_STATUS`     | background → content | `{ type: 'GET_STATUS' }`                  | `{ total, modified, isSelecting, isToolbarHidden }` |
 | `EXPORT_DIFF`    | content → background       | `{ type: 'EXPORT_DIFF', payload: {...} }` | `{ ok, filename }`                                  |
 
 ### 6.2 导出 Payload 格式
@@ -387,7 +384,6 @@
   ],
   "host_permissions": ["<all_urls>"],
   "action": {
-    "default_popup": "popup/popup.html",
     "default_title": "HTML Diff Marker",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -432,7 +428,6 @@
 ```bash
 node --check content/content.js
 node --check background/background.js
-node --check popup/popup.js
 ```
 
 ### 8.2 手动功能测试清单
@@ -441,8 +436,8 @@ node --check popup/popup.js
 | -- | ------- | ----------------------- | --------------------- |
 | 1  | 扩展加载    | Chrome → 扩展管理 → 加载已解压扩展 | 扩展成功加载，无错误            |
 | 2  | 页面打开    | 打开 test-page.html       | 页面正常显示                |
-| 3  | 点击扩展图标  | 工具栏中的扩展图标               | 弹出 popup 窗口           |
-| 4  | 进入选择模式  | Popup 中点击"开始选择元素"       | 鼠标光标变十字线              |
+| 3  | 点击扩展图标  | 工具栏中的扩展图标               | 工具栏三态切换（隐藏→唤醒→完整） |
+| 4  | 进入选择模式  | 点击工具栏"选择元素"按钮          | 鼠标光标变十字线              |
 | 5  | 标记元素    | 点击页面上任意元素               | 元素显示绿色边框 + 编号徽章       |
 | 6  | 打开检查面板  | 点击元素上的编号徽章              | 弹出编辑面板，显示 HTML 和样式属性  |
 | 7  | 拖拽移动    | 拖拽标记的元素                 | 元素位置改变，CSS 属性更新       |
@@ -485,7 +480,6 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 □ 所有核心文件存在且非空（content.js, content.css, background.js, manifest.json）
 □ 语法检查通过：node --check content/content.js
 □ 语法检查通过：node --check background/background.js
-□ 语法检查通过：node --check popup/popup.js
 □ 无临时/垃圾文件（content_generator_*, 空文件, _tmp_* 等）
 □ README.md 与代码功能一致
 □ Project_Rule.md 是最新版本
@@ -604,7 +598,7 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 
 ### A.3 generate\_ext.py 伪"打包脚本"陷阱（曾发生）
 
-**现象**：项目中存在一个名为 `generate_ext.py` 的 Python 文件，被标注为"打包脚本"。但它实际上把 **content.js、content.css、background.js、popup.js、popup.html、manifest.json、README.md 的完整代码** 都作为 Python 三引号字符串硬编码在内部，运行时用 `write()` 函数"生成"这些文件。
+**现象**：项目中存在一个名为 `generate_ext.py` 的 Python 文件，被标注为"打包脚本"。但它实际上把 **content.js、content.css、background.js、manifest.json、README.md 的完整代码** 都作为 Python 三引号字符串硬编码在内部，运行时用 `write()` 函数"生成"这些文件。
 
 **问题机制**：
 
@@ -619,7 +613,7 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 **解决方案**：
 
 - 删除 `generate_ext.py`
-- 所有核心文件（content.js、content.css、background.js、popup.js、popup.html、manifest.json、README.md）作为直接手写的源文件存在
+- 所有核心文件（content.js、content.css、background.js、manifest.json、README.md）作为直接手写的源文件存在
 - 修改 content.js 时直接 `Edit(content.js)` 或 `Write(content.js, 完整代码)`，**不经过任何中间脚本**
 - 修改 README.md 时直接 `Edit(README.md)` 或 `Write(README.md, 完整内容)`
 - 如需要"批量初始化"，临时脚本用完后必须删除，不能留在项目中
@@ -659,6 +653,6 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 
 ***
 
-**文档版本**：1.3
-**最后更新**：2026-06-20
+**文档版本**：1.4
+**最后更新**：2026-06-25
 **适用项目**：HTML Diff Marker Chrome 扩展
