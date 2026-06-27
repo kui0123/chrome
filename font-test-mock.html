@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字体切换逻辑 Mock 测试 - macOS 幼圆体场景</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+    background: #f1f5f9;
+    padding: 24px;
+    color: #1f2937;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: #0f172a;
+  }
+  .desc {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #075985;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .tag-ok { background: #dcfce7; color: #166534; }
+  .tag-warn { background: #fef3c7; color: #92400e; }
+  .tag-info { background: #e0f2fe; color: #075985; }
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .row label {
+    font-size: 13px;
+    color: #475569;
+    min-width: 120px;
+    font-weight: 500;
+  }
+  select, input[type="text"] {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  .hint-box {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .hint-warn {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+  }
+  .hint-ok {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+  .hint-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+  }
+  .hint-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .preview-area {
+    margin-top: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
+  }
+  .preview-text {
+    font-size: 24px;
+    color: #0f172a;
+    transition: font-family 0.2s;
+  }
+  .preview-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .step-list {
+    list-style: none;
+    counter-reset: step;
+  }
+  .step-list li {
+    counter-increment: step;
+    padding: 8px 0 8px 32px;
+    position: relative;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 22px;
+    height: 22px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-list li.ok::before { background: #10b981; }
+  .step-list li.warn::before { background: #f59e0b; }
+  .step-list li.info::before { background: #6366f1; }
+  .step-detail {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toggle-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  .toggle-btn:hover:not(.active) {
+    background: #f3f4f6;
+  }
+  .font-test-list {
+    margin-top: 12px;
+  }
+  .font-test-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .font-test-item:last-child { border-bottom: none; }
+  .font-test-name { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .font-test-result { font-size: 12px; font-weight: 500; }
+  .result-yes { color: #16a34a; }
+  .result-no { color: #dc2626; }
+  .code-block {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    overflow-x: auto;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .code-comment { color: #64748b; }
+  .code-str { color: #fbbf24; }
+  .code-key { color: #60a5fa; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🧪 字体切换逻辑 Mock 测试</h1>
+
+  <div class="desc">
+    <strong>测试场景：</strong>macOS 系统下，用户选择「幼圆」字体，但系统未安装该字体。<br>
+    验证：系统检测 → 字体映射 → 可用性检测 → 提示信息 的完整逻辑是否正确。
+  </div>
+
+  <!-- 环境模拟 -->
+  <div class="card">
+    <div class="card-title">
+      🔧 环境模拟
+      <span class="tag tag-info" id="currentOsTag">macOS</span>
+    </div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setMockOS('macos')">模拟 macOS</button>
+      <button class="toggle-btn" onclick="setMockOS('windows')">模拟 Windows</button>
+    </div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setFontAvailable('YouYuan', false)">幼圆 YouYuan：未安装</button>
+      <button class="toggle-btn" onclick="setFontAvailable('YouYuan', true)">幼圆 YouYuan：已安装</button>
+    </div>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setFontAvailable('Yuanti SC', true)">圆体-简 Yuanti SC：已安装</button>
+      <button class="toggle-btn" onclick="setFontAvailable('Yuanti SC', false)">圆体-简 Yuanti SC：未安装</button>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin-top:8px;">
+      💡 点击上方按钮切换模拟环境，观察下方逻辑变化
+    </p>
+  </div>
+
+  <!-- 字体选择器 -->
+  <div class="card">
+    <div class="card-title">
+      🎨 字体选择（模拟编辑面板）
+      <span class="tag tag-info" id="fontCountTag">内置 10 种 + 自定义 0 种</span>
+    </div>
+    <div class="row">
+      <label>选择字体：</label>
+      <select id="fontSelect" onchange="onFontChange()">
+        <!-- 动态填充 -->
+      </select>
+    </div>
+    <div id="fontHint"></div>
+  </div>
+
+  <!-- 执行流程 -->
+  <div class="card">
+    <div class="card-title">
+      📋 执行流程
+      <span class="tag tag-warn">实时计算</span>
+    </div>
+    <ol class="step-list" id="stepList">
+      <!-- 动态填充 -->
+    </ol>
+  </div>
+
+  <!-- 预览效果 -->
+  <div class="card">
+    <div class="card-title">
+      👁️ 实际显示效果
+      <span class="tag tag-ok" id="previewTag">预览中</span>
+    </div>
+    <div class="preview-area">
+      <div class="preview-label">当前应用的 font-family：</div>
+      <div class="code-block" id="fontFamilyCode">font-family: "";</div>
+      <div class="preview-label" style="margin-top:12px;">文字预览：</div>
+      <div class="preview-text" id="previewText">这是一段测试文字：Hello World 你好世界 123</div>
+    </div>
+  </div>
+
+  <!-- 系统字体检测 -->
+  <div class="card">
+    <div class="card-title">
+      🔍 本地字体可用性检测（真实环境）
+      <span class="tag tag-info">基于 Canvas</span>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:8px;">
+      以下是对你当前系统真实字体的检测结果，可与上方 mock 逻辑对比验证
+    </p>
+    <div class="font-test-list" id="realFontTestList">
+      <!-- 动态填充 -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Mock 数据配置
+// ============================================================
+
+const FONT_OPTIONS = [
+  { value: '', label: '(默认字体)' },
+  { value: '', label: '── 中文字体 ──', disabled: true },
+  { value: '"Microsoft YaHei", "微软雅黑", sans-serif', label: '微软雅黑 - 经典商务' },
+  { value: '"PingFang SC", "苹方", sans-serif', label: '苹方 - 现代简约' },
+  { value: '"Source Han Sans CN", "思源黑体", sans-serif', label: '思源黑体 - 开源专业' },
+  { value: '"SimSun", "宋体", serif', label: '宋体 - 传统正式' },
+  { value: '"SimHei", "黑体", sans-serif', label: '黑体 - 醒目有力' },
+  { value: '"KaiTi", "楷体", serif', label: '楷体 - 优雅手写' },
+  { value: '"YouYuan", "幼圆", sans-serif', label: '幼圆 - 圆润亲和' },
+  { value: '"STXihei", "华文细黑", sans-serif', label: '华文细黑 - 精致细腻' },
+  { value: '"LiSu", "隶书", serif', label: '隶书 - 古典韵味' },
+  { value: '"FZShuTi", "方正舒体", cursive', label: '方正舒体 - 艺术风格' },
+  { value: '', label: '── 英文字体 ──', disabled: true },
+  { value: 'Arial, sans-serif', label: 'Arial - 经典商务' },
+  { value: 'Helvetica, sans-serif', label: 'Helvetica - 现代极简' },
+  { value: 'Georgia, serif', label: 'Georgia - 优雅衬线' },
+  { value: 'Roboto, sans-serif', label: 'Roboto - Material 设计' },
+  { value: 'Inter, sans-serif', label: 'Inter - 屏幕优化' }
+];
+
+// Mock 字体可用性（可通过按钮切换）
+let mockFontAvailable = {
+  'Microsoft YaHei': false,
+  'PingFang SC': true,
+  'SimSun': false,
+  'SimHei': false,
+  'KaiTi': false,
+  'YouYuan': false,
+  'STXihei': false,
+  'LiSu': false,
+  'FZShuTi': false,
+  'Arial': true,
+  'Helvetica': true,
+  'Georgia': true,
+  'Roboto': false,
+  'Inter': false,
+  'Source Han Sans CN': false
+};
+
+let mockOS = 'macos';
+
+// ============================================================
+// 核心逻辑函数（与实际扩展实现一致）
+// ============================================================
+
+function detectOS() {
+  return mockOS; // mock 返回
+}
+
+function resolveFontFamily(fontValue) {
+  // 直接解析原始字体栈，不做任何映射
+  const fonts = fontValue.split(',').map(f => f.trim().replace(/^["']|["']$/g, ''));
+  return {
+    value: fontValue,
+    fonts: fonts
+  };
+}
+
+function isFontAvailable(fontFamily) {
+  // mock 版本：直接查 mockFontAvailable
+  if (mockFontAvailable[fontFamily] !== undefined) {
+    return mockFontAvailable[fontFamily];
+  }
+  // 通用字体族默认可用
+  if (['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'].includes(fontFamily)) {
+    return true;
+  }
+  return false;
+}
+
+function getFirstAvailableFont(fontValue) {
+  const fonts = fontValue.split(',').map(f => f.trim().replace(/^["']|["']$/g, ''));
+  for (const font of fonts) {
+    if (['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'].includes(font)) {
+      return { font, isGeneric: true, index: fonts.indexOf(font) };
+    }
+    if (isFontAvailable(font)) {
+      return { font, isGeneric: false, index: fonts.indexOf(font) };
+    }
+  }
+  return { font: 'sans-serif', isGeneric: true, index: -1 };
+}
+
+// 真实环境字体检测（基于 Canvas）
+function isFontAvailableReal(fontFamily) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const baseFont = 'monospace';
+  const testText = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  
+  ctx.font = `72px ${baseFont}`;
+  const baseWidth = ctx.measureText(testText).width;
+  
+  ctx.font = `72px "${fontFamily}", ${baseFont}`;
+  const testWidth = ctx.measureText(testText).width;
+  
+  return testWidth !== baseWidth;
+}
+
+// ============================================================
+// UI 渲染逻辑
+// ============================================================
+
+function initFontSelect() {
+  const sel = document.getElementById('fontSelect');
+  sel.innerHTML = '';
+  FONT_OPTIONS.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    if (opt.disabled) o.disabled = true;
+    // 预览字体
+    if (opt.value && !opt.disabled) {
+      o.style.fontFamily = opt.value;
+    }
+    sel.appendChild(o);
+  });
+  // 默认选中幼圆
+  sel.value = '"YouYuan", "幼圆", sans-serif';
+}
+
+function onFontChange() {
+  const sel = document.getElementById('fontSelect');
+  const selectedValue = sel.value;
+  
+  if (!selectedValue) {
+    document.getElementById('fontHint').innerHTML = '';
+    document.getElementById('stepList').innerHTML = '';
+    document.getElementById('previewText').style.fontFamily = '';
+    document.getElementById('fontFamilyCode').textContent = 'font-family: "";';
+    return;
+  }
+  
+  const os = detectOS();
+  const fontInfo = resolveFontFamily(selectedValue);
+  const firstAvail = getFirstAvailableFont(fontInfo.value);
+  
+  // 渲染提示
+  renderHint(fontInfo, firstAvail);
+  
+  // 渲染步骤
+  renderSteps(fontInfo, firstAvail, os);
+  
+  // 渲染预览
+  document.getElementById('previewText').style.fontFamily = fontInfo.value;
+  document.getElementById('fontFamilyCode').textContent = `font-family: ${fontInfo.value};`;
+}
+
+function renderHint(fontInfo, firstAvail) {
+  const hintEl = document.getElementById('fontHint');
+  
+  // 只有当字体回退到通用字体族（即预览完全失败）时才显示提示
+  const isPreviewFailed = firstAvail.isGeneric;
+  
+  if (isPreviewFailed) {
+    hintEl.innerHTML = `
+      <div class="hint-box hint-warn">
+        ⚠ 当前预览不可用，Diff 中可以保存选项字体，AI 将依照选项修改。
+      </div>
+    `;
+  } else {
+    hintEl.innerHTML = '';
+  }
+}
+
+function renderSteps(fontInfo, firstAvail, os) {
+  const listEl = document.getElementById('stepList');
+  const firstFont = fontInfo.fonts[0];
+  
+  let steps = [];
+  
+  // 步骤1：系统检测
+  steps.push({
+    class: 'ok',
+    title: `检测操作系统：${os === 'macos' ? 'macOS' : 'Windows'}`,
+    detail: `navigator.userAgent 检测 → ${os === 'macos' ? 'MacIntel' : 'Windows'}`
+  });
+  
+  // 步骤2：应用字体栈
+  steps.push({
+    class: 'ok',
+    title: `应用 font-family 到元素`,
+    detail: `font-family: ${fontInfo.value};`
+  });
+  
+  // 步骤3：检测可用性
+  const firstAvailResult = isFontAvailable(firstFont);
+  steps.push({
+    class: firstAvailResult ? 'ok' : 'warn',
+    title: `检测字体可用性：${firstFont} → ${firstAvailResult ? '可用' : '不可用'}`,
+    detail: firstAvailResult 
+      ? `Canvas 测量宽度不同 → 字体生效`
+      : `Canvas 测量宽度相同 → 字体未生效，触发回退`
+  });
+  
+  // 步骤4：实际使用的字体
+  steps.push({
+    class: firstAvail.isGeneric ? 'warn' : 'ok',
+    title: `实际渲染字体：${firstAvail.font}`,
+    detail: firstAvail.isGeneric 
+      ? `回退到通用字体族 ${firstAvail.font}`
+      : `字体栈第 ${firstAvail.index + 1} 个字体可用`
+  });
+  
+  // 渲染
+  listEl.innerHTML = steps.map(s => `
+    <li class="${s.class}">
+      ${s.title}
+      <div class="step-detail">${s.detail}</div>
+    </li>
+  `).join('');
+}
+
+// ============================================================
+// 真实环境字体检测
+// ============================================================
+
+function runRealFontTests() {
+  const testFonts = [
+    'Microsoft YaHei', 'PingFang SC', 'SimSun', 'Songti SC',
+    'SimHei', 'STHeiti', 'KaiTi', 'Kaiti SC',
+    'YouYuan', 'Yuanti SC', 'STXihei', 'LiSu',
+    'Arial', 'Helvetica', 'Georgia', 'Roboto', 'Inter'
+  ];
+  
+  const listEl = document.getElementById('realFontTestList');
+  listEl.innerHTML = testFonts.map(f => {
+    const avail = isFontAvailableReal(f);
+    return `
+      <div class="font-test-item">
+        <span class="font-test-name" style="font-family: '${f}', sans-serif;">${f}</span>
+        <span class="font-test-result ${avail ? 'result-yes' : 'result-no'}">
+          ${avail ? '✓ 可用' : '✗ 不可用'}
+        </span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// 控制函数
+// ============================================================
+
+function setMockOS(os) {
+  mockOS = os;
+  document.getElementById('currentOsTag').textContent = os === 'macos' ? 'macOS' : 'Windows';
+  document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  initFontSelect();
+  onFontChange();
+}
+
+function setFontAvailable(font, available) {
+  mockFontAvailable[font] = available;
+  event.target.classList.add('active');
+  event.target.classList.toggle('active', true);
+  // 更新同组另一个按钮状态
+  const group = event.target.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(btn => {
+    if (btn !== event.target) btn.classList.remove('active');
+  });
+  onFontChange();
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+
+initFontSelect();
+onFontChange();
+runRealFontTests();
+
+</script>
+</body>
+</html>

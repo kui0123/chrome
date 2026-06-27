@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUG 修复验证 - HTML Diff Marker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .header {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .header h1 { font-size: 24px; color: #1a1a2e; margin-bottom: 8px; }
+  .header p { color: #666; font-size: 14px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+  .badge-severe { background: #fee2e2; color: #dc2626; }
+  .badge-medium { background: #fef3c7; color: #d97706; }
+  .badge-minor { background: #dbeafe; color: #2563eb; }
+
+  .bug-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .bug-card h2 {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .bug-desc {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .steps {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px 0;
+  }
+  .steps h3 {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .steps ol {
+    padding-left: 20px;
+    font-size: 13px;
+    color: #555;
+    line-height: 2;
+  }
+  .expected {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #065f46;
+    margin-bottom: 16px;
+  }
+  .expected strong { color: #047857; }
+
+  .test-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 24px;
+    background: #fafbfc;
+  }
+  .test-area h4 {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  /* BUG-1 测试区域 */
+  .bug1-test-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  /* BUG-2 测试区域 */
+  .bug2-test-box {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #92400e;
+  }
+  .bug2-test-box .small-text {
+    font-size: 12px;
+    font-weight: normal;
+    margin-top: 8px;
+    color: #b45309;
+  }
+
+  /* BUG-3 测试区域 */
+  .bug3-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .bug3-btn:hover { background: #2563eb; }
+  .bug3-result {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #475569;
+    min-height: 20px;
+  }
+
+  /* BUG-4 测试区域 */
+  .bug4-test-box {
+    background: #dcfce7;
+    border: 2px solid #22c55e;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #166534;
+  }
+
+  .footer-note {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 20px;
+    padding-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🐛 BUG 修复验证页面</h1>
+    <p>针对 4 个已修复 BUG 的本地验证测试 — HTML Diff Marker v1.2.1</p>
+  </div>
+
+  <!-- BUG-1: 非链接元素跳转链接 -->
+  <div class="bug-card">
+    <h2>BUG-1：非链接元素跳转链接不生效 <span class="badge badge-severe">严重</span></h2>
+    <p class="bug-desc">
+      <strong>问题：</strong>元素刚标记时 <code>modifiedHref</code> 为空，click 事件不注册；
+      用户在检查面板设置跳转链接后，点击元素不会跳转。<br>
+      <strong>修复：</strong>始终注册 click 事件，handler 内部判断是否有链接才跳转；同时动态更新 cursor 样式。
+    </p>
+    <div class="steps">
+      <h3>📋 验证步骤：</h3>
+      <ol>
+        <li>点击扩展图标 → 显示工具栏，点击「选择元素」进入选择模式</li>
+        <li>点击下面的紫色方框，标记它</li>
+        <li>点击元素上的编号徽章，打开检查面板</li>
+        <li>在「跳转链接」输入框中填入：<code>https://www.baidu.com</code></li>
+        <li>关闭检查面板，退出选择模式</li>
+        <li><strong>点击紫色方框</strong> → 观察是否跳转到百度（新标签页打开）</li>
+        <li>额外验证：鼠标悬停在方框上时，光标应该变成 👆 pointer 形状</li>
+      </ol>
+    </div>
+    <div class="expected">
+      <strong>✅ 修复后预期：</strong>点击紫色方框后，应在新标签页打开百度；鼠标悬停时光标变手型。
+    </div>
+    <div class="test-area">
+      <h4>👇 测试目标元素（点击标记这个紫色方框）</h4>
+      <div class="bug1-test-box" id="bug1-target">
+        我是一个普通的 div，不是链接<br>
+        <span style="font-size:12px;opacity:0.8;">设置跳转链接后点击我试试</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG-2: 滚轮缩放 transform scale -->
+  <div class="bug-card">
+    <h2>BUG-2：滚轮缩放用 width/height 而非 transform <span class="badge badge-medium">中等</span></h2>
+    <p class="bug-desc">
+      <strong>问题：</strong>滚轮缩放通过修改 width/height 实现，文字不缩放、破坏文档流布局。<br>
+      <strong>修复：</strong>改用 <code>transform: scale()</code> 实现真正的视觉缩放，不影响布局。
+    </p>
+    <div class="steps">
+      <h3>📋 验证步骤：</h3>
+      <ol>
+        <li>标记下面的黄色方框</li>
+        <li>按住 <code>Ctrl</code>（Mac 为 <code>Cmd</code>）+ 滚轮向上放大</li>
+        <li>观察：方框内的文字是否跟着一起放大</li>
+        <li>观察：方框下方的其他元素位置是否被推动（应该不动才对）</li>
+        <li>再滚轮向下缩小，观察文字是否一起缩小</li>
+      </ol>
+    </div>
+    <div class="expected">
+      <strong>✅ 修复后预期：</strong>文字和方框整体缩放（像放大镜效果）；下面的绿色参考元素位置不变（不破坏文档流）。
+    </div>
+    <div class="test-area">
+      <h4>👇 测试目标元素（Ctrl+滚轮缩放这个黄色方框）</h4>
+      <div class="bug2-test-box" id="bug2-target">
+        我是测试缩放的元素<br>
+        <span class="small-text">看看我里面的文字会不会跟着缩放</span>
+      </div>
+      <div style="margin-top: 16px; padding: 12px; background: #dcfce7; border-radius: 6px; text-align: center; font-size: 13px; color: #166534;">
+        📍 我是参考元素，看我的位置会不会被推动
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG-3: 导出 Diff 事件丢失 -->
+  <div class="bug-card">
+    <h2>BUG-3：导出 Diff 后页面原有事件全部丢失 <span class="badge badge-severe">严重</span></h2>
+    <p class="bug-desc">
+      <strong>问题：</strong><code>buildDiffData</code> 用 <code>innerHTML = old</code> 恢复元素，重建 DOM 导致所有 <code>addEventListener</code> 绑定的事件全部丢失。<br>
+      <strong>修复：</strong>用 <code>cloneNode(true)</code> 克隆副本后操作，原始 DOM 完全不动。
+    </p>
+    <div class="steps">
+      <h3>📋 验证步骤：</h3>
+      <ol>
+        <li>先点击下面的「点我测试」蓝色按钮，观察下方显示「按钮点击了 1 次」，说明事件正常工作</li>
+        <li>标记这个蓝色按钮</li>
+        <li>点击工具栏的「导出 Diff」按钮，生成并下载 Diff 文件</li>
+        <li><strong>导出完成后</strong>，再次点击「点我测试」按钮</li>
+        <li>观察下方计数器是否继续增加（说明事件还在）</li>
+      </ol>
+    </div>
+    <div class="expected">
+      <strong>✅ 修复后预期：</strong>导出 Diff 后再点击按钮，计数器应该继续计数（事件监听器仍然有效）。<br>
+      <strong>❌ 未修复表现：</strong>导出后点击按钮无反应，计数器不增加。
+    </div>
+    <div class="test-area">
+      <h4>👇 测试目标元素（标记这个按钮，导出 Diff 后再点它）</h4>
+      <button class="bug3-btn" id="bug3-btn">点我测试（点击计数）</button>
+      <div class="bug3-result" id="bug3-result">按钮还没被点击过</div>
+    </div>
+  </div>
+
+  <!-- BUG-4: 三态切换面板位置 -->
+  <div class="bug-card">
+    <h2>BUG-4：三态切换时检查面板位置丢失 <span class="badge badge-minor">轻微</span></h2>
+    <p class="bug-desc">
+      <strong>问题：</strong><code>toggleThreeState</code> 直接 remove 检查面板，不保存位置。<br>
+      <strong>修复：</strong>移除前先读取位置保存到 <code>state.inspectorPos</code>。
+    </p>
+    <div class="steps">
+      <h3>📋 验证步骤：</h3>
+      <ol>
+        <li>标记下面的绿色方框</li>
+        <li>点击编号徽章打开检查面板</li>
+        <li>拖拽检查面板的标题栏，把它拖到屏幕左侧（或你喜欢的位置）</li>
+        <li>按快捷键 <code>Ctrl+Shift+E</code>（Mac 为 <code>Cmd+Shift+E</code>）隐藏工具栏</li>
+        <li>再按一次 <code>Ctrl+Shift+E</code> 显示工具栏（唤醒按钮）</li>
+        <li>再按一次显示完整工具栏</li>
+        <li>再次点击编号徽章打开检查面板</li>
+        <li>观察检查面板的位置是否和你之前拖动的位置一致</li>
+      </ol>
+    </div>
+    <div class="expected">
+      <strong>✅ 修复后预期：</strong>三态切换后再次打开检查面板，位置保持在你上次拖动的地方。<br>
+      <strong>❌ 未修复表现：</strong>面板位置回到默认的右上角。
+    </div>
+    <div class="test-area">
+      <h4>👇 测试目标元素（标记后打开检查面板，拖动位置后测试三态切换）</h4>
+      <div class="bug4-test-box" id="bug4-target">
+        标记我，打开检查面板拖一拖位置
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    HTML Diff Marker v1.2.1 BUG 验证页面 | 所有测试通过即表示 BUG 已修复
+  </div>
+
+</div>
+
+<script>
+  // BUG-3 测试：按钮点击计数
+  var clickCount = 0;
+  var btn = document.getElementById('bug3-btn');
+  var result = document.getElementById('bug3-result');
+  btn.addEventListener('click', function() {
+    clickCount++;
+    result.textContent = '✅ 按钮点击了 ' + clickCount + ' 次（事件监听器工作正常）';
+  });
+</script>
+</body>
+</html>
