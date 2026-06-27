@@ -13,6 +13,24 @@ chrome.action.onClicked.addListener(function(tab) {
   } catch(e) { console.error('Action click failed:', e); }
 });
 
+// 快捷键命令：三态切换
+chrome.commands.onCommand.addListener(function(command) {
+  if (command !== 'toggle-three-state') return;
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    const tab = tabs && tabs[0];
+    if (!tab || !tab.id) return;
+    try {
+      chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_WAKE' }, function(resp) {
+        if (chrome.runtime.lastError) {
+          chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] }, function() {
+            chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_WAKE' });
+          });
+        }
+      });
+    } catch(e) { console.error('Command failed:', e); }
+  });
+});
+
 // 安装时创建右键菜单
 chrome.runtime.onInstalled.addListener(function() {
   try {

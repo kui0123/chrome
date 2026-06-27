@@ -281,6 +281,10 @@
   color: #1f2937 !important;
 }
 
+.html-diff-marker-inspector.html-diff-marker-collapsed {
+  height: auto !important;
+  min-height: 0 !important;
+}
 .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-body,
 .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-actions,
 .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-resize-handle-se {

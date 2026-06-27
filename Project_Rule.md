@@ -280,7 +280,7 @@
 // exportDiffMessage, buildDiffPayload, buildMarkdownSection, lineDiff
 
 // ================ 消息处理 ================
-// onMessage (处理 TOGGLE_SELECT, CLEAR_ALL, EXPORT_NOW, GET_STATUS, TOGGLE_TOOLBAR)
+// onMessage (处理 TOGGLE_SELECT, CLEAR_ALL, EXPORT_NOW, GET_STATUS, TOGGLE_WAKE)
 
 // ================ 初始化 ================
 // init() + DOMContentLoaded 事件监听
@@ -322,7 +322,7 @@
 | `TOGGLE_SELECT`  | background → content | `{ type: 'TOGGLE_SELECT' }`               | -                                                   |
 | `CLEAR_ALL`      | background → content | `{ type: 'CLEAR_ALL' }`                   | -                                                   |
 | `EXPORT_NOW`     | background → content | `{ type: 'EXPORT_NOW' }`                  | -                                                   |
-| `TOGGLE_TOOLBAR` | background → content | `{ type: 'TOGGLE_TOOLBAR' }`              | -                                                   |
+| `TOGGLE_WAKE`    | background → content | `{ type: 'TOGGLE_WAKE' }`                | -                                                   |
 | `GET_STATUS`     | background → content | `{ type: 'GET_STATUS' }`                  | `{ total, modified, isSelecting, isToolbarHidden }` |
 | `EXPORT_DIFF`    | content → background       | `{ type: 'EXPORT_DIFF', payload: {...} }` | `{ ok, filename }`                                  |
 

@@ -131,12 +131,10 @@
     el.querySelectorAll('.html-diff-marker-badge, .html-diff-marker-overlay, .html-diff-marker-resize-handle, .html-diff-marker-remove-badge').forEach(b => b.remove());
   }
   function getOuterHTML(el) {
-    stripMarkerChildren(el);
-    const cls = el.className;
-    el.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
-    const html = el.outerHTML;
-    el.className = cls;
-    return html;
+    const clone = el.cloneNode(true);
+    stripMarkerChildren(clone);
+    clone.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
+    return clone.outerHTML;
   }
   function recordOriginalStyles(entry) {
     if (!entry._el || entry.originalStyles) return;
@@ -262,6 +260,11 @@
 
     // 清除旧的标记装饰
     stripMarkerChildren(el);
+    entry._dragEnabled = false;
+    entry._resizeEnabled = false;
+    entry._wheelEnabled = false;
+    entry._textEditEnabled = false;
+    entry._hrefClickEnabled = false;
 
     // 添加选中状态样式
     if (entry.modifiedHTML || hasStyleChanges(entry)) {
@@ -323,6 +326,23 @@
         e.preventDefault(); e.stopPropagation();
       }, true);
     }
+
+    // 非链接元素的跳转链接功能（始终注册事件，在 handler 内判断是否有链接）
+    if (el.tagName !== 'A' && !entry._hrefClickEnabled) {
+      entry._hrefClickEnabled = true;
+      el.addEventListener('click', function(e) {
+        if (state.isVisualEditing || state.isSelecting) return;
+        const t = e.target;
+        if (t && t.classList && (t.classList.contains('html-diff-marker-badge') || t.classList.contains('html-diff-marker-resize-handle') || t.classList.contains('html-diff-marker-remove-badge'))) return;
+        if (!entry.modifiedHref || entry.modifiedHref === '') return;
+        e.preventDefault(); e.stopPropagation();
+        window.open(entry.modifiedHref, '_blank');
+      }, true);
+    }
+    // 根据是否有跳转链接设置光标样式
+    if (el.tagName !== 'A') {
+      el.style.cursor = (entry.modifiedHref && entry.modifiedHref !== '') ? 'pointer' : '';
+    }
   }
 
   // ---------- 元素拖拽（带位置辅助线） ----------
@@ -382,6 +402,7 @@
 
     el.addEventListener('mousedown', function(e) {
       if (e.button !== 0) return;
+      if (el.contentEditable === 'true') return;
       const target = e.target;
       if (target && target.classList) {
         if (target.classList.contains('html-diff-marker-badge')) return;
@@ -430,6 +451,23 @@
     const el = entry._el;
     if (!el || entry._resizeEnabled) return;
     entry._resizeEnabled = true;
+    // 确保 _scale 已初始化（可能从持久化恢复或复制元素而来）
+    if (entry._scale === undefined) {
+      if (entry.modifiedStyles && entry.modifiedStyles.transform) {
+        const match = entry.modifiedStyles.transform.match(/scale\(([\d.]+)\)/);
+        entry._scale = match ? parseFloat(match[1]) : 1;
+      } else {
+        const cs = window.getComputedStyle(el);
+        const t = cs.transform;
+        if (t && t !== 'none') {
+          const m = t.match(/matrix\(([^)]+)\)/);
+          if (m) {
+            const parts = m[1].split(',').map(s => parseFloat(s.trim()));
+            entry._scale = parts.length >= 1 ? parts[0] : 1;
+          } else { entry._scale = 1; }
+        } else { entry._scale = 1; }
+      }
+    }
     const currentPos = window.getComputedStyle(el).position;
     if (currentPos === 'static') { el.style.position = 'relative'; entry.modifiedStyles.position = 'relative'; }
 
@@ -497,9 +535,105 @@
       handle.className = 'html-diff-marker-resize-handle html-diff-marker-handle-' + dir.name;
       handle.setAttribute('data-entry-id', entry.id);
       handle.addEventListener('mousedown', function(e) {
-        e.preventDefault(); e.stopPropagation();
         if (e.button !== 0) return;
+        if (el.contentEditable === 'true') return;
+        e.preventDefault(); e.stopPropagation();
         const startX = e.clientX; const startY = e.clientY;
+        // 如果有 transform: scale，先将缩放效果吸收到真实样式中，再重置 scale
+        const scale = entry._scale || 1;
+        if (scale !== 1) {
+          const beforeRect = el.getBoundingClientRect();
+          const cs = window.getComputedStyle(el);
+          const boxSizing = cs.boxSizing || 'content-box';
+          // 需要按比例缩放的尺寸属性（camelCase）
+          const sizeProps = [
+            'fontSize',
+            'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+            'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+            'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+            'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomRightRadius', 'borderBottomLeftRadius'
+          ];
+          function scaleElementStyles(targetEl) {
+            const targetCs = window.getComputedStyle(targetEl);
+            sizeProps.forEach(function(prop) {
+              const val = targetCs[prop];
+              if (!val || !val.endsWith('px')) return;
+              const num = parseFloat(val);
+              if (isNaN(num) || num === 0) return;
+              const newVal = (num * scale) + 'px';
+              targetEl.style[prop] = newVal;
+            });
+          }
+          scaleElementStyles(el);
+          const children = el.querySelectorAll('*');
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (child.classList && child.classList.value && child.classList.value.indexOf('html-diff-marker-') >= 0) continue;
+            scaleElementStyles(child);
+          }
+          if (entry.modifiedStyles) {
+            entry.modifiedStyles.fontSize = el.style.fontSize;
+            entry.modifiedStyles.paddingTop = el.style.paddingTop;
+            entry.modifiedStyles.paddingRight = el.style.paddingRight;
+            entry.modifiedStyles.paddingBottom = el.style.paddingBottom;
+            entry.modifiedStyles.paddingLeft = el.style.paddingLeft;
+            entry.modifiedStyles.marginTop = el.style.marginTop;
+            entry.modifiedStyles.marginRight = el.style.marginRight;
+            entry.modifiedStyles.marginBottom = el.style.marginBottom;
+            entry.modifiedStyles.marginLeft = el.style.marginLeft;
+            entry.modifiedStyles.borderTopWidth = el.style.borderTopWidth;
+            entry.modifiedStyles.borderRightWidth = el.style.borderRightWidth;
+            entry.modifiedStyles.borderBottomWidth = el.style.borderBottomWidth;
+            entry.modifiedStyles.borderLeftWidth = el.style.borderLeftWidth;
+            entry.modifiedStyles.borderTopLeftRadius = el.style.borderTopLeftRadius;
+            entry.modifiedStyles.borderTopRightRadius = el.style.borderTopRightRadius;
+            entry.modifiedStyles.borderBottomRightRadius = el.style.borderBottomRightRadius;
+            entry.modifiedStyles.borderBottomLeftRadius = el.style.borderBottomLeftRadius;
+          }
+          // 设置宽高（考虑 box-sizing）
+          if (boxSizing === 'border-box') {
+            el.style.width = beforeRect.width + 'px';
+            el.style.height = beforeRect.height + 'px';
+          } else {
+            const pl = parseFloat(el.style.paddingLeft) || 0;
+            const pr = parseFloat(el.style.paddingRight) || 0;
+            const pt = parseFloat(el.style.paddingTop) || 0;
+            const pb = parseFloat(el.style.paddingBottom) || 0;
+            const bl = parseFloat(el.style.borderLeftWidth) || 0;
+            const br = parseFloat(el.style.borderRightWidth) || 0;
+            const bt = parseFloat(el.style.borderTopWidth) || 0;
+            const bb = parseFloat(el.style.borderBottomWidth) || 0;
+            el.style.width = Math.max(0, beforeRect.width - pl - pr - bl - br) + 'px';
+            el.style.height = Math.max(0, beforeRect.height - pt - pb - bt - bb) + 'px';
+          }
+          if (entry.modifiedStyles) {
+            entry.modifiedStyles.width = el.style.width;
+            entry.modifiedStyles.height = el.style.height;
+          }
+          el.style.transform = '';
+          el.style.transformOrigin = '';
+          // 调整 left/top 保证视觉位置不变（scale 以 center 为原点，清除后左上角会偏移）
+          const afterRect = el.getBoundingClientRect();
+          const dx = beforeRect.left - afterRect.left;
+          const dy = beforeRect.top - afterRect.top;
+          if (dx !== 0 || dy !== 0) {
+            const curLeft = parseFloat(el.style.left) || 0;
+            const curTop = parseFloat(el.style.top) || 0;
+            const newLeft = curLeft + dx;
+            const newTop = curTop + dy;
+            el.style.left = newLeft + 'px';
+            el.style.top = newTop + 'px';
+            if (entry.modifiedStyles) {
+              entry.modifiedStyles.left = newLeft + 'px';
+              entry.modifiedStyles.top = newTop + 'px';
+            }
+          }
+          entry._scale = 1;
+          if (entry.modifiedStyles) {
+            entry.modifiedStyles.transform = '';
+            delete entry.modifiedStyles.transform;
+          }
+        }
         const startRect = el.getBoundingClientRect();
         const startW = startRect.width; const startH = startRect.height;
         const startLeft = parseFloat(el.style.left) || 0;
@@ -551,25 +685,33 @@
     });
   }
 
-  // ---------- 滚轮缩放 ----------
+  // ---------- 滚轮缩放（使用 transform: scale 实现视觉缩放） ----------
   function enableWheelResize(entry) {
     const el = entry._el;
     if (!el || entry._wheelEnabled) return;
     entry._wheelEnabled = true;
+
+    // 从持久化样式中恢复 scale 值
+    if (entry._scale === undefined) {
+      if (entry.modifiedStyles && entry.modifiedStyles.transform) {
+        const match = entry.modifiedStyles.transform.match(/scale\(([\d.]+)\)/);
+        entry._scale = match ? parseFloat(match[1]) : 1;
+      } else {
+        entry._scale = 1;
+      }
+    }
+
     el.addEventListener('wheel', function(e) {
       if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault(); e.stopPropagation();
-      const rect = el.getBoundingClientRect();
-      const startW = rect.width; const startH = rect.height;
-      const scale = e.deltaY > 0 ? 0.95 : 1.05;
-      const newW = Math.max(20, startW * scale);
-      const newH = Math.max(20, startH * scale);
-      const currentPos = window.getComputedStyle(el).position;
-      if (currentPos === 'static') { el.style.position = 'relative'; entry.modifiedStyles.position = 'relative'; }
-      el.style.width = newW + 'px';
-      el.style.height = newH + 'px';
-      entry.modifiedStyles.width = newW + 'px';
-      entry.modifiedStyles.height = newH + 'px';
+      const factor = e.deltaY > 0 ? 0.98 : 1.02;
+      let newScale = entry._scale * factor;
+      newScale = Math.max(0.1, Math.min(10, newScale));
+      entry._scale = newScale;
+      el.style.transformOrigin = 'center center';
+      el.style.transform = 'scale(' + newScale + ')';
+      if (!entry.modifiedStyles) entry.modifiedStyles = {};
+      entry.modifiedStyles.transform = 'scale(' + newScale + ')';
       saveState();
       el.classList.add('html-diff-marker-modified');
       if (state.currentEditId === entry.id) openInspector(entry.id);
@@ -670,6 +812,8 @@
       if (entry.tag === 'a') {
         if (entry.originalHref !== undefined && entry.originalHref !== null) el.setAttribute('href', entry.originalHref);
         else el.removeAttribute('href');
+      } else {
+        el.style.cursor = '';
       }
       stripMarkerChildren(el);
     }
@@ -681,6 +825,52 @@
   function clearAll() {
     const ids = state.markedElements.map(m => m.id);
     ids.forEach(id => removeMark(id));
+    if (state.domChanges && state.domChanges.length > 0) {
+      for (let i = state.domChanges.length - 1; i >= 0; i--) {
+        const change = state.domChanges[i];
+        try {
+          if (change.type === 'delete') {
+            const container = document.createElement('div');
+            container.innerHTML = change.deletedHTML;
+            const restoredEl = container.firstElementChild;
+            if (restoredEl) {
+              let parentEl = null;
+              if (change.parentSelector) {
+                parentEl = document.querySelector(change.parentSelector);
+              }
+              if (!parentEl) parentEl = document.body;
+              if (change.nextSiblingSelector) {
+                const nextSibling = document.querySelector(change.nextSiblingSelector);
+                if (nextSibling && nextSibling.parentNode === parentEl) {
+                  parentEl.insertBefore(restoredEl, nextSibling);
+                } else {
+                  parentEl.appendChild(restoredEl);
+                }
+              } else {
+                parentEl.appendChild(restoredEl);
+              }
+            }
+          } else if (change.type === 'duplicate') {
+            const target = document.querySelector(change.targetSelector);
+            if (target && target.parentNode && target.nextElementSibling) {
+              target.parentNode.removeChild(target.nextElementSibling);
+            }
+          } else if (change.type === 'add') {
+            if (change.afterSelector) {
+              const ref = document.querySelector(change.afterSelector);
+              if (ref && ref.parentNode && ref.nextElementSibling) {
+                ref.parentNode.removeChild(ref.nextElementSibling);
+              }
+            } else if (document.body.lastElementChild) {
+              document.body.removeChild(document.body.lastElementChild);
+            }
+          }
+        } catch(e) {
+          console.warn('clearAll undo error:', change.type, e);
+        }
+      }
+    }
+    state.domChanges = [];
     sessionStorage.removeItem(STATE_KEY);
     updateToolbarCounts();
   }
@@ -704,6 +894,13 @@
       const clone = el.cloneNode(true);
       clone.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified', 'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
       stripMarkerChildren(clone);
+      if (entry.modifiedStyles) {
+        Object.keys(entry.modifiedStyles).forEach(prop => {
+          clone.style.removeProperty(cssProp(prop));
+        });
+      }
+      clone.style.left = '';
+      clone.style.top = '';
       if (el.parentNode) {
         el.parentNode.insertBefore(clone, el.nextSibling);
       } else {
@@ -715,12 +912,17 @@
         id: uid(), selector: buildSelector(clone), tag: clone.tagName.toLowerCase(),
         note: (entry.note || '') + '（复制）',
         description: entry.description || '',
-        originalHTML: getOuterHTML(clone), modifiedHTML: null,
-        originalStyles: null, modifiedStyles: {},
-        originalHref: clone.tagName === 'A' ? clone.getAttribute('href') : undefined,
-        modifiedHref: undefined,
+        originalHTML: getOuterHTML(clone), modifiedHTML: entry.modifiedHTML ? getOuterHTML(clone) : null,
+        originalStyles: null,
+        modifiedStyles: entry.modifiedStyles ? JSON.parse(JSON.stringify(entry.modifiedStyles)) : {},
+        originalHref: entry.originalHref !== undefined ? (clone.tagName === 'A' ? clone.getAttribute('href') : undefined) : undefined,
+        modifiedHref: entry.modifiedHref,
         _el: clone
       };
+      if (newEntry.modifiedStyles) {
+        delete newEntry.modifiedStyles.left;
+        delete newEntry.modifiedStyles.top;
+      }
       state.markedElements.push(newEntry);
       state.domChanges.push({ type: 'duplicate', targetSelector: targetSelector, cloneHTML: cloneHTML });
       applyMarkVisual(newEntry);
@@ -780,8 +982,12 @@
     const el = entry._el;
     const selector = entry.selector;
     const id = entry.id;
+    stripMarkerChildren(el);
+    const deletedHTML = el.outerHTML;
+    const parentSelector = el.parentNode ? buildSelector(el.parentNode) : null;
+    const nextSiblingSelector = el.nextSibling && el.nextSibling.nodeType === 1 ? buildSelector(el.nextSibling) : null;
     state.markedElements = state.markedElements.filter(m => m.id !== id);
-    state.domChanges.push({ type: 'delete', selector: selector });
+    state.domChanges.push({ type: 'delete', selector: selector, deletedHTML: deletedHTML, parentSelector: parentSelector, nextSiblingSelector: nextSiblingSelector });
     if (el && el.parentNode) el.parentNode.removeChild(el);
     if (state.currentEditId === id) closeInspector();
     saveState();
@@ -1065,19 +1271,47 @@
     // 修改说明（给 AI Agent 看）
     const descWrap = document.createElement('div');
     descWrap.className = 'html-diff-marker-field-row';
+    const descHeader = document.createElement('div');
+    descHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;';
     const descLabel = document.createElement('label');
     descLabel.textContent = '修改说明（给 AI Agent 看）';
-    descWrap.appendChild(descLabel);
+    descHeader.appendChild(descLabel);
+    const descPreviewBtn = document.createElement('button');
+    descPreviewBtn.className = 'html-diff-marker-style-reset-all';
+    descPreviewBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
+    descPreviewBtn.textContent = '预览链接';
+    descPreviewBtn.setAttribute('title', '预览 Markdown 链接');
+    descHeader.appendChild(descPreviewBtn);
+    descWrap.appendChild(descHeader);
     const descTa = document.createElement('textarea');
     descTa.rows = 3;
     descTa.className = 'html-diff-marker-textarea';
-    descTa.placeholder = '请描述这次修改的目的、设计意图或具体变更内容，便于 AI Agent 理解并应用相同风格的修改...';
+    descTa.placeholder = '请描述这次修改的目的、设计意图或具体变更内容，便于 AI Agent 理解并应用相同风格的修改...\n\n支持 Markdown 链接格式：[链接文字](https://example.com)';
     descTa.value = entry.description || '';
     descTa.addEventListener('input', function() { entry.description = this.value; saveState(); });
     descWrap.appendChild(descTa);
+    const descPreview = document.createElement('div');
+    descPreview.className = 'html-diff-marker-desc-preview';
+    descPreview.style.cssText = 'display:none; margin-top:4px; padding:6px; background:#f8f9fa; border:1px solid #e9ecef; border-radius:4px; font-size:12px; color:#333; word-break:break-all;';
+    descWrap.appendChild(descPreview);
+    descPreviewBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (descPreview.style.display === 'none') {
+        let html = descTa.value || '';
+        html = escapeHtml(html);
+        html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" style="color:#007bff; text-decoration:underline;">$1</a>');
+        html = html.replace(/\n/g, '<br>');
+        descPreview.innerHTML = html;
+        descPreview.style.display = 'block';
+        descPreviewBtn.textContent = '隐藏预览';
+      } else {
+        descPreview.style.display = 'none';
+        descPreviewBtn.textContent = '预览链接';
+      }
+    }, true);
     body.appendChild(descWrap);
 
-    // 链接 href 编辑（仅对 <a> 元素显示）
+    // 链接 href 编辑（对 <a> 元素显示）
     if (entry.tag === 'a') {
       const hrefWrap = document.createElement('div');
       hrefWrap.className = 'html-diff-marker-field-row';
@@ -1098,6 +1332,29 @@
       });
       hrefWrap.appendChild(hrefInput);
       body.appendChild(hrefWrap);
+    }
+
+    // 跳转链接（对非 <a> 元素显示，点击该元素时跳转）
+    if (entry.tag !== 'a') {
+      const jumpWrap = document.createElement('div');
+      jumpWrap.className = 'html-diff-marker-field-row';
+      const jumpLabel = document.createElement('label');
+      jumpLabel.textContent = '跳转链接 (点击元素时跳转)';
+      jumpWrap.appendChild(jumpLabel);
+      const jumpInput = document.createElement('input');
+      jumpInput.type = 'text';
+      jumpInput.className = 'html-diff-marker-text-input';
+      jumpInput.value = entry.modifiedHref || '';
+      jumpInput.placeholder = '输入链接地址，如 https://example.com（为空则不跳转）';
+      jumpInput.addEventListener('input', function() {
+        entry.modifiedHref = this.value;
+        el.style.cursor = this.value ? 'pointer' : '';
+        if (this.value) el.classList.add('html-diff-marker-modified');
+        else if (!hasStyleChanges(entry) && !entry.modifiedHTML) el.classList.remove('html-diff-marker-modified');
+        saveState();
+      });
+      jumpWrap.appendChild(jumpInput);
+      body.appendChild(jumpWrap);
     }
 
     // 位置调整
@@ -1545,18 +1802,15 @@
     const items = state.markedElements.map((m, i) => {
       let html = '';
       if (m._el) {
-        const old = m._el.innerHTML;
-        stripMarkerChildren(m._el);
-        html = m._el.outerHTML;
-        // 恢复 innerHTML
-        m._el.innerHTML = old;
-        // 重新添加徽章等（applyMarkVisual）
-        m._dragEnabled = false; m._resizeEnabled = false;
-        m._wheelEnabled = false; m._textEditEnabled = false;
-        applyMarkVisual(m);
+        // 克隆元素副本后清理标记装饰，不操作原始 DOM，避免页面原有事件监听器丢失
+        const clone = m._el.cloneNode(true);
+        stripMarkerChildren(clone);
+        clone.classList.remove('html-diff-marker-selected', 'html-diff-marker-modified',
+          'html-diff-marker-highlight-hover', 'html-diff-marker-visual-edit');
+        html = clone.outerHTML;
       }
       const currentOuter = html || m.originalHTML;
-      const hasHrefChange = m.tag === 'a' && m.modifiedHref !== undefined && m.modifiedHref !== null && m.modifiedHref !== m.originalHref;
+      const hasHrefChange = m.modifiedHref !== undefined && m.modifiedHref !== null && m.modifiedHref !== '';
       return {
         index: i + 1, tag: m.tag || '', selector: m.selector,
         element: m._el ? elementInfo(m._el) : '',
@@ -1569,9 +1823,31 @@
         hasChange: !!(m.modifiedHTML || hasStyleChanges(m) || hasHrefChange)
       };
     });
+    const deletedItems = (state.domChanges || []).filter(c => c.type === 'delete').map((c, i) => {
+      let tag = 'unknown';
+      try {
+        const container = document.createElement('div');
+        container.innerHTML = c.deletedHTML || '';
+        const el = container.firstElementChild;
+        if (el) tag = el.tagName.toLowerCase();
+      } catch(e) {}
+      return {
+        index: i + 1, tag: tag, selector: c.selector,
+        element: '',
+        note: '已删除的组件',
+        description: '',
+        originalHTML: c.deletedHTML || '',
+        modifiedHTML: null,
+        styleChanges: {},
+        hrefChange: null,
+        hasChange: true,
+        deleted: true
+      };
+    });
     return {
       url: location.href, title: document.title, timestamp: new Date().toISOString(),
-      totalMarked: items.length, totalModified: items.filter(i => i.hasChange).length, items: items
+      totalMarked: items.length, totalModified: items.filter(i => i.hasChange).length + deletedItems.length, items: items,
+      deletedItems: deletedItems
     };
   }
 
@@ -1580,7 +1856,11 @@
     out += '- **页面**: [' + (d.title || '') + '](' + (d.url || '') + ')\n';
     out += '- **生成时间**: ' + d.timestamp + '\n';
     out += '- **标记组件数**: ' + d.totalMarked + '\n';
-    out += '- **包含修改的组件**: ' + d.totalModified + '\n\n';
+    out += '- **包含修改的组件**: ' + d.totalModified + '\n';
+    if (d.deletedItems && d.deletedItems.length > 0) {
+      out += '- **已删除的组件**: ' + d.deletedItems.length + '\n';
+    }
+    out += '\n';
     out += '---\n\n';
     out += '## 给 AI Agent 的指令\n\n';
     out += '请根据以下每个组件的 "原始 HTML" 和 "修改后的 HTML/样式"，分析差异并理解设计意图，对项目中相应组件进行同样风格的代码修改。\n\n';
@@ -1594,6 +1874,8 @@
       if (item.description) out += '- **修改说明（给 AI Agent 看）**: ' + item.description + '\n';
       if (item.hrefChange && item.hrefChange.modified !== undefined && item.hrefChange.modified !== item.hrefChange.original) {
         out += '- **href 变更**: `' + (item.hrefChange.original || '(空)') + '` → `' + item.hrefChange.modified + '`\n';
+      } else if (item.hrefChange && item.hrefChange.modified !== undefined && item.hrefChange.modified !== '') {
+        out += '- **跳转链接**: `' + item.hrefChange.modified + '`\n';
       }
       const styleKeys = Object.keys(item.styleChanges || {}).filter(k => item.styleChanges[k]);
       if (styleKeys.length) {
@@ -1614,6 +1896,19 @@
       }
       out += '---\n\n';
     });
+    if (d.deletedItems && d.deletedItems.length > 0) {
+      out += '## 已删除的组件\n\n';
+      out += '以下组件已从 DOM 中删除，请参考原始 HTML 进行相应处理。\n\n';
+      out += '---\n\n';
+      d.deletedItems.forEach(item => {
+        out += '## 🗑 ' + (item.tag ? item.tag + ' - ' : '') + '已删除组件 #' + item.index + '\n\n';
+        out += '- **CSS 选择器**: `' + item.selector + '`\n';
+        out += '- **状态**: **已删除**\n';
+        out += '\n';
+        out += '### 被删除的原始 HTML\n\n```html\n' + item.originalHTML + '\n```\n\n';
+        out += '---\n\n';
+      });
+    }
     out += '## 完整 JSON 数据\n\n';
     out += '```json\n' + JSON.stringify(d, null, 2) + '\n```\n';
     return out;
@@ -1676,7 +1971,15 @@
       renderToolbar();
     } else {
       if (state.toolbarEl) { state.toolbarEl.remove(); state.toolbarEl = null; }
-      if (state.inspectorEl) { state.inspectorEl.remove(); state.inspectorEl = null; }
+      if (state.inspectorEl) {
+        // 保存检查面板位置后再移除，避免位置丢失
+        const rect = state.inspectorEl.getBoundingClientRect();
+        if (rect && rect.left >= 0 && rect.top >= 0) {
+          state.inspectorPos = { left: Math.round(rect.left), top: Math.round(rect.top) };
+        }
+        state.inspectorEl.remove();
+        state.inspectorEl = null;
+      }
     }
   }
 
@@ -1694,14 +1997,6 @@
     });
     // 不自动显示工具栏，点击扩展图标 -> 显示唤醒按钮 -> 显示工具栏
     chrome.runtime.onMessage.addListener(onMessage);
-    // 快捷键：Ctrl+Shift+E / Cmd+Shift+E 切换三态
-    document.addEventListener('keydown', function(e) {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleThreeState();
-      }
-    }, true);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
