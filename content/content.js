@@ -76,6 +76,120 @@
   function cssProp(k) { return k.replace(/([A-Z])/g, '-$1').toLowerCase(); }
   function escapeHtml(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+  // ---------- HSL 颜色衍生算法 ----------
+  function hexToHsl(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function hslToHex(h, s, l) {
+    h = h / 360;
+    s = s / 100;
+    l = l / 100;
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      function hue2rgb(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      }
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+    function toHex(x) {
+      const hex = Math.round(x * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }
+    return '#' + toHex(r) + toHex(g) + toHex(b);
+  }
+
+  // 基于主色衍生全套主题色（带黑白边界保护）
+  function deriveColors(primaryHex) {
+    try {
+      const hsl = hexToHsl(primaryHex);
+      let { h, s, l } = hsl;
+
+      // 边界保护：饱和度下限 20%，亮度范围 15%-75%
+      s = Math.max(20, Math.min(s, 100));
+      l = Math.max(15, Math.min(l, 75));
+
+      // 浅色版本：亮度 +20%，饱和度 -10%
+      const lightL = Math.min(85, l + 20);
+      const lightS = Math.max(15, s - 10);
+      const light = hslToHex(h, lightS, lightL);
+
+      // 深色版本：亮度 -15%，饱和度 +5%
+      const darkL = Math.max(10, l - 15);
+      const darkS = Math.min(95, s + 5);
+      const dark = hslToHex(h, darkS, darkL);
+
+      // 渐变：从浅色到主色
+      const gradient = 'linear-gradient(135deg, ' + light + ' 0%, ' + primaryHex + ' 100%)';
+
+      // 柔和背景色：亮度极高（88%-92%），饱和度低
+      const softBgL = Math.min(95, l + 50);
+      const softBgS = Math.max(10, s - 30);
+      const softBg = hslToHex(h, softBgS, softBgL);
+
+      // 柔和文字色：主色降饱和提亮
+      const softTextL = Math.min(70, l + 15);
+      const softTextS = Math.max(25, s - 20);
+      const softText = hslToHex(h, softTextS, softTextL);
+
+      // 计数文字色：使用主色
+      const countText = primaryHex;
+
+      return {
+        primary: primaryHex,
+        light: light,
+        dark: dark,
+        gradient: gradient,
+        softBg: softBg,
+        softText: softText,
+        countText: countText
+      };
+    } catch (e) {
+      // 兜底：返回默认暮紫
+      return {
+        primary: '#70649A',
+        light: '#8B7FB3',
+        dark: '#5A4F7D',
+        gradient: 'linear-gradient(135deg, #8B7FB3 0%, #70649A 100%)',
+        softBg: '#F0EEF7',
+        softText: '#70649A',
+        countText: '#70649A'
+      };
+    }
+  }
+
+  // 判断 hex 颜色是否有效
+  function isValidHex(hex) {
+    return /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+  }
+
   // ================ 状态持久化 ================
   function saveState() {
     try {
@@ -86,7 +200,6 @@
         modifiedStyles: m.modifiedStyles || {},
         originalHref: m.originalHref !== undefined ? m.originalHref : undefined,
         modifiedHref: m.modifiedHref !== undefined ? m.modifiedHref : undefined,
-        syncChildrenScale: m.syncChildrenScale === true,
         type: m.type || 'element',
         children: m.children || undefined
       }));
@@ -198,6 +311,139 @@
     document.addEventListener('mouseup', function() {
       if (dragging) { dragging = false; document.body.style.userSelect = ''; }
     }, true);
+  }
+
+  // ---------- 滑块组件 ----------
+  function createSlider(opts) {
+    const { label, value, min, max, step, unit, onChange } = opts;
+    const wrap = document.createElement('div');
+    wrap.className = 'html-diff-marker-slider-wrap';
+
+    const header = document.createElement('div');
+    header.className = 'html-diff-marker-slider-header';
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'html-diff-marker-slider-label';
+    labelEl.textContent = label;
+    header.appendChild(labelEl);
+
+    const valueEl = document.createElement('span');
+    valueEl.className = 'html-diff-marker-slider-value';
+    valueEl.textContent = value + (unit || '');
+    header.appendChild(valueEl);
+
+    wrap.appendChild(header);
+
+    const trackWrap = document.createElement('div');
+    trackWrap.className = 'html-diff-marker-slider-track-wrap';
+
+    const track = document.createElement('div');
+    track.className = 'html-diff-marker-slider-track';
+
+    const fill = document.createElement('div');
+    fill.className = 'html-diff-marker-slider-fill';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'html-diff-marker-slider-thumb';
+
+    track.appendChild(fill);
+    track.appendChild(thumb);
+    trackWrap.appendChild(track);
+    wrap.appendChild(trackWrap);
+
+    // 计算百分比
+    const range = max - min;
+    const pct = ((value - min) / range) * 100;
+    fill.style.width = pct + '%';
+    thumb.style.left = pct + '%';
+
+    let dragging = false;
+
+    function updateFromEvent(e) {
+      const rect = track.getBoundingClientRect();
+      let pct = (e.clientX - rect.left) / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      let val = min + pct * range;
+      val = Math.round(val / step) * step;
+      val = Math.max(min, Math.min(max, val));
+      fill.style.width = (pct * 100) + '%';
+      thumb.style.left = (pct * 100) + '%';
+      valueEl.textContent = val + (unit || '');
+      if (onChange) onChange(val);
+    }
+
+    thumb.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (e.button !== 0) return;
+      dragging = true;
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'ew-resize';
+    }, true);
+
+    track.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (e.button !== 0) return;
+      dragging = true;
+      updateFromEvent(e);
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'ew-resize';
+    }, true);
+
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      e.preventDefault(); e.stopPropagation();
+      updateFromEvent(e);
+    }, true);
+
+    document.addEventListener('mouseup', function() {
+      if (dragging) {
+        dragging = false;
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      }
+    }, true);
+
+    // 双击数值编辑
+    valueEl.addEventListener('dblclick', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'html-diff-marker-slider-value-input';
+      input.value = value;
+      valueEl.textContent = '';
+      valueEl.appendChild(input);
+      valueEl.classList.add('html-diff-marker-editing');
+      input.focus();
+      input.select();
+
+      function finish(save) {
+        if (save) {
+          let newVal = parseFloat(input.value);
+          if (!isNaN(newVal)) {
+            newVal = Math.max(min, Math.min(max, newVal));
+            newVal = Math.round(newVal / step) * step;
+            const pct = ((newVal - min) / range) * 100;
+            fill.style.width = pct + '%';
+            thumb.style.left = pct + '%';
+            valueEl.textContent = newVal + (unit || '');
+            if (onChange) onChange(newVal);
+          } else {
+            valueEl.textContent = value + (unit || '');
+          }
+        } else {
+          valueEl.textContent = value + (unit || '');
+        }
+        valueEl.classList.remove('html-diff-marker-editing');
+      }
+
+      input.addEventListener('blur', function() { finish(true); }, true);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+      }, true);
+    }, true);
+
+    return wrap;
   }
 
   // ================ 选择模式 ================
@@ -912,14 +1158,6 @@
             });
           }
           scaleElementStyles(el);
-          if (entry.syncChildrenScale) {
-            const children = el.querySelectorAll('*');
-            for (let i = 0; i < children.length; i++) {
-              const child = children[i];
-              if (child.classList && child.classList.value && child.classList.value.indexOf('html-diff-marker-') >= 0) continue;
-              scaleElementStyles(child);
-            }
-          }
           if (entry.modifiedStyles) {
             entry.modifiedStyles.fontSize = el.style.fontSize;
             entry.modifiedStyles.paddingTop = el.style.paddingTop;
@@ -1202,6 +1440,7 @@
     updateToolbarCounts();
   }
   function clearAll() {
+    if (state.inspectorEl) closeInspector();
     const ids = state.markedElements.map(m => m.id);
     ids.forEach(id => removeMark(id));
     if (state.domChanges && state.domChanges.length > 0) {
@@ -1430,6 +1669,140 @@
     saveState();
   }
 
+  // ================ 主题管理器 ================
+  const THEME_KEY = 'htmlDiffMarker_theme';
+  const PRESET_THEMES = [
+    { id: 'dusk-purple', name: '柔雾紫', color: '#70649A' },
+    { id: 'deep-cyan', name: '深海蓝', color: '#211E55' },
+    { id: 'gray-green', name: '墨绿', color: '#6A8372' },
+    { id: 'warm-brown', name: '暖棕', color: '#9E7A7A' }
+  ];
+
+  let themeManager = {
+    currentTheme: 'dusk-purple',
+    customColor: null,
+    _ready: false,
+
+    // 初始化：从存储中加载主题
+    init: function(callback) {
+      const self = this;
+      // 先尝试从 chrome.storage.local 读取
+      try {
+        if (chrome && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.get([THEME_KEY], function(result) {
+            if (result && result[THEME_KEY]) {
+              const saved = result[THEME_KEY];
+              if (saved.type === 'preset' && saved.themeId) {
+                self.applyPreset(saved.themeId);
+              } else if (saved.type === 'custom' && saved.color) {
+                self.applyCustom(saved.color);
+              } else {
+                self.applyPreset('dusk-purple');
+              }
+            } else {
+              self.applyPreset('dusk-purple');
+            }
+            self._ready = true;
+            // 同时存一份到 sessionStorage 作为 fallback
+            try {
+              sessionStorage.setItem(THEME_KEY, JSON.stringify({
+                type: saved && saved.type || 'preset',
+                themeId: saved && saved.themeId || 'dusk-purple',
+                color: saved && saved.color || null
+              }));
+            } catch (e) {}
+            if (callback) callback();
+          });
+          return;
+        }
+      } catch (e) {}
+      // Fallback：从 sessionStorage 读取
+      try {
+        const raw = sessionStorage.getItem(THEME_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw);
+          if (saved.type === 'preset' && saved.themeId) {
+            self.applyPreset(saved.themeId);
+          } else if (saved.type === 'custom' && saved.color) {
+            self.applyCustom(saved.color);
+          } else {
+            self.applyPreset('dusk-purple');
+          }
+        } else {
+          self.applyPreset('dusk-purple');
+        }
+      } catch (e) {
+        self.applyPreset('dusk-purple');
+      }
+      self._ready = true;
+      if (callback) callback();
+    },
+
+    // 应用预设主题
+    applyPreset: function(themeId) {
+      const preset = PRESET_THEMES.find(function(t) { return t.id === themeId; });
+      if (!preset) themeId = 'dusk-purple';
+      this.currentTheme = themeId;
+      this.customColor = null;
+      document.body.setAttribute('data-theme', themeId);
+      this._saveToStorage({ type: 'preset', themeId: themeId });
+    },
+
+    // 应用自定义颜色
+    applyCustom: function(hexColor) {
+      if (!hexColor || !isValidHex(hexColor)) return false;
+      if (!hexColor.startsWith('#')) hexColor = '#' + hexColor;
+      hexColor = hexColor.toUpperCase();
+      this.currentTheme = 'custom';
+      this.customColor = hexColor;
+      // 计算衍生色并应用到 body 的 CSS 变量
+      const colors = deriveColors(hexColor);
+      this._applyCustomColors(colors);
+      document.body.setAttribute('data-theme', 'custom');
+      this._saveToStorage({ type: 'custom', color: hexColor });
+      return true;
+    },
+
+    // 应用自定义颜色的 CSS 变量
+    _applyCustomColors: function(colors) {
+      const style = document.body.style;
+      style.setProperty('--hdm-theme-primary', colors.primary);
+      style.setProperty('--hdm-theme-primary-light', colors.light);
+      style.setProperty('--hdm-theme-primary-dark', colors.dark);
+      style.setProperty('--hdm-theme-gradient', colors.gradient);
+      style.setProperty('--hdm-theme-soft-bg', colors.softBg);
+      style.setProperty('--hdm-theme-soft-text', colors.softText);
+      style.setProperty('--hdm-theme-count-text', colors.countText);
+    },
+
+    // 保存到存储（chrome.storage.local + sessionStorage fallback）
+    _saveToStorage: function(data) {
+      try {
+        if (chrome && chrome.storage && chrome.storage.local) {
+          const saveObj = {};
+          saveObj[THEME_KEY] = data;
+          chrome.storage.local.set(saveObj);
+        }
+      } catch (e) {}
+      try {
+        sessionStorage.setItem(THEME_KEY, JSON.stringify(data));
+      } catch (e) {}
+    },
+
+    // 获取当前主题信息
+    getCurrentTheme: function() {
+      if (this.currentTheme === 'custom') {
+        return { type: 'custom', color: this.customColor };
+      }
+      return { type: 'preset', themeId: this.currentTheme };
+    },
+
+    // 获取所有预设主题
+    getPresets: function() {
+      return PRESET_THEMES.slice();
+    }
+  };
+
   // ---------- 工具栏 ----------
   function updateToolbarCounts() {
     if (!state.toolbarEl) return;
@@ -1555,6 +1928,7 @@
   }
 
   function showWakeOnly() {
+    if (state.inspectorEl) closeInspector();
     if (state.toolbarEl) { state.toolbarEl.remove(); state.toolbarEl = null; }
     if (state.wakeBtn) return;
     const btn = document.createElement('div');
@@ -1597,14 +1971,15 @@
     const panel = document.createElement('div');
     panel.className = 'html-diff-marker-inspector';
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'html-diff-marker-inspector-header';
-    const title = document.createElement('span');
-    title.textContent = '编辑组件 #' + (state.markedElements.indexOf(entry) + 1) + ' (' + entry.tag + ')';
-    header.appendChild(title);
-    const btnGroup = document.createElement('div');
-    btnGroup.className = 'html-diff-marker-header-btns';
+    // 顶部色条（3px）
+    const topBar = document.createElement('div');
+    topBar.className = 'html-diff-marker-inspector-top-bar';
+    topBar.style.cssText = 'height:3px; width:100%; background:var(--hdm-theme-primary); flex-shrink:0;';
+    panel.appendChild(topBar);
+
+    // 窗口控制栏（最小化/关闭）
+    const windowControls = document.createElement('div');
+    windowControls.className = 'html-diff-marker-inspector-controls';
     const collapseBtn = document.createElement('button');
     collapseBtn.className = 'html-diff-marker-collapse-btn';
     collapseBtn.innerHTML = '−';
@@ -1614,27 +1989,37 @@
       panel.classList.toggle('html-diff-marker-collapsed');
       collapseBtn.innerHTML = panel.classList.contains('html-diff-marker-collapsed') ? '+' : '−';
     }, true);
-    btnGroup.appendChild(collapseBtn);
+    windowControls.appendChild(collapseBtn);
     const closeBtn = document.createElement('button');
     closeBtn.className = 'html-diff-marker-close-btn';
     closeBtn.innerHTML = '×';
     closeBtn.setAttribute('title', '关闭');
     closeBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeInspector(); }, true);
-    btnGroup.appendChild(closeBtn);
-    header.appendChild(btnGroup);
+    windowControls.appendChild(closeBtn);
+    panel.appendChild(windowControls);
+
+    // Header（标题+选择器）
+    const header = document.createElement('div');
+    header.className = 'html-diff-marker-inspector-header';
+    
+    const title = document.createElement('span');
+    title.className = 'html-diff-marker-inspector-title';
+    title.textContent = '元素编辑';
+    header.appendChild(title);
+    
+    const selectorBadge = document.createElement('span');
+    selectorBadge.className = 'html-diff-marker-inspector-selector';
+    selectorBadge.textContent = entry.selector;
+    header.appendChild(selectorBadge);
     panel.appendChild(header);
 
     // Body
     const body = document.createElement('div');
     body.className = 'html-diff-marker-inspector-body';
 
-    // 元素信息
-    const infoBox = document.createElement('div');
-    infoBox.className = 'html-diff-marker-element-info';
-    infoBox.textContent = elementInfo(el) + ' | selector: ' + entry.selector;
-    body.appendChild(infoBox);
+    // ===== 用户指定的顺序 =====
 
-    // 组件标签
+    // 1. 组件标签 (noteWrap)
     const noteWrap = document.createElement('div');
     noteWrap.className = 'html-diff-marker-field-row';
     const noteLabel = document.createElement('label');
@@ -1648,49 +2033,7 @@
     noteWrap.appendChild(noteInput);
     body.appendChild(noteWrap);
 
-    // 修改说明（给 AI Agent 看）
-    const descWrap = document.createElement('div');
-    descWrap.className = 'html-diff-marker-field-row';
-    const descHeader = document.createElement('div');
-    descHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;';
-    const descLabel = document.createElement('label');
-    descLabel.textContent = '修改说明（给 AI Agent 看）';
-    descHeader.appendChild(descLabel);
-    const descPreviewBtn = document.createElement('button');
-    descPreviewBtn.className = 'html-diff-marker-style-reset-all';
-    descPreviewBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
-    descPreviewBtn.textContent = '预览链接';
-    descPreviewBtn.setAttribute('title', '预览 Markdown 链接');
-    descHeader.appendChild(descPreviewBtn);
-    descWrap.appendChild(descHeader);
-    const descTa = document.createElement('textarea');
-    descTa.rows = 3;
-    descTa.className = 'html-diff-marker-textarea';
-    descTa.placeholder = '请描述这次修改的目的、设计意图或具体变更内容，便于 AI Agent 理解并应用相同风格的修改...\n\n支持 Markdown 链接格式：[链接文字](https://example.com)';
-    descTa.value = entry.description || '';
-    descTa.addEventListener('input', function() { entry.description = this.value; saveState(); });
-    descWrap.appendChild(descTa);
-    const descPreview = document.createElement('div');
-    descPreview.className = 'html-diff-marker-desc-preview';
-    descPreview.style.cssText = 'display:none; margin-top:4px; padding:6px; background:#f8f9fa; border:1px solid #e9ecef; border-radius:4px; font-size:12px; color:#333; word-break:break-all;';
-    descWrap.appendChild(descPreview);
-    descPreviewBtn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      if (descPreview.style.display === 'none') {
-        let html = descTa.value || '';
-        html = escapeHtml(html);
-        html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" style="color:#007bff; text-decoration:underline;">$1</a>');
-        html = html.replace(/\n/g, '<br>');
-        descPreview.innerHTML = html;
-        descPreview.style.display = 'block';
-        descPreviewBtn.textContent = '隐藏预览';
-      } else {
-        descPreview.style.display = 'none';
-        descPreviewBtn.textContent = '预览链接';
-      }
-    }, true);
-    body.appendChild(descWrap);
-
+    // 2. 链接href/跳转链接 (hrefWrap/jumpWrap)
     // 链接 href 编辑（对 <a> 元素显示）
     if (entry.tag === 'a') {
       const hrefWrap = document.createElement('div');
@@ -1737,230 +2080,51 @@
       body.appendChild(jumpWrap);
     }
 
-    // 位置调整
-    const posSection = document.createElement('div');
-    posSection.className = 'html-diff-marker-style-section';
-    const posHeader = document.createElement('div');
-    posHeader.className = 'html-diff-marker-style-header';
-    const posLabel = document.createElement('label');
-    posLabel.textContent = '📍 位置调整';
-    posHeader.appendChild(posLabel);
-    const posReset = document.createElement('button');
-    posReset.className = 'html-diff-marker-style-reset-all';
-    posReset.textContent = '↺ 重置';
-    posReset.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      applyStyleChange(entry, 'left', '');
-      applyStyleChange(entry, 'top', '');
-      openInspector(entry.id);
-    }, true);
-    posHeader.appendChild(posReset);
-    posSection.appendChild(posHeader);
+    // 3. 图片上传
+    if (entry.tag === 'img') {
+      const imgSection = document.createElement('div');
+      imgSection.className = 'html-diff-marker-style-section';
+      const imgHeader = document.createElement('div');
+      imgHeader.className = 'html-diff-marker-style-header';
+      const imgLabel = document.createElement('label');
+      imgLabel.textContent = '🖼️ 图片上传';
+      imgHeader.appendChild(imgLabel);
+      imgSection.appendChild(imgHeader);
 
-    const curLeft = entry.modifiedStyles.left !== undefined ? entry.modifiedStyles.left : (parseFloat(entry.originalStyles.left) || 0) + 'px';
-    const curTop = entry.modifiedStyles.top !== undefined ? entry.modifiedStyles.top : (parseFloat(entry.originalStyles.top) || 0) + 'px';
-
-    const posRows = [
-      { label: 'X (左偏移)', prop: 'left', val: curLeft, nudges: [-10, -1, 1, 10] },
-      { label: 'Y (上偏移)', prop: 'top', val: curTop, nudges: [-10, -1, 1, 10] }
-    ];
-    posRows.forEach(pr => {
-      const row = document.createElement('div');
-      row.className = 'html-diff-marker-style-row';
-      const lab = document.createElement('label');
-      lab.className = 'html-diff-marker-style-label';
-      lab.textContent = pr.label;
-      row.appendChild(lab);
-      const inpWrap = document.createElement('div');
-      inpWrap.className = 'html-diff-marker-style-input-wrap';
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.className = 'html-diff-marker-style-input';
-      inp.setAttribute('data-prop', pr.prop);
-      inp.value = pr.val;
-      inp.addEventListener('input', function() { applyStyleChange(entry, this.getAttribute('data-prop'), this.value); });
-      inpWrap.appendChild(inp);
-      pr.nudges.forEach(n => {
-        const nb = document.createElement('button');
-        nb.className = 'html-diff-marker-nudge-btn';
-        nb.textContent = (n > 0 ? '+' : '') + n;
-        nb.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          let curPx = parseFloat(entry.modifiedStyles[pr.prop] || entry.originalStyles[pr.prop]) || 0;
-          const newVal = (curPx + n) + 'px';
-          applyStyleChange(entry, pr.prop, newVal);
-          openInspector(entry.id);
-        }, true);
-        inpWrap.appendChild(nb);
-      });
-      row.appendChild(inpWrap);
-      posSection.appendChild(row);
-    });
-    body.appendChild(posSection);
-
-    // 大小调整
-    const sizeSection = document.createElement('div');
-    sizeSection.className = 'html-diff-marker-style-section';
-    const sizeHeader = document.createElement('div');
-    sizeHeader.className = 'html-diff-marker-style-header';
-    const sizeLabel = document.createElement('label');
-    sizeLabel.textContent = '📐 大小调整';
-    sizeHeader.appendChild(sizeLabel);
-    const sizeResetRow = document.createElement('div');
-    sizeResetRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
-    const unitToggleBtn = document.createElement('button');
-    unitToggleBtn.className = 'html-diff-marker-style-reset-all';
-    unitToggleBtn.textContent = 'px';
-    unitToggleBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
-    unitToggleBtn.setAttribute('title', '切换单位 px / %');
-    const sizeReset = document.createElement('button');
-    sizeReset.className = 'html-diff-marker-style-reset-all';
-    sizeReset.textContent = '↺ 重置';
-    sizeReset.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      applyStyleChange(entry, 'width', '');
-      applyStyleChange(entry, 'height', '');
-      openInspector(entry.id);
-    }, true);
-    sizeResetRow.appendChild(unitToggleBtn);
-    sizeResetRow.appendChild(sizeReset);
-    sizeHeader.appendChild(sizeResetRow);
-    sizeSection.appendChild(sizeHeader);
-
-    const curWidth = entry.modifiedStyles.width !== undefined ? entry.modifiedStyles.width : (parseFloat(entry.originalStyles.width) || el.getBoundingClientRect().width) + 'px';
-    const curHeight = entry.modifiedStyles.height !== undefined ? entry.modifiedStyles.height : (parseFloat(entry.originalStyles.height) || el.getBoundingClientRect().height) + 'px';
-
-    function getParentSize() {
-      const parent = el && el.parentNode ? el.parentNode : null;
-      if (!parent || parent.nodeType !== 1) return { w: window.innerWidth, h: window.innerHeight };
-      const r = parent.getBoundingClientRect();
-      return { w: r.width, h: r.height };
-    }
-    function isPctVal(v) { return typeof v === 'string' && v.indexOf('%') >= 0; }
-    function pxToPct(px, base) { return base > 0 ? ((parseFloat(px) / base) * 100) : 0; }
-    function pctToPx(pct, base) { return (parseFloat(pct) / 100) * base; }
-    function toDisplayVal(val, base, usePct) {
-      if (!val) return usePct ? '0%' : '0px';
-      if (usePct) {
-        if (isPctVal(val)) return val;
-        return pxToPct(val, base).toFixed(2) + '%';
+      const imgPreview = document.createElement('div');
+      imgPreview.className = 'html-diff-marker-image-preview';
+      if (el && el.src) {
+        imgPreview.style.backgroundImage = 'url(' + el.src + ')';
       } else {
-        if (isPctVal(val)) return pctToPx(val, base).toFixed(0) + 'px';
-        return val;
+        imgPreview.classList.add('empty');
+        imgPreview.textContent = '暂无图片预览';
       }
-    }
-    function fromDisplayVal(displayVal, base, usePct) {
-      if (!displayVal) return '';
-      const num = parseFloat(displayVal);
-      if (isNaN(num)) return displayVal;
-      if (usePct) return num + '%';
-      return num + 'px';
-    }
+      imgSection.appendChild(imgPreview);
 
-    let displayUnitPx = !isPctVal(curWidth);
-    unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
-    unitToggleBtn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
-      displayUnitPx = !displayUnitPx;
-      unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
-      refreshSizeInputs();
-    });
-
-    function refreshSizeInputs() {
-      const ps = getParentSize();
-      const wInputs = sizeSection.querySelectorAll('.html-diff-marker-size-width-input');
-      const hInputs = sizeSection.querySelectorAll('.html-diff-marker-size-height-input');
-      if (wInputs.length) wInputs[0].value = toDisplayVal(entry.modifiedStyles.width !== undefined ? entry.modifiedStyles.width : curWidth, ps.w, !displayUnitPx);
-      if (hInputs.length) hInputs[0].value = toDisplayVal(entry.modifiedStyles.height !== undefined ? entry.modifiedStyles.height : curHeight, ps.h, !displayUnitPx);
-    }
-
-    const sizeRows = [
-      { label: '宽度', prop: 'width', val: curWidth, inputClass: 'html-diff-marker-size-width-input', nudges: [-10, -1, 1, 10] },
-      { label: '高度', prop: 'height', val: curHeight, inputClass: 'html-diff-marker-size-height-input', nudges: [-10, -1, 1, 10] }
-    ];
-    sizeRows.forEach(sr => {
-      const row = document.createElement('div');
-      row.className = 'html-diff-marker-style-row';
-      const lab = document.createElement('label');
-      lab.className = 'html-diff-marker-style-label';
-      lab.textContent = sr.label;
-      row.appendChild(lab);
-      const inpWrap = document.createElement('div');
-      inpWrap.className = 'html-diff-marker-style-input-wrap';
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.className = 'html-diff-marker-style-input ' + sr.inputClass;
-      inp.setAttribute('data-prop', sr.prop);
-      const ps = getParentSize();
-      const base = sr.prop === 'width' ? ps.w : ps.h;
-      inp.value = toDisplayVal(sr.val, base, !displayUnitPx);
-      inp.addEventListener('input', function() {
-        const ps2 = getParentSize();
-        const base2 = sr.prop === 'width' ? ps2.w : ps2.h;
-        const newVal = fromDisplayVal(this.value, base2, !displayUnitPx);
-        applyStyleChange(entry, this.getAttribute('data-prop'), newVal);
+      const imgInput = document.createElement('input');
+      imgInput.type = 'file';
+      imgInput.accept = 'image/*';
+      imgInput.style.cssText = 'width:100%; margin-top:8px;';
+      imgInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const url = ev.target.result;
+          if (el) el.src = url;
+          entry.modifiedStyles.content = 'url(' + url + ')';
+          imgPreview.style.backgroundImage = 'url(' + url + ')';
+          imgPreview.classList.remove('empty');
+          saveState();
+        };
+        reader.readAsDataURL(file);
       });
-      inpWrap.appendChild(inp);
-      sr.nudges.forEach(n => {
-        const nb = document.createElement('button');
-        nb.className = 'html-diff-marker-nudge-btn';
-        nb.textContent = (n > 0 ? '+' : '') + n;
-        nb.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          const ps3 = getParentSize();
-          const base3 = sr.prop === 'width' ? ps3.w : ps3.h;
-          let curVal = entry.modifiedStyles[sr.prop];
-          if (curVal === undefined || curVal === '') curVal = sr.val;
-          let newVal;
-          if (isPctVal(curVal) || !displayUnitPx) {
-            const curPct = isPctVal(curVal) ? parseFloat(curVal) : pxToPct(curVal, base3);
-            const step = n > 0 ? 0.1 : -0.1;
-            newVal = (curPct + (n * 0.1)) + '%';
-          } else {
-            const curPx = parseFloat(curVal) || 0;
-            newVal = (curPx + n) + 'px';
-          }
-          applyStyleChange(entry, sr.prop, newVal);
-          openInspector(entry.id);
-        }, true);
-        inpWrap.appendChild(nb);
-      });
-      row.appendChild(inpWrap);
-      sizeSection.appendChild(row);
-    });
-    body.appendChild(sizeSection);
+      imgSection.appendChild(imgInput);
 
-    // 缩放选项
-    const scaleOptSection = document.createElement('div');
-    scaleOptSection.className = 'html-diff-marker-style-section';
-    const scaleOptHeader = document.createElement('div');
-    scaleOptHeader.className = 'html-diff-marker-style-header';
-    const scaleOptLabel = document.createElement('label');
-    scaleOptLabel.textContent = '⚙️ 缩放选项';
-    scaleOptHeader.appendChild(scaleOptLabel);
-    scaleOptSection.appendChild(scaleOptHeader);
+      body.appendChild(imgSection);
+    }
 
-    const syncChildrenRow = document.createElement('div');
-    syncChildrenRow.className = 'html-diff-marker-field-row';
-    syncChildrenRow.style.cssText = 'display:flex; align-items:center; gap:8px;';
-    const syncChildrenCheck = document.createElement('input');
-    syncChildrenCheck.type = 'checkbox';
-    syncChildrenCheck.id = 'html-diff-marker-sync-children';
-    syncChildrenCheck.checked = entry.syncChildrenScale === true;
-    syncChildrenCheck.addEventListener('change', function() {
-      entry.syncChildrenScale = this.checked;
-      saveState();
-    }, true);
-    const syncChildrenLabel = document.createElement('label');
-    syncChildrenLabel.htmlFor = 'html-diff-marker-sync-children';
-    syncChildrenLabel.style.cssText = 'font-size:12px; color:#555; cursor:pointer;';
-    syncChildrenLabel.textContent = '同步缩放子元素（滚轮缩放/拖拽大小时，子元素样式同步缩放）';
-    syncChildrenRow.appendChild(syncChildrenCheck);
-    syncChildrenRow.appendChild(syncChildrenLabel);
-    scaleOptSection.appendChild(syncChildrenRow);
-    body.appendChild(scaleOptSection);
-
-    // 样式编辑区
+    // 4. 样式编辑 (styleSection)包含字体、颜色等
     const styleSection = document.createElement('div');
     styleSection.className = 'html-diff-marker-style-section';
     const styleHeader = document.createElement('div');
@@ -2041,6 +2205,23 @@
         });
         sel.addEventListener('change', function() { applyStyleChange(entry, this.getAttribute('data-prop'), this.value); });
         inpWrap.appendChild(sel);
+
+        // 添加自定义字体"+"按钮（针对字体选择）
+        if (sp.key === 'fontFamily') {
+          const addFontBtn = document.createElement('button');
+          addFontBtn.className = 'html-diff-marker-add-font-btn';
+          addFontBtn.textContent = '+';
+          addFontBtn.setAttribute('title', '添加自定义字体');
+          addFontBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            const customFont = prompt('请输入自定义字体名称（如 "Custom Font, sans-serif"）：');
+            if (customFont) {
+              applyStyleChange(entry, 'fontFamily', customFont);
+              openInspector(entry.id);
+            }
+          }, true);
+          inpWrap.appendChild(addFontBtn);
+        }
       } else {
         const textInput = document.createElement('input');
         textInput.type = 'text';
@@ -2051,9 +2232,12 @@
         textInput.addEventListener('input', function() { applyStyleChange(entry, this.getAttribute('data-prop'), this.value); });
         inpWrap.appendChild(textInput);
       }
+
+      // 统一重置按钮UI设计，使用最新设计（替换红色的R）
       const resetBtn = document.createElement('button');
       resetBtn.className = 'html-diff-marker-style-reset';
-      resetBtn.textContent = 'R';
+      resetBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+      resetBtn.setAttribute('title', '重置');
       resetBtn.setAttribute('data-prop', sp.key);
       resetBtn.addEventListener('click', function(e) {
         e.preventDefault(); e.stopPropagation();
@@ -2063,6 +2247,14 @@
       inpWrap.appendChild(resetBtn);
       row.appendChild(inpWrap);
       styleSection.appendChild(row);
+
+      // 添加字体预览不可用的提示（针对字体选择）
+      if (sp.key === 'fontFamily') {
+        const fontHint = document.createElement('div');
+        fontHint.className = 'html-diff-marker-font-hint';
+        fontHint.innerHTML = '<span>⚠️</span><span>字体预览功能暂不可用，所选字体会直接应用到目标元素上。</span>';
+        styleSection.appendChild(fontHint);
+      }
     });
 
     const stats = document.createElement('div');
@@ -2071,7 +2263,177 @@
     styleSection.appendChild(stats);
     body.appendChild(styleSection);
 
-    // HTML 编辑区
+    // 5. 位置调整 (posSection)
+    const posSection = document.createElement('div');
+    posSection.className = 'html-diff-marker-style-section';
+    const posHeader = document.createElement('div');
+    posHeader.className = 'html-diff-marker-style-header';
+    const posLabel = document.createElement('label');
+    posLabel.textContent = '位置调整';
+    posHeader.appendChild(posLabel);
+    const posReset = document.createElement('button');
+    posReset.className = 'html-diff-marker-style-reset-all';
+    posReset.textContent = '↺ 重置';
+    posReset.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      applyStyleChange(entry, 'left', '');
+      applyStyleChange(entry, 'top', '');
+      openInspector(entry.id);
+    }, true);
+    posHeader.appendChild(posReset);
+    posSection.appendChild(posHeader);
+
+    const curLeft = Math.round(parseFloat(entry.modifiedStyles.left || entry.originalStyles.left) || 0);
+    const curTop = Math.round(parseFloat(entry.modifiedStyles.top || entry.originalStyles.top) || 0);
+
+    const leftSlider = createSlider({
+      label: 'X (左偏移)',
+      value: curLeft,
+      min: -500,
+      max: 500,
+      step: 1,
+      unit: 'px',
+      onChange: function(val) {
+        applyStyleChange(entry, 'left', val + 'px');
+      }
+    });
+    posSection.appendChild(leftSlider);
+
+    const topSlider = createSlider({
+      label: 'Y (上偏移)',
+      value: curTop,
+      min: -500,
+      max: 500,
+      step: 1,
+      unit: 'px',
+      onChange: function(val) {
+        applyStyleChange(entry, 'top', val + 'px');
+      }
+    });
+    posSection.appendChild(topSlider);
+
+    body.appendChild(posSection);
+
+    // 6. 大小调整 (sizeSection)
+    const sizeSection = document.createElement('div');
+    sizeSection.className = 'html-diff-marker-style-section';
+    const sizeHeader = document.createElement('div');
+    sizeHeader.className = 'html-diff-marker-style-header';
+    const sizeLabel = document.createElement('label');
+    sizeLabel.textContent = '大小调整';
+    sizeHeader.appendChild(sizeLabel);
+    const sizeResetRow = document.createElement('div');
+    sizeResetRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
+    const unitToggleBtn = document.createElement('button');
+    unitToggleBtn.className = 'html-diff-marker-style-reset-all';
+    unitToggleBtn.textContent = 'px';
+    unitToggleBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
+    unitToggleBtn.setAttribute('title', '切换单位 px / %');
+    const sizeReset = document.createElement('button');
+    sizeReset.className = 'html-diff-marker-style-reset-all';
+    sizeReset.textContent = '↺ 重置';
+    sizeReset.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      applyStyleChange(entry, 'width', '');
+      applyStyleChange(entry, 'height', '');
+      openInspector(entry.id);
+    }, true);
+    sizeResetRow.appendChild(unitToggleBtn);
+    sizeResetRow.appendChild(sizeReset);
+    sizeHeader.appendChild(sizeResetRow);
+    sizeSection.appendChild(sizeHeader);
+
+    function isPctVal(v) { return typeof v === 'string' && v.indexOf('%') >= 0; }
+
+    const curWidthVal = isPctVal(entry.modifiedStyles.width) 
+      ? parseFloat(entry.modifiedStyles.width) 
+      : Math.round(parseFloat(entry.modifiedStyles.width || entry.originalStyles.width) || el.getBoundingClientRect().width);
+    const curHeightVal = isPctVal(entry.modifiedStyles.height) 
+      ? parseFloat(entry.modifiedStyles.height) 
+      : Math.round(parseFloat(entry.modifiedStyles.height || entry.originalStyles.height) || el.getBoundingClientRect().height);
+
+    let displayUnitPx = !isPctVal(entry.modifiedStyles.width);
+    unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
+
+    const widthSlider = createSlider({
+      label: '宽度',
+      value: displayUnitPx ? curWidthVal : curWidthVal,
+      min: 0,
+      max: displayUnitPx ? 2000 : 200,
+      step: displayUnitPx ? 1 : 0.1,
+      unit: displayUnitPx ? 'px' : '%',
+      onChange: function(val) {
+        applyStyleChange(entry, 'width', val + (displayUnitPx ? 'px' : '%'));
+      }
+    });
+    sizeSection.appendChild(widthSlider);
+
+    const heightSlider = createSlider({
+      label: '高度',
+      value: displayUnitPx ? curHeightVal : curHeightVal,
+      min: 0,
+      max: displayUnitPx ? 2000 : 200,
+      step: displayUnitPx ? 1 : 0.1,
+      unit: displayUnitPx ? 'px' : '%',
+      onChange: function(val) {
+        applyStyleChange(entry, 'height', val + (displayUnitPx ? 'px' : '%'));
+      }
+    });
+    sizeSection.appendChild(heightSlider);
+
+    unitToggleBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      displayUnitPx = !displayUnitPx;
+      unitToggleBtn.textContent = displayUnitPx ? 'px' : '%';
+      openInspector(entry.id);
+    });
+
+    body.appendChild(sizeSection);
+
+    // 7. 修改说明 (descWrap)
+    const descWrap = document.createElement('div');
+    descWrap.className = 'html-diff-marker-field-row';
+    const descHeader = document.createElement('div');
+    descHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;';
+    const descLabel = document.createElement('label');
+    descLabel.textContent = '修改说明（给 AI Agent 看）';
+    descHeader.appendChild(descLabel);
+    const descPreviewBtn = document.createElement('button');
+    descPreviewBtn.className = 'html-diff-marker-style-reset-all';
+    descPreviewBtn.style.cssText = 'font-size:11px; padding:2px 6px; min-width:auto;';
+    descPreviewBtn.textContent = '预览内容';
+    descPreviewBtn.setAttribute('title', '预览修改说明内容');
+    descHeader.appendChild(descPreviewBtn);
+    descWrap.appendChild(descHeader);
+    const descTa = document.createElement('textarea');
+    descTa.rows = 3;
+    descTa.className = 'html-diff-marker-textarea';
+    descTa.placeholder = '请描述这次修改的目的、设计意图或具体变更内容，便于 AI Agent 理解并应用相同风格的修改...\n\n支持 Markdown 链接格式：[链接文字](https://example.com)';
+    descTa.value = entry.description || '';
+    descTa.addEventListener('input', function() { entry.description = this.value; saveState(); });
+    descWrap.appendChild(descTa);
+    const descPreview = document.createElement('div');
+    descPreview.className = 'html-diff-marker-desc-preview';
+    descPreview.style.cssText = 'display:none; margin-top:4px; padding:6px; background:#f8f9fa; border:1px solid #e9ecef; border-radius:4px; font-size:12px; color:#333; word-break:break-all;';
+    descWrap.appendChild(descPreview);
+    descPreviewBtn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      if (descPreview.style.display === 'none') {
+        let html = descTa.value || '';
+        html = escapeHtml(html);
+        html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" style="color:#007bff; text-decoration:underline;">$1</a>');
+        html = html.replace(/\n/g, '<br>');
+        descPreview.innerHTML = html;
+        descPreview.style.display = 'block';
+        descPreviewBtn.textContent = '隐藏预览';
+      } else {
+        descPreview.style.display = 'none';
+        descPreviewBtn.textContent = '预览内容';
+      }
+    }, true);
+    body.appendChild(descWrap);
+
+    // 8. HTML编辑区 (htmlInfo + htmlEdit)
     const htmlInfo = document.createElement('div');
     htmlInfo.className = 'html-diff-marker-field-row';
     const htmlLabel1 = document.createElement('label');
@@ -2097,14 +2459,20 @@
     htmlEdit.appendChild(modTa);
     body.appendChild(htmlEdit);
 
+    // 9. 元素信息 (infoBox)
+    const infoBox = document.createElement('div');
+    infoBox.className = 'html-diff-marker-element-info';
+    infoBox.textContent = elementInfo(el) + ' | selector: ' + entry.selector;
+    body.appendChild(infoBox);
+
     panel.appendChild(body);
 
-    // Footer
+    // 10. 底部操作栏 (footer)
     const footer = document.createElement('div');
     footer.className = 'html-diff-marker-inspector-actions';
     const removeBtn = document.createElement('button');
     removeBtn.className = 'html-diff-marker-btn-danger';
-    removeBtn.textContent = '🗑 删除';
+    removeBtn.textContent = '删除';
     removeBtn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
       if (confirm('确定删除此标记吗？')) removeMark(entry.id);
@@ -2112,7 +2480,7 @@
     footer.appendChild(removeBtn);
     const saveBtn = document.createElement('button');
     saveBtn.className = 'html-diff-marker-btn-success';
-    saveBtn.textContent = '✓ 保存修改';
+    saveBtn.textContent = '保存修改';
     saveBtn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
       saveState();
@@ -2121,6 +2489,14 @@
     }, true);
     footer.appendChild(saveBtn);
     panel.appendChild(footer);
+
+    // 快捷键提示区域（工具栏底部）
+    const shortcutBar = document.createElement('div');
+    shortcutBar.className = 'html-diff-marker-toolbar-shortcut';
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const shortcutKey = isMac ? '⌥+E' : 'Alt+E';
+    shortcutBar.textContent = shortcutKey + ' 切换';
+    panel.appendChild(shortcutBar);
 
     // 右下角拖拽调整大小把手
     const resizeHandle = document.createElement('div');
@@ -2634,13 +3010,7 @@
     } else {
       if (state.toolbarEl) { state.toolbarEl.remove(); state.toolbarEl = null; }
       if (state.inspectorEl) {
-        // 保存检查面板位置后再移除，避免位置丢失
-        const rect = state.inspectorEl.getBoundingClientRect();
-        if (rect && rect.left >= 0 && rect.top >= 0) {
-          state.inspectorPos = { left: Math.round(rect.left), top: Math.round(rect.top) };
-        }
-        state.inspectorEl.remove();
-        state.inspectorEl = null;
+        closeInspector();
       }
     }
   }
@@ -2649,21 +3019,24 @@
   function init() {
     if (window.__htmlDiffMarkerLoaded) return;
     window.__htmlDiffMarkerLoaded = true;
-    loadState();
-    // 先重放 DOM 结构变更（删除/复制/添加）
-    replayDomChanges();
-    // 恢复标记元素的视觉样式（但不自动显示工具栏）
-    state.markedElements.forEach(m => {
-      if (m.type === 'group') return;
-      const el = document.querySelector(m.selector);
-      if (el) { m._el = el; recordOriginalStyles(m); applyMarkVisual(m); }
+    // 先初始化主题（异步加载，带兜底）
+    themeManager.init(function() {
+      loadState();
+      // 先重放 DOM 结构变更（删除/复制/添加）
+      replayDomChanges();
+      // 恢复标记元素的视觉样式（但不自动显示工具栏）
+      state.markedElements.forEach(m => {
+        if (m.type === 'group') return;
+        const el = document.querySelector(m.selector);
+        if (el) { m._el = el; recordOriginalStyles(m); applyMarkVisual(m); }
+      });
+      state.markedElements.forEach(m => {
+        if (m.type !== 'group') return;
+        applyGroupMarkVisual(m);
+      });
+      // 不自动显示工具栏，点击扩展图标 -> 显示唤醒按钮 -> 显示工具栏
+      chrome.runtime.onMessage.addListener(onMessage);
     });
-    state.markedElements.forEach(m => {
-      if (m.type !== 'group') return;
-      applyGroupMarkVisual(m);
-    });
-    // 不自动显示工具栏，点击扩展图标 -> 显示唤醒按钮 -> 显示工具栏
-    chrome.runtime.onMessage.addListener(onMessage);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
