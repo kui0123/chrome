@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG 深度排查 - DOM & 全属性检测</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 24px;
+      background: #f3f4f6;
+    }
+    h1 { font-size: 20px; margin-bottom: 16px; }
+    .row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .col { flex: 1; background: white; border-radius: 10px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .col h2 { font-size: 14px; margin-bottom: 12px; color: #111827; }
+    .icon-box {
+      width: 80px; height: 80px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      background: #fafafa;
+    }
+    .console {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .console .k { color: #93c5fd; }
+    .console .g { color: #86efac; }
+    .console .r { color: #fca5a5; }
+    .console .y { color: #fde047; }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tag.ok { background: #dcfce7; color: #166534; }
+    .tag.no { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+<h1>🔍 SVG 深度排查 - DOM 结构 & 全属性检测</h1>
+
+<div class="row">
+  <div class="col">
+    <h2>测试 A：纯 SVG（无干扰）</h2>
+    <div class="icon-box" id="box-a">
+      <svg id="svg-a" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="red" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div id="tag-a" class="tag">检测中</div>
+  </div>
+  
+  <div class="col">
+    <h2>测试 B：all:unset + CSS 恢复（红色描边）</h2>
+    <style>
+      #box-b * { all: unset !important; box-sizing: border-box !important; }
+      #box-b svg,
+      #box-b svg * {
+        display: block !important;
+        fill: none !important;
+        stroke: red !important;
+        stroke-width: 2px !important;
+        stroke-linecap: round !important;
+        stroke-linejoin: round !important;
+      }
+      #box-b svg {
+        width: 32px !important;
+        height: 32px !important;
+      }
+    </style>
+    <div class="icon-box" id="box-b">
+      <svg id="svg-b" viewBox="0 0 24 24" width="32" height="32">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div id="tag-b" class="tag">检测中</div>
+  </div>
+  
+  <div class="col">
+    <h2>测试 C：all:unset + JS 内联（蓝色描边）</h2>
+    <style>
+      #box-c * { all: unset !important; box-sizing: border-box !important; }
+    </style>
+    <div class="icon-box" id="box-c">
+      <svg id="svg-c" viewBox="0 0 24 24" width="32" height="32">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div id="tag-c" class="tag">检测中</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <h2>DOM 结构对比</h2>
+    <div class="console" id="dom-output">加载中...</div>
+  </div>
+  <div class="col">
+    <h2>Computed Style 全对比（circle）</h2>
+    <div class="console" id="style-output">加载中...</div>
+  </div>
+  <div class="col">
+    <h2>SVG 特殊属性检测</h2>
+    <div class="console" id="svg-output">加载中...</div>
+  </div>
+</div>
+
+<script>
+  // 测试 C: JS 内联样式
+  (function() {
+    const svg = document.getElementById('svg-c');
+    const children = svg.querySelectorAll('*');
+    
+    svg.style.setProperty('display', 'block', 'important');
+    svg.style.setProperty('width', '32px', 'important');
+    svg.style.setProperty('height', '32px', 'important');
+    svg.style.setProperty('fill', 'none', 'important');
+    svg.style.setProperty('stroke', 'blue', 'important');
+    svg.style.setProperty('stroke-width', '2px', 'important');
+    svg.style.setProperty('stroke-linecap', 'round', 'important');
+    svg.style.setProperty('stroke-linejoin', 'round', 'important');
+    
+    children.forEach(child => {
+      child.style.setProperty('display', 'block', 'important');
+      child.style.setProperty('fill', 'none', 'important');
+      child.style.setProperty('stroke', 'blue', 'important');
+      child.style.setProperty('stroke-width', '2px', 'important');
+      child.style.setProperty('stroke-linecap', 'round', 'important');
+      child.style.setProperty('stroke-linejoin', 'round', 'important');
+    });
+  })();
+  
+  // DOM 结构对比
+  function domOutput() {
+    let out = '';
+    ['a', 'b', 'c'].forEach(id => {
+      const svg = document.getElementById('svg-' + id);
+      out += `<span class="k">=== SVG ${id.toUpperCase()} ===</span>\n`;
+      out += svg.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;\n');
+      out += '\n\n';
+    });
+    document.getElementById('dom-output').innerHTML = out;
+  }
+  
+  // 全属性对比
+  function styleOutput() {
+    const props = [
+      'display', 'width', 'height', 'opacity', 'visibility',
+      'fill', 'fillOpacity', 'fillRule',
+      'stroke', 'strokeOpacity', 'strokeWidth', 'strokeLinecap', 'strokeLinejoin', 'strokeDasharray', 'strokeDashoffset',
+      'color', 'backgroundColor', 'backgroundImage',
+      'position', 'top', 'left', 'transform',
+      'boxSizing', 'overflow',
+      'paintOrder', 'vectorEffect', 'shapeRendering',
+      'clipPath', 'mask', 'filter',
+      'mixBlendMode', 'isolation'
+    ];
+    
+    let out = '';
+    const circleA = document.querySelector('#svg-a circle');
+    const circleB = document.querySelector('#svg-b circle');
+    const circleC = document.querySelector('#svg-c circle');
+    
+    props.forEach(prop => {
+      const a = getComputedStyle(circleA)[prop];
+      const b = getComputedStyle(circleB)[prop];
+      const c = getComputedStyle(circleC)[prop];
+      
+      const diffB = b !== a;
+      const diffC = c !== a;
+      
+      let line = `<span class="k">${prop}</span>: `;
+      line += `A=${a}`;
+      line += diffB ? ` <span class="r">B=${b}</span>` : ` B=${b}`;
+      line += diffC ? ` <span class="y">C=${c}</span>` : ` C=${c}`;
+      out += line + '\n';
+    });
+    
+    document.getElementById('style-output').innerHTML = out;
+  }
+  
+  // SVG 特殊属性检测
+  function svgOutput() {
+    let out = '';
+    
+    ['a', 'b', 'c'].forEach(id => {
+      const svg = document.getElementById('svg-' + id);
+      out += `<span class="k">=== SVG ${id.toUpperCase()} ===</span>\n`;
+      
+      // SVG 元素属性
+      out += `  <span class="k">viewBox:</span> ${svg.getAttribute('viewBox')}\n`;
+      out += `  <span class="k">width attr:</span> ${svg.getAttribute('width')}\n`;
+      out += `  <span class="k">height attr:</span> ${svg.getAttribute('height')}\n`;
+      out += `  <span class="k">namespaceURI:</span> ${svg.namespaceURI}\n`;
+      
+      // 检查 SVG 元素的 Bounding Box
+      try {
+        const bbox = svg.getBBox();
+        out += `  <span class="k">getBBox:</span> ${bbox.width}x${bbox.height} @(${bbox.x}, ${bbox.y})\n`;
+      } catch(e) {
+        out += `  <span class="r">getBBox error:</span> ${e.message}\n`;
+      }
+      
+      // 检查 boundingClientRect
+      const rect = svg.getBoundingClientRect();
+      out += `  <span class="k">getBoundingClientRect:</span> ${rect.width}x${rect.height}\n`;
+      
+      // 检查子元素
+      const children = svg.querySelectorAll('*');
+      out += `  <span class="k">child count:</span> ${children.length}\n`;
+      children.forEach((child, i) => {
+        out += `    [${i}] <span class="k">${child.tagName}</span>: ns=${child.namespaceURI}\n`;
+        try {
+          const cb = child.getBBox();
+          out += `         getBBox: ${cb.width}x${cb.height} @(${cb.x}, ${cb.y})\n`;
+        } catch(e) {}
+      });
+      
+      // 检查 innerHTML 是否为 SVG 命名空间
+      out += `  <span class="k">is SVG element:</span> ${svg instanceof SVGSVGElement ? 'YES' : 'NO'}\n`;
+      
+      out += '\n';
+    });
+    
+    document.getElementById('svg-output').innerHTML = out;
+    
+    // 更新标签
+    ['a', 'b', 'c'].forEach(id => {
+      const svg = document.getElementById('svg-' + id);
+      const circle = svg.querySelector('circle');
+      const cs = getComputedStyle(circle);
+      const visible = cs.stroke !== 'none' && parseFloat(cs.strokeWidth) > 0 && cs.visibility === 'visible' && cs.opacity !== '0';
+      const tag = document.getElementById('tag-' + id);
+      tag.textContent = visible ? '✅ 应该可见' : '❌ 不可见';
+      tag.className = 'tag ' + (visible ? 'ok' : 'no');
+    });
+  }
+  
+  setTimeout(() => {
+    domOutput();
+    styleOutput();
+    svgOutput();
+  }, 300);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG innerHTML 注入测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 40px;
+      background: #f3f4f6;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #1f2937;
+    }
+    
+    .test-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .test-label {
+      font-size: 12px;
+      color: #6b7280;
+      min-width: 200px;
+    }
+    
+    .test-btn {
+      width: 36px;
+      height: 40px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    
+    /* ===== 模拟插件的 toolbar 容器 ===== */
+    .hdm-toolbar {
+      width: 300px;
+      background: white;
+      color: #1f2937;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    /* ===== all: unset 重置 ===== */
+    .hdm-toolbar * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* ===== 恢复按钮样式 ===== */
+    .hdm-toolbar .hdm-side-btn {
+      width: 36px !important;
+      height: 40px !important;
+      border: 1.5px solid #e5e7eb !important;
+      border-radius: 6px !important;
+      background: white !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: #6b7280 !important;
+    }
+    
+    /* ===== 方案 A：仅 svg 选择器 ===== */
+    .hdm-toolbar.recovery-a svg {
+      display: block !important;
+      width: 14px !important;
+      height: 14px !important;
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    /* ===== 方案 B：svg + svg * ===== */
+    .hdm-toolbar.recovery-b svg,
+    .hdm-toolbar.recovery-b svg * {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    .hdm-toolbar.recovery-b svg {
+      display: block !important;
+      width: 14px !important;
+      height: 14px !important;
+    }
+    
+    /* ===== 方案 C：带父类的 svg * ===== */
+    .hdm-toolbar.recovery-c .hdm-side-btn svg,
+    .hdm-toolbar.recovery-c .hdm-side-btn svg * {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    .hdm-toolbar.recovery-c .hdm-side-btn svg {
+      display: block !important;
+      width: 14px !important;
+      height: 14px !important;
+    }
+    
+    /* ===== 方案 D：JS 内联样式（由 JS 设置） ===== */
+    
+    .console-output {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+    
+    .note { font-size: 11px; margin-top: 4px; }
+    .note.ok { color: #16a34a; }
+    .note.fail { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 20px; margin-bottom: 24px;">SVG innerHTML 动态注入测试</h1>
+  
+  <!-- 容器 A：仅 svg 选择器 -->
+  <div class="test-section">
+    <h2>方案 A：仅 svg 选择器（不选子元素）</h2>
+    <div class="hdm-toolbar recovery-a" id="toolbar-a">
+      <div class="test-row">
+        <span class="test-label">innerHTML 注入的 SVG：</span>
+        <button class="hdm-side-btn" id="btn-a"></button>
+      </div>
+    </div>
+    <div class="note" id="note-a">检测中...</div>
+  </div>
+  
+  <!-- 容器 B：svg + svg * -->
+  <div class="test-section">
+    <h2>方案 B：svg + svg *（通配符）</h2>
+    <div class="hdm-toolbar recovery-b" id="toolbar-b">
+      <div class="test-row">
+        <span class="test-label">innerHTML 注入的 SVG：</span>
+        <button class="hdm-side-btn" id="btn-b"></button>
+      </div>
+    </div>
+    <div class="note" id="note-b">检测中...</div>
+  </div>
+  
+  <!-- 容器 C：带父类的 svg * -->
+  <div class="test-section">
+    <h2>方案 C：.hdm-side-btn svg *（更贴近插件实际）</h2>
+    <div class="hdm-toolbar recovery-c" id="toolbar-c">
+      <div class="test-row">
+        <span class="test-label">innerHTML 注入的 SVG：</span>
+        <button class="hdm-side-btn" id="btn-c"></button>
+      </div>
+    </div>
+    <div class="note" id="note-c">检测中...</div>
+  </div>
+  
+  <!-- 容器 D：JS 内联样式 -->
+  <div class="test-section">
+    <h2>方案 D：JS 内联样式 + !important（终极方案）</h2>
+    <div class="hdm-toolbar" id="toolbar-d" style="all: initial;">
+      <div class="test-row">
+        <span class="test-label">innerHTML 注入 + JS 设置样式：</span>
+        <button class="hdm-side-btn" id="btn-d"></button>
+      </div>
+    </div>
+    <div class="note" id="note-d">检测中...</div>
+  </div>
+  
+  <div class="test-section">
+    <h2>检测结果汇总</h2>
+    <div class="console-output" id="console-output">正在检测...</div>
+  </div>
+
+  <script>
+    const SVG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3"/></svg>';
+    
+    // 注入 SVG
+    document.getElementById('btn-a').innerHTML = SVG_ICON;
+    document.getElementById('btn-b').innerHTML = SVG_ICON;
+    document.getElementById('btn-c').innerHTML = SVG_ICON;
+    document.getElementById('btn-d').innerHTML = SVG_ICON;
+    
+    // 方案 D：JS 内联样式
+    const svgD = document.getElementById('btn-d').querySelector('svg');
+    if (svgD) {
+      svgD.style.setProperty('display', 'block', 'important');
+      svgD.style.setProperty('width', '14px', 'important');
+      svgD.style.setProperty('height', '14px', 'important');
+      svgD.style.setProperty('fill', 'none', 'important');
+      svgD.style.setProperty('stroke', '#6b7280', 'important');
+      svgD.style.setProperty('stroke-width', '2px', 'important');
+      svgD.style.setProperty('stroke-linecap', 'round', 'important');
+      svgD.style.setProperty('stroke-linejoin', 'round', 'important');
+      
+      const children = svgD.querySelectorAll('*');
+      for (let i = 0; i < children.length; i++) {
+        children[i].style.setProperty('fill', 'none', 'important');
+        children[i].style.setProperty('stroke', '#6b7280', 'important');
+        children[i].style.setProperty('stroke-width', '2px', 'important');
+        children[i].style.setProperty('stroke-linecap', 'round', 'important');
+        children[i].style.setProperty('stroke-linejoin', 'round', 'important');
+      }
+    }
+    
+    function checkVisibility(btnId, label) {
+      const btn = document.getElementById(btnId);
+      const svg = btn.querySelector('svg');
+      const path = btn.querySelector('path');
+      
+      let result = { label: label, visible: false };
+      
+      if (!svg || !path) {
+        result.reason = 'SVG 或 path 不存在';
+        return result;
+      }
+      
+      const svgStyle = getComputedStyle(svg);
+      const pathStyle = getComputedStyle(path);
+      
+      result.svgWidth = svgStyle.width;
+      result.svgHeight = svgStyle.height;
+      result.svgDisplay = svgStyle.display;
+      result.pathStroke = pathStyle.stroke;
+      result.pathStrokeWidth = pathStyle.strokeWidth;
+      result.pathDisplay = pathStyle.display;
+      result.pathVisibility = pathStyle.visibility;
+      result.pathOpacity = pathStyle.opacity;
+      
+      const hasStroke = pathStyle.stroke !== 'none' && pathStyle.stroke !== 'rgba(0, 0, 0, 0)';
+      const hasSize = svgStyle.width !== '0px' && svgStyle.height !== '0px';
+      const isVisible = hasStroke && hasSize && pathStyle.visibility === 'visible' && pathStyle.opacity !== '0';
+      
+      result.visible = isVisible;
+      result.hasStroke = hasStroke;
+      result.hasSize = hasSize;
+      
+      return result;
+    }
+    
+    function runTests() {
+      const results = [
+        checkVisibility('btn-a', '方案 A: 仅 svg'),
+        checkVisibility('btn-b', '方案 B: svg + svg *'),
+        checkVisibility('btn-c', '方案 C: .hdm-side-btn svg *'),
+        checkVisibility('btn-d', '方案 D: JS 内联样式')
+      ];
+      
+      let output = '';
+      results.forEach(r => {
+        const status = r.visible ? '✅ 可见' : '❌ 不可见';
+        output += `=== ${r.label} - ${status} ===\n`;
+        output += `  SVG: ${r.svgDisplay} ${r.svgWidth} x ${r.svgHeight}\n`;
+        output += `  PATH stroke: ${r.pathStroke}\n`;
+        output += `  PATH stroke-width: ${r.pathStrokeWidth}\n`;
+        output += `  PATH display: ${r.pathDisplay}\n`;
+        output += `  PATH visibility: ${r.pathVisibility}\n`;
+        output += `  有描边: ${r.hasStroke}, 有尺寸: ${r.hasSize}\n`;
+        output += '\n';
+      });
+      
+      document.getElementById('console-output').textContent = output;
+      
+      // 更新每个测试的状态
+      ['a', 'b', 'c', 'd'].forEach((id, idx) => {
+        const note = document.getElementById('note-' + id);
+        if (results[idx].visible) {
+          note.textContent = '✅ 图标可见 - stroke 和尺寸都正确';
+          note.className = 'note ok';
+        } else {
+          note.textContent = '❌ 图标不可见 - ' + (results[idx].hasStroke ? '有描边但尺寸有问题' : '描边缺失');
+          note.className = 'note fail';
+        }
+      });
+    }
+    
+    setTimeout(runTests, 200);
+  </script>
+</body>
+</html>

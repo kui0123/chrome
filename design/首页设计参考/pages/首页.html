@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en" class="light" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizo - Home</title>
+    <style id="theme-vars">
+/* Wizo Mobile App — Brand CSS */
+:root {
+  /* Primary palette */
+  --color-primary: #8B5CF6;
+  --color-primary-dark: #6D28D9;
+  --color-primary-light: #EDE9FE;
+  --color-primary-50: #F5F3FF;
+
+  /* Category background tints */
+  --color-cat-foods: #EDE9FE;
+  --color-cat-gift: #E0E7FF;
+  --color-cat-fashion: #FEE2E2;
+  --color-cat-gadget: #E2E8F0;
+  --color-cat-accessory: #FEF9C3;
+
+  /* Neutral palette */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F9FAFB;
+  --color-surface: #F3F4F6;
+  --color-border: #E5E7EB;
+  --color-border-light: #F3F4F6;
+
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
+  --color-text-inverse: #FFFFFF;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+.dark {
+  --color-bg: #111827;
+  --color-bg-secondary: #1F2937;
+  --color-surface: #374151;
+  --color-border: #4B5563;
+  --color-border-light: #374151;
+  --color-text-primary: #F9FAFB;
+  --color-text-secondary: #D1D5DB;
+  --color-text-tertiary: #9CA3AF;
+  --color-cat-foods: #2E1065;
+  --color-cat-gift: #1E1B4B;
+  --color-cat-fashion: #450A0A;
+  --color-cat-gadget: #1E293B;
+  --color-cat-accessory: #422006;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--color-bg);
+    --color-foreground: var(--color-text-primary);
+    --color-primary: var(--color-primary);
+    --color-primary-foreground: var(--color-text-inverse);
+    --color-secondary: var(--color-text-secondary);
+    --color-muted: var(--color-surface);
+    --color-muted-foreground: var(--color-text-tertiary);
+    --color-border: var(--color-border);
+    --color-card: var(--color-bg);
+    --color-card-foreground: var(--color-text-primary);
+    --color-popover: var(--color-bg);
+    --color-popover-foreground: var(--color-text-primary);
+    --color-accent: var(--color-primary);
+    --color-accent-foreground: var(--color-text-inverse);
+    --color-destructive: #EF4444;
+    --color-destructive-foreground: var(--color-text-inverse);
+    --color-input: var(--color-border);
+    --color-ring: var(--color-primary);
+    --radius-sm: var(--radius-sm);
+    --radius-md: var(--radius-md);
+    --radius-lg: var(--radius-lg);
+    --radius-xl: var(--radius-xl);
+    --radius-full: var(--radius-full);
+  }
+  @layer base {
+    body { background: var(--color-bg); color: var(--color-text-primary); font-family: var(--font-family); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+    <!-- ===== Wizo Mobile App — Shared Project Shell ===== -->
+    <!-- This fragment is included inside every leaf page. Do NOT wrap in <html>/<head>/<body>. -->
+    <!-- Max-width 375px mobile viewport. Brand CSS variables are assumed available. -->
+
+    <!-- ========== 1. App Top Bar (fixed top) ========== -->
+    <header
+      id="app-top-bar"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        height: 56px;
+        background: var(--color-bg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        box-shadow: 0 1px 0 var(--color-border-light);
+      "
+    >
+      <!-- Left: Logo + Brand Name -->
+      <div style="display:flex; align-items:center; gap:10px;">
+        <!-- Purple Diamond Logo (rotated square with gem accent) -->
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Wizo logo">
+          <!-- Outer diamond (rotated square) -->
+          <rect x="7" y="7" width="14" height="14" rx="2"
+                transform="rotate(45 14 14)"
+                fill="#8B5CF6" />
+          <!-- Inner gem / crystal facet lines -->
+          <path d="M14 6 L17 12 L14 22 L11 12 Z" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M10 12 L14 10 L18 12" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+        <!-- Brand text -->
+        <span style="
+          font-family: var(--font-family);
+          font-weight: var(--font-weight-bold);
+          font-size: var(--font-size-lg);
+          color: var(--color-text-primary);
+          letter-spacing: -0.3px;
+        ">Wizo</span>
+      </div>
+
+      <!-- Right: Notification bell + Wishlist heart -->
+      <div style="display:flex; align-items:center; gap:16px;">
+        <!-- Bell icon with purple dot -->
+        <div style="position:relative; width:24px; height:24px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <!-- Purple notification dot -->
+          <span style="
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            background: #8B5CF6;
+            border-radius: 50%;
+            border: 1.5px solid var(--color-bg);
+          "></span>
+        </div>
+
+        <!-- Heart icon with purple badge "1" -->
+        <div style="position:relative; width:24px; height:24px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <!-- Purple circular badge -->
+          <span style="
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            min-width: 16px;
+            height: 16px;
+            background: #8B5CF6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-family);
+            font-size: 10px;
+            font-weight: var(--font-weight-bold);
+            color: #FFFFFF;
+            line-height: 1;
+            padding: 0 3px;
+          ">1</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== 2. Page Frame (scrollable content area) ========== -->
+    <div
+      id="page-frame"
+      style="
+        position: relative;
+        margin-top: 56px;
+        margin-bottom: 56px;
+        min-height: calc(100vh - 112px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+      "
+    >
+      <!-- SLOT: pageContent -->
+
+      <!-- ========== Section 1: Search Bar ========== -->
+      <div style="padding: 0 20px; margin-bottom: 20px; margin-top: 8px;">
+        <div style="
+          display: flex;
+          align-items: center;
+          height: 44px;
+          background: #F3F4F6;
+          border-radius: 24px;
+          padding: 0 16px;
+          gap: 10px;
+        ">
+          <!-- Search magnifying glass icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span style="
+            font-family: var(--font-family);
+            font-size: 14px;
+            color: #9CA3AF;
+          ">Search</span>
+        </div>
+      </div>
+
+      <!-- ========== Section 2: Categories ========== -->
+      <div style="padding: 0 20px; margin-bottom: 20px;">
+        <!-- Title row -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="
+            font-family: var(--font-family);
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+          ">Categories</span>
+          <span style="
+            font-family: var(--font-family);
+            font-size: 14px;
+            color: #8B5CF6;
+          ">See all</span>
+        </div>
+        <!-- Category icons row -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <!-- Foods -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="
+              width: 56px;
+              height: 56px;
+              border-radius: 16px;
+              background: #EDE9FE;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <!-- Dome / cloche icon (Foods) -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 16h20"/>
+                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                <path d="M12 16V8"/>
+                <path d="M6 12c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+              </svg>
+            </div>
+            <span style="
+              font-family: var(--font-family);
+              font-size: 12px;
+              font-weight: 400;
+              color: #111827;
+            ">Foods</span>
+          </div>
+
+          <!-- Gift -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="
+              width: 56px;
+              height: 56px;
+              border-radius: 16px;
+              background: #E0E7FF;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <!-- Gift box icon with ribbon -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12"/>
+                <rect x="2" y="7" width="20" height="5" rx="1"/>
+                <line x1="12" y1="22" x2="12" y2="7"/>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+              </svg>
+            </div>
+            <span style="
+              font-family: var(--font-family);
+              font-size: 12px;
+              font-weight: 400;
+              color: #111827;
+            ">Gift</span>
+          </div>
+
+          <!-- Fashion -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="
+              width: 56px;
+              height: 56px;
+              border-radius: 16px;
+              background: #FEE2E2;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <!-- Sunglasses icon (Fashion) -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h4l3-4c1.5 0 2.5 1.5 3 4"/>
+                <path d="M22 12h-4l-3-4c-1.5 0-2.5 1.5-3 4"/>
+                <circle cx="7" cy="14" r="2"/>
+                <circle cx="17" cy="14" r="2"/>
+              </svg>
+            </div>
+            <span style="
+              font-family: var(--font-family);
+              font-size: 12px;
+              font-weight: 400;
+              color: #111827;
+            ">Fashion</span>
+          </div>
+
+          <!-- Gadget -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="
+              width: 56px;
+              height: 56px;
+              border-radius: 16px;
+              background: #E2E8F0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <!-- Game controller icon (Gadget) -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="6" y1="11" x2="10" y2="11"/>
+                <line x1="8" y1="9" x2="8" y2="13"/>
+                <line x1="15" y1="12" x2="15.01" y2="12"/>
+                <line x1="18" y1="10" x2="18.01" y2="10"/>
+                <path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>
+              </svg>
+            </div>
+            <span style="
+              font-family: var(--font-family);
+              font-size: 12px;
+              font-weight: 400;
+              color: #111827;
+            ">Gadget</span>
+          </div>
+
+          <!-- Accessory -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="
+              width: 56px;
+              height: 56px;
+              border-radius: 16px;
+              background: #FEF9C3;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <!-- Chain link / jewelry icon (Accessory) -->
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CA8A04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+            </div>
+            <span style="
+              font-family: var(--font-family);
+              font-size: 12px;
+              font-weight: 400;
+              color: #111827;
+            ">Accessory</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Section 3: Promotional Banner ========== -->
+      <div style="padding: 0 20px; margin-bottom: 20px;">
+        <div style="
+          position: relative;
+          height: 160px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+          overflow: hidden;
+        ">
+          <!-- Background image with opacity overlay -->
+          <img src="../assets/image_0_yi19x4.jpg" alt="" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+          "/>
+          <!-- Content overlay -->
+          <div style="
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            box-sizing: border-box;
+          ">
+            <div>
+              <h2 style="
+                font-family: var(--font-family);
+                font-size: 20px;
+                font-weight: 700;
+                color: #FFFFFF;
+                margin: 0 0 4px 0;
+              ">Don't Miss Out!</h2>
+              <p style="
+                font-family: var(--font-family);
+                font-size: 14px;
+                font-weight: 400;
+                color: #FFFFFF;
+                margin: 0;
+                opacity: 0.9;
+              ">Save Up To 75% Off</p>
+            </div>
+            <!-- CTA button -->
+            <div style="align-self: flex-start;">
+              <span style="
+                display: inline-block;
+                background: #FFFFFF;
+                color: #8B5CF6;
+                font-family: var(--font-family);
+                font-size: 14px;
+                font-weight: 700;
+                padding: 10px 24px;
+                border-radius: 9999px;
+              ">Shop now</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Section 4: Featured Products ========== -->
+      <div style="padding: 0 20px; margin-bottom: 20px;">
+        <!-- Title row -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="
+            font-family: var(--font-family);
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+          ">Featured products</span>
+          <span style="
+            font-family: var(--font-family);
+            font-size: 14px;
+            color: #8B5CF6;
+          ">See all</span>
+        </div>
+        <!-- Product grid 2x2 -->
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        ">
+          <!-- Product 1: Sneaker -->
+          <div style="
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 8px;
+          ">
+            <div style="
+              height: 120px;
+              border-radius: 8px;
+              overflow: hidden;
+              margin-bottom: 8px;
+            ">
+              <img src="../assets/image_1_yi19x4.jpg" alt="Sneaker" style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              "/>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: #111827;
+                  margin: 0 0 2px 0;
+                ">Sneaker</p>
+                <span style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 700;
+                  color: #111827;
+                ">$100</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Product 2: Fitbit Smartwatch -->
+          <div style="
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 8px;
+          ">
+            <div style="
+              height: 120px;
+              border-radius: 8px;
+              overflow: hidden;
+              margin-bottom: 8px;
+            ">
+              <img src="../assets/image_2_yi19x4.jpg" alt="Fitbit Smartwatch" style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              "/>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: #111827;
+                  margin: 0 0 2px 0;
+                ">Fitbit Smartwatch</p>
+                <span style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 700;
+                  color: #111827;
+                ">$150</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Product 3: Smartphone -->
+          <div style="
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 8px;
+          ">
+            <div style="
+              height: 120px;
+              border-radius: 8px;
+              overflow: hidden;
+              margin-bottom: 8px;
+            ">
+              <img src="../assets/image_3_yi19x4.jpg" alt="Smartphone" style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              "/>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: #111827;
+                  margin: 0 0 2px 0;
+                ">Smartphone</p>
+                <span style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 700;
+                  color: #111827;
+                ">$599</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Product 4: Headphone -->
+          <div style="
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 8px;
+          ">
+            <div style="
+              height: 120px;
+              border-radius: 8px;
+              overflow: hidden;
+              margin-bottom: 8px;
+            ">
+              <img src="../assets/image_4_yi19x4.jpg" alt="Headphone" style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              "/>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: #111827;
+                  margin: 0 0 2px 0;
+                ">Headphone</p>
+                <span style="
+                  font-family: var(--font-family);
+                  font-size: 14px;
+                  font-weight: 700;
+                  color: #111827;
+                ">$199</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- end SLOT: pageContent -->
+    </div>
+
+    <!-- ========== 3. Bottom Navigation Bar (fixed bottom) ========== -->
+    <nav
+      id="bottom-navigation-bar"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        height: 56px;
+        background: var(--color-bg);
+        border-top: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 8px;
+      "
+    >
+      <!-- Home (Active) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px; position:relative;">
+        <!-- Active dot indicator -->
+        <span style="
+          position: absolute;
+          top: -6px;
+          width: 4px;
+          height: 4px;
+          background: #8B5CF6;
+          border-radius: 50%;
+        "></span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span style="
+          font-family: var(--font-family);
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+          color: #8B5CF6;
+          line-height: 1;
+        ">Home</span>
+      </div>
+
+      <!-- Favorites (Inactive) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span style="
+          font-family: var(--font-family);
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+          color: #9CA3AF;
+          line-height: 1;
+        ">Favorites</span>
+      </div>
+
+      <!-- Cart (Inactive, with badge) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px; position:relative;">
+        <div style="position:relative; width:24px; height:24px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <!-- Purple cart badge -->
+          <span style="
+            position: absolute;
+            top: -5px;
+            right: -7px;
+            min-width: 20px;
+            height: 20px;
+            background: #8B5CF6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-family);
+            font-size: 10px;
+            font-weight: var(--font-weight-bold);
+            color: #FFFFFF;
+            line-height: 1;
+            padding: 0 4px;
+          ">3</span>
+        </div>
+        <span style="
+          font-family: var(--font-family);
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+          color: #9CA3AF;
+          line-height: 1;
+        ">Cart</span>
+      </div>
+
+      <!-- Settings (Inactive) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span style="
+          font-family: var(--font-family);
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+          color: #9CA3AF;
+          line-height: 1;
+        ">Settings</span>
+      </div>
+
+      <!-- Messages (Inactive) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span style="
+          font-family: var(--font-family);
+          font-size: 10px;
+          font-weight: var(--font-weight-medium);
+          color: #9CA3AF;
+          line-height: 1;
+        ">Messages</span>
+      </div>
+    </nav>
+
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

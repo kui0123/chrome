@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS 变量继承 + all:initial 精确测试</title>
+  <style>
+    :root {
+      --theme-primary: #70649A;
+      --hdm-primary: var(--theme-primary);
+    }
+
+    [data-theme="blue"] {
+      --theme-primary: #211E55;
+    }
+
+    .panel {
+      all: initial !important;
+      display: block !important;
+      color: var(--hdm-primary) !important;
+      font-family: sans-serif !important;
+      font-size: 16px !important;
+      padding: 20px !important;
+      border: 1px solid #ccc !important;
+      margin: 20px !important;
+    }
+
+    .panel * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+
+    .panel button {
+      display: inline-flex !important;
+      padding: 8px 16px !important;
+      background: var(--hdm-primary) !important;
+      color: white !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      font-size: 14px !important;
+    }
+
+    .test-result {
+      margin: 10px 20px;
+      padding: 10px;
+      background: #f0f0f0;
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body data-theme="blue">
+  <h2>测试：all:initial 下 CSS 变量是否能继承</h2>
+
+  <div class="test-result" id="result1"></div>
+
+  <div class="panel" id="testPanel">
+    <p>这段文字颜色应该是深海蓝 (#211E55)</p>
+    <br>
+    <button>这个按钮背景应该是深海蓝</button>
+  </div>
+
+  <div class="test-result" id="result2"></div>
+
+  <button onclick="toggleTheme()">切换主题</button>
+  <span id="themeLabel"></span>
+
+  <script>
+    function checkVars() {
+      var panel = document.getElementById('testPanel');
+      var btn = panel.querySelector('button');
+      var p = panel.querySelector('p');
+
+      var panelStyle = getComputedStyle(panel);
+      var btnStyle = getComputedStyle(btn);
+      var pStyle = getComputedStyle(p);
+
+      document.getElementById('result1').innerHTML =
+        'body --theme-primary: ' + getComputedStyle(document.body).getPropertyValue('--theme-primary') + '<br>' +
+        'body --hdm-primary: ' + getComputedStyle(document.body).getPropertyValue('--hdm-primary');
+
+      document.getElementById('result2').innerHTML =
+        'panel --theme-primary: ' + panelStyle.getPropertyValue('--theme-primary') + '<br>' +
+        'panel --hdm-primary: ' + panelStyle.getPropertyValue('--hdm-primary') + '<br>' +
+        'button background: ' + btnStyle.backgroundColor + '<br>' +
+        'p color: ' + pStyle.color;
+    }
+
+    function toggleTheme() {
+      var body = document.body;
+      if (body.getAttribute('data-theme') === 'blue') {
+        body.setAttribute('data-theme', 'purple');
+        document.getElementById('themeLabel').textContent = '当前：紫色 (默认)';
+      } else {
+        body.setAttribute('data-theme', 'blue');
+        document.getElementById('themeLabel').textContent = '当前：蓝色';
+      }
+      checkVars();
+    }
+
+    document.getElementById('themeLabel').textContent = '当前：蓝色';
+    checkVars();
+  </script>
+</body>
+</html>

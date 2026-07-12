@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>精确模拟插件 CSS 结构测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 40px;
+      background: #f3f4f6;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* ===== 精确模拟插件的 CSS 顺序和结构 ===== */
+    
+    /* 1. toolbar 根元素 all:initial */
+    .html-diff-marker-toolbar {
+      all: initial !important;
+      box-sizing: border-box !important;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+      font-size: 12px !important;
+      color: #1f2937 !important;
+      display: block !important;
+      width: 300px !important;
+      background: white !important;
+      padding: 20px !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* 2. 所有子元素 all:unset */
+    .html-diff-marker-toolbar * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* 3. 按钮恢复 */
+    .html-diff-marker-toolbar button {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      border: none !important;
+      background: none !important;
+      font: inherit !important;
+      color: inherit !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    
+    /* 4. div 恢复 */
+    .html-diff-marker-toolbar div {
+      display: block !important;
+    }
+    
+    /* 5. span 恢复 */
+    .html-diff-marker-toolbar span {
+      display: inline !important;
+    }
+    
+    /* 6. 全局 SVG 恢复（之前缺少 stroke-width 的版本） */
+    .html-diff-marker-toolbar svg {
+      display: inline-block !important;
+      width: 1em !important;
+      height: 1em !important;
+      fill: currentColor !important;
+      stroke: currentColor !important;
+      vertical-align: middle !important;
+      flex-shrink: 0 !important;
+    }
+    
+    /* 7. side-btn 特定样式 */
+    .html-diff-marker-toolbar .html-diff-marker-side-btn {
+      width: 36px !important;
+      height: 40px !important;
+      border: 1.5px solid #e5e7eb !important;
+      border-radius: 6px !important;
+      background: white !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: #6b7280 !important;
+    }
+    
+    /* 8. side-btn 中的 SVG 恢复（之前缺少 stroke-width 的版本） */
+    .html-diff-marker-side-btn svg,
+    .html-diff-marker-side-btn svg * {
+      width: 14px !important;
+      height: 14px !important;
+      display: block !important;
+      fill: none !important;
+      stroke: currentColor !important;
+    }
+    
+    /* ===== 新增：补充 stroke-width 后的版本（测试场景） ===== */
+    .test-fixed .html-diff-marker-side-btn svg,
+    .test-fixed .html-diff-marker-side-btn svg * {
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    .console-output {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+    
+    .row { display: flex; gap: 20px; align-items: flex-start; }
+    .col { flex: 1; }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 20px; margin-bottom: 24px;">精确模拟插件 CSS 结构测试</h1>
+  
+  <div class="row">
+    <div class="col">
+      <div class="test-section">
+        <h2>修复前（无 stroke-width）</h2>
+        <div class="html-diff-marker-toolbar" id="toolbar-before">
+          <div class="test-row">
+            <button class="html-diff-marker-side-btn" id="btn-before"></button>
+          </div>
+        </div>
+        <div id="note-before" style="font-size:12px; color:#ef4444; margin-top:8px;">检测中...</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div class="test-section">
+        <h2>修复后（补充 stroke-width）</h2>
+        <div class="html-diff-marker-toolbar test-fixed" id="toolbar-after">
+          <div class="test-row">
+            <button class="html-diff-marker-side-btn" id="btn-after"></button>
+          </div>
+        </div>
+        <div id="note-after" style="font-size:12px; color:#16a34a; margin-top:8px;">检测中...</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>详细检测结果</h2>
+    <div class="console-output" id="console-output">正在检测...</div>
+  </div>
+
+  <script>
+    const SVG_SETTINGS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3"/></svg>';
+    
+    document.getElementById('btn-before').innerHTML = SVG_SETTINGS;
+    document.getElementById('btn-after').innerHTML = SVG_SETTINGS;
+    
+    function analyze(btnId, label) {
+      const btn = document.getElementById(btnId);
+      const svg = btn.querySelector('svg');
+      const path = btn.querySelector('path');
+      const circle = btn.querySelector('circle');
+      
+      let out = `=== ${label} ===\n`;
+      
+      if (svg) {
+        const s = getComputedStyle(svg);
+        out += `  SVG:\n`;
+        out += `    display: ${s.display}\n`;
+        out += `    width: ${s.width}, height: ${s.height}\n`;
+        out += `    fill: ${s.fill}\n`;
+        out += `    stroke: ${s.stroke}\n`;
+        out += `    strokeWidth: ${s.strokeWidth}\n`;
+        out += `    strokeLinecap: ${s.strokeLinecap}\n`;
+        out += `    strokeLinejoin: ${s.strokeLinejoin}\n`;
+        out += `    color: ${s.color}\n`;
+      }
+      
+      if (path) {
+        const s = getComputedStyle(path);
+        out += `  PATH:\n`;
+        out += `    display: ${s.display}\n`;
+        out += `    fill: ${s.fill}\n`;
+        out += `    stroke: ${s.stroke}\n`;
+        out += `    strokeWidth: ${s.strokeWidth}\n`;
+        out += `    strokeLinecap: ${s.strokeLinecap}\n`;
+        out += `    strokeLinejoin: ${s.strokeLinejoin}\n`;
+        out += `    visibility: ${s.visibility}\n`;
+        out += `    opacity: ${s.opacity}\n`;
+        out += `    color: ${s.color}\n`;
+      }
+      
+      // 判断是否可见
+      const pathStyle = getComputedStyle(path);
+      const svgStyle = getComputedStyle(svg);
+      const hasStroke = pathStyle.stroke !== 'none' && pathStyle.stroke !== 'rgba(0, 0, 0, 0)';
+      const hasWidth = parseFloat(pathStyle.strokeWidth) > 0;
+      const hasSize = svgStyle.width !== '0px' && svgStyle.height !== '0px';
+      const visible = hasStroke && hasWidth && hasSize;
+      
+      out += `  可见性: ${visible ? '✅ 可见' : '❌ 不可见'}\n`;
+      out += `    有描边色: ${hasStroke}, 描边宽度>0: ${hasWidth}, 有尺寸: ${hasSize}\n`;
+      out += '\n';
+      
+      return { output: out, visible: visible, hasStroke, hasWidth, hasSize };
+    }
+    
+    function runTests() {
+      const before = analyze('btn-before', '修复前（缺少 stroke-width）');
+      const after = analyze('btn-after', '修复后（补充 stroke-width）');
+      
+      document.getElementById('console-output').textContent = before.output + after.output;
+      
+      document.getElementById('note-before').textContent = before.visible 
+        ? '✅ 可见 - 有描边有宽度' 
+        : `❌ 不可见 - 原因: ${!before.hasStroke ? '无描边' : !before.hasWidth ? '描边宽度为0' : '尺寸为0'}`;
+      
+      document.getElementById('note-after').textContent = after.visible 
+        ? '✅ 可见 - 有描边有宽度' 
+        : `❌ 不可见 - 原因: ${!after.hasStroke ? '无描边' : !after.hasWidth ? '描边宽度为0' : '尺寸为0'}`;
+    }
+    
+    setTimeout(runTests, 200);
+  </script>
+</body>
+</html>

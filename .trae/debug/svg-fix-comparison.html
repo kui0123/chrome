@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG 图标修复效果对比测试</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      padding: 30px;
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 24px; }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #111827;
+    }
+    
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .compare-col {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .compare-col h3 {
+      font-size: 13px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .compare-col.before h3 { color: #dc2626; }
+    .compare-col.after h3 { color: #16a34a; }
+    
+    .icon-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .icon-label {
+      font-size: 11px;
+      color: #6b7280;
+      min-width: 80px;
+    }
+    
+    .demo-toolbar {
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .demo-toolbar-header {
+      background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+      padding: 12px 14px 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .demo-window-ctrl {
+      display: flex;
+      gap: 5px;
+    }
+    .demo-ctrl-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .demo-toolbar-body {
+      padding: 12px;
+    }
+    .demo-export-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .demo-side-btn {
+      width: 34px;
+      height: 38px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    .demo-export-btn {
+      flex: 1;
+      height: 38px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    
+    .toast-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .demo-toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      border-left: 3px solid;
+    }
+    .demo-toast.success { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+    .demo-toast.warning { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+    .demo-toast.error { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+    .demo-toast.info { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
+    .demo-toast-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    
+    .settings-demo {
+      width: 260px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .settings-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .settings-body { padding: 8px 14px 12px; }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 12px;
+      color: #374151;
+    }
+    
+    .inspector-demo {
+      width: 280px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .inspector-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .inspector-header-btns { display: flex; gap: 4px; }
+    .inspector-header-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      cursor: pointer;
+    }
+    .inspector-header-btn:hover { background: #f3f4f6; }
+    .inspector-group { padding: 8px 12px; }
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .group-title { font-size: 11px; color: #6b7280; font-weight: 500; }
+    .group-reset-btn {
+      font-size: 11px;
+      color: #7c3aed;
+      background: #f5f3ff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .prop-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+      font-size: 11px;
+      color: #374151;
+    }
+    .prop-reset {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ef4444;
+      opacity: 0.6;
+      cursor: pointer;
+    }
+    .prop-reset:hover { opacity: 1; }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .status-badge.fail { background: #fef2f2; color: #dc2626; }
+    .status-badge.pass { background: #ecfdf5; color: #16a34a; }
+    
+    .note {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.6;
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid #7c3aed;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>SVG 图标修复效果对比测试</h1>
+<p class="subtitle">测试 CSS 补充 stroke-width / stroke-linecap / stroke-linejoin 后的效果</p>
+
+<!-- ============================================================
+     第一部分：工具栏整体效果对比
+     ============================================================ -->
+<div class="section">
+  <h2>一、工具栏整体效果对比</h2>
+  <div class="compare-grid">
+    
+    <!-- 修复前 -->
+    <div class="compare-col before">
+      <h3>❌ 修复前（缺少 stroke-width）</h3>
+      <div class="demo-toolbar" id="toolbar-before">
+        <div class="demo-toolbar-header">
+          <span>HTML Diff Marker</span>
+          <div class="demo-window-ctrl">
+            <div class="demo-ctrl-btn" id="ctrl-minus-before"></div>
+            <div class="demo-ctrl-btn" id="ctrl-close-before"></div>
+          </div>
+        </div>
+        <div class="demo-toolbar-body">
+          <div class="demo-export-row">
+            <button class="demo-side-btn" id="side-reset-before"></button>
+            <button class="demo-export-btn" id="export-before">
+              <span class="icon-slot"></span>
+              <span>导出 Diff</span>
+            </button>
+            <button class="demo-side-btn" id="side-settings-before"></button>
+          </div>
+        </div>
+      </div>
+      <span class="status-badge fail">图标不可见</span>
+    </div>
+    
+    <!-- 修复后 -->
+    <div class="compare-col after">
+      <h3>✅ 修复后（补充 stroke 属性）</h3>
+      <div class="demo-toolbar" id="toolbar-after">
+        <div class="demo-toolbar-header">
+          <span>HTML Diff Marker</span>
+          <div class="demo-window-ctrl">
+            <div class="demo-ctrl-btn" id="ctrl-minus-after"></div>
+            <div class="demo-ctrl-btn" id="ctrl-close-after"></div>
+          </div>
+        </div>
+        <div class="demo-toolbar-body">
+          <div class="demo-export-row">
+            <button class="demo-side-btn" id="side-reset-after"></button>
+            <button class="demo-export-btn" id="export-after">
+              <span class="icon-slot"></span>
+              <span>导出 Diff</span>
+            </button>
+            <button class="demo-side-btn" id="side-settings-after"></button>
+          </div>
+        </div>
+      </div>
+      <span class="status-badge pass">图标可见</span>
+    </div>
+    
+  </div>
+  
+  <div class="note">
+    <strong>说明：</strong>修复前，SVG 的 stroke 属性被 <code>all: unset</code> 重置，且恢复规则缺少 <code>stroke-width</code>，导致描边宽度为 0（或极细），图标不可见。<br>
+    修复后，补充了 <code>stroke-width: 2px</code>、<code>stroke-linecap: round</code>、<code>stroke-linejoin: round</code> 三个属性到 SVG 及其所有子元素，图标恢复正常显示。
+  </div>
+</div>
+
+<!-- ============================================================
+     第二部分：Toast 图标对比
+     ============================================================ -->
+<div class="section">
+  <h2>二、Toast 提示图标对比</h2>
+  <div class="compare-grid">
+    
+    <div class="compare-col before">
+      <h3>❌ 修复前</h3>
+      <div class="toast-demo" id="toast-before">
+        <div class="demo-toast success">
+          <div class="demo-toast-icon"></div>
+          <span>操作成功完成</span>
+        </div>
+        <div class="demo-toast warning">
+          <div class="demo-toast-icon"></div>
+          <span>请注意检查内容</span>
+        </div>
+        <div class="demo-toast error">
+          <div class="demo-toast-icon"></div>
+          <span>操作失败，请重试</span>
+        </div>
+        <div class="demo-toast info">
+          <div class="demo-toast-icon"></div>
+          <span>点击开始添加</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="compare-col after">
+      <h3>✅ 修复后</h3>
+      <div class="toast-demo" id="toast-after">
+        <div class="demo-toast success">
+          <div class="demo-toast-icon"></div>
+          <span>操作成功完成</span>
+        </div>
+        <div class="demo-toast warning">
+          <div class="demo-toast-icon"></div>
+          <span>请注意检查内容</span>
+        </div>
+        <div class="demo-toast error">
+          <div class="demo-toast-icon"></div>
+          <span>操作失败，请重试</span>
+        </div>
+        <div class="demo-toast info">
+          <div class="demo-toast-icon"></div>
+          <span>点击开始添加</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- ============================================================
+     第三部分：设置面板 + 编辑面板对比
+     ============================================================ -->
+<div class="section">
+  <h2>三、设置面板 & 编辑面板对比</h2>
+  <div class="compare-grid">
+    
+    <div class="compare-col before">
+      <h3>❌ 修复前</h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- 设置面板 -->
+        <div class="settings-demo" id="settings-before">
+          <div class="settings-header">
+            <div class="settings-icon-slot" style="width: 14px; height: 14px;"></div>
+            <span>设置</span>
+          </div>
+          <div class="settings-body">
+            <div class="settings-row">
+              <span>显示编号徽章</span>
+              <div style="width: 36px; height: 20px; background: #10b981; border-radius: 10px; position: relative;">
+                <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 编辑面板 -->
+        <div class="inspector-demo" id="inspector-before">
+          <div class="inspector-header">
+            <span>样式编辑</span>
+            <div class="inspector-header-btns">
+              <div class="inspector-header-btn" id="insp-minus-before"></div>
+              <div class="inspector-header-btn" id="insp-close-before"></div>
+            </div>
+          </div>
+          <div class="inspector-group">
+            <div class="group-header">
+              <span class="group-title">文字样式</span>
+              <div class="group-reset-btn" id="group-reset-before">
+                <span class="group-reset-icon" style="width: 12px; height: 12px;"></span>
+                <span>重置</span>
+              </div>
+            </div>
+            <div class="prop-row">
+              <span>字号</span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span>14px</span>
+                <div class="prop-reset" id="prop-reset-before"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="compare-col after">
+      <h3>✅ 修复后</h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- 设置面板 -->
+        <div class="settings-demo" id="settings-after">
+          <div class="settings-header">
+            <div class="settings-icon-slot" style="width: 14px; height: 14px;"></div>
+            <span>设置</span>
+          </div>
+          <div class="settings-body">
+            <div class="settings-row">
+              <span>显示编号徽章</span>
+              <div style="width: 36px; height: 20px; background: #10b981; border-radius: 10px; position: relative;">
+                <div style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 编辑面板 -->
+        <div class="inspector-demo" id="inspector-after">
+          <div class="inspector-header">
+            <span>样式编辑</span>
+            <div class="inspector-header-btns">
+              <div class="inspector-header-btn" id="insp-minus-after"></div>
+              <div class="inspector-header-btn" id="insp-close-after"></div>
+            </div>
+          </div>
+          <div class="inspector-group">
+            <div class="group-header">
+              <span class="group-title">文字样式</span>
+              <div class="group-reset-btn" id="group-reset-after">
+                <span class="group-reset-icon" style="width: 12px; height: 12px;"></span>
+                <span>重置</span>
+              </div>
+            </div>
+            <div class="prop-row">
+              <span>字号</span>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span>14px</span>
+                <div class="prop-reset" id="prop-reset-after"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- ============================================================
+     第四部分：单图标详细对比
+     ============================================================ -->
+<div class="section">
+  <h2>四、单图标细节对比（放大 2x）</h2>
+  <div class="compare-grid">
+    
+    <div class="compare-col before">
+      <h3>❌ 修复前</h3>
+      <div class="icon-row"><span class="icon-label">reset</span><div class="icon-2x" id="icon-reset-before"></div></div>
+      <div class="icon-row"><span class="icon-label">settings</span><div class="icon-2x" id="icon-settings-before"></div></div>
+      <div class="icon-row"><span class="icon-label">export</span><div class="icon-2x" id="icon-export-before"></div></div>
+      <div class="icon-row"><span class="icon-label">close</span><div class="icon-2x" id="icon-close-before"></div></div>
+      <div class="icon-row"><span class="icon-label">check</span><div class="icon-2x" id="icon-check-before"></div></div>
+      <div class="icon-row"><span class="icon-label">warning</span><div class="icon-2x" id="icon-warning-before"></div></div>
+    </div>
+    
+    <div class="compare-col after">
+      <h3>✅ 修复后</h3>
+      <div class="icon-row"><span class="icon-label">reset</span><div class="icon-2x" id="icon-reset-after"></div></div>
+      <div class="icon-row"><span class="icon-label">settings</span><div class="icon-2x" id="icon-settings-after"></div></div>
+      <div class="icon-row"><span class="icon-label">export</span><div class="icon-2x" id="icon-export-after"></div></div>
+      <div class="icon-row"><span class="icon-label">close</span><div class="icon-2x" id="icon-close-after"></div></div>
+      <div class="icon-row"><span class="icon-label">check</span><div class="icon-2x" id="icon-check-after"></div></div>
+      <div class="icon-row"><span class="icon-label">warning</span><div class="icon-2x" id="icon-warning-after"></div></div>
+    </div>
+    
+  </div>
+  <style>
+    .icon-2x {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #374151;
+    }
+    .icon-2x svg { transform: scale(2); }
+  </style>
+</div>
+
+<script>
+  // SVG 图标定义（与插件完全一致）
+  const SVG_ICONS = {
+    reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    export: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M5 12h14"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M20 6 9 17l-5-5"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+  };
+  
+  // ======== 修复前：模拟 all:unset 但不恢复 stroke-width ========
+  const styleBefore = document.createElement('style');
+  styleBefore.textContent = `
+    /* 模拟 all:unset 效果（仅作用于修复前的容器） */
+    #toolbar-before *,
+    #toast-before *,
+    #settings-before *,
+    #inspector-before *,
+    #icon-reset-before *,
+    #icon-settings-before *,
+    #icon-export-before *,
+    #icon-close-before *,
+    #icon-check-before *,
+    #icon-warning-before * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* 基础恢复（按钮、div、span 等） */
+    #toolbar-before button,
+    #toolbar-before div,
+    #toolbar-before span { display: block !important; }
+    
+    /* SVG 恢复（故意缺少 stroke-width） */
+    #toolbar-before svg,
+    #toast-before svg,
+    #settings-before svg,
+    #inspector-before svg {
+      display: block !important;
+      fill: none !important;
+      stroke: currentColor !important;
+    }
+    #toolbar-before svg *,
+    #toast-before svg *,
+    #settings-before svg *,
+    #inspector-before svg * {
+      fill: none !important;
+      stroke: currentColor !important;
+    }
+    
+    /* 单图标对比区（修复前） */
+    #icon-reset-before *, #icon-settings-before *,
+    #icon-export-before *, #icon-close-before *,
+    #icon-check-before *, #icon-warning-before * {
+      fill: none !important;
+      stroke: currentColor !important;
+    }
+    
+    /* toast 图标颜色 */
+    .demo-toast.success svg, .demo-toast.success svg * { stroke: #10b981 !important; }
+    .demo-toast.warning svg, .demo-toast.warning svg * { stroke: #f59e0b !important; }
+    .demo-toast.error svg, .demo-toast.error svg * { stroke: #ef4444 !important; }
+    .demo-toast.info svg, .demo-toast.info svg * { stroke: #3b82f6 !important; }
+  `;
+  document.head.appendChild(styleBefore);
+  
+  // ======== 修复后：补充 stroke-width 等属性 ========
+  const styleAfter = document.createElement('style');
+  styleAfter.textContent = `
+    /* 同样的 all:unset */
+    #toolbar-after *,
+    #toast-after *,
+    #settings-after *,
+    #inspector-after *,
+    #icon-reset-after *,
+    #icon-settings-after *,
+    #icon-export-after *,
+    #icon-close-after *,
+    #icon-check-after *,
+    #icon-warning-after * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* 基础恢复 */
+    #toolbar-after button,
+    #toolbar-after div,
+    #toolbar-after span { display: block !important; }
+    
+    /* SVG 恢复（完整修复版） */
+    #toolbar-after svg,
+    #toolbar-after svg *,
+    #toast-after svg,
+    #toast-after svg *,
+    #settings-after svg,
+    #settings-after svg *,
+    #inspector-after svg,
+    #inspector-after svg * {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      display: block !important;
+    }
+    
+    /* 单图标对比区（修复后） */
+    #icon-reset-after svg, #icon-reset-after svg *,
+    #icon-settings-after svg, #icon-settings-after svg *,
+    #icon-export-after svg, #icon-export-after svg *,
+    #icon-close-after svg, #icon-close-after svg *,
+    #icon-check-after svg, #icon-check-after svg *,
+    #icon-warning-after svg, #icon-warning-after svg * {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    /* toast 图标颜色 */
+    #toast-after .success svg, #toast-after .success svg * { stroke: #10b981 !important; }
+    #toast-after .warning svg, #toast-after .warning svg * { stroke: #f59e0b !important; }
+    #toast-after .error svg, #toast-after .error svg * { stroke: #ef4444 !important; }
+    #toast-after .info svg, #toast-after .info svg * { stroke: #3b82f6 !important; }
+  `;
+  document.head.appendChild(styleAfter);
+  
+  // 注入工具栏图标
+  document.getElementById('side-reset-before').innerHTML = SVG_ICONS.reset;
+  document.getElementById('side-settings-before').innerHTML = SVG_ICONS.settings;
+  document.querySelector('#export-before .icon-slot').innerHTML = SVG_ICONS.export;
+  document.getElementById('ctrl-minus-before').innerHTML = SVG_ICONS.minus;
+  document.getElementById('ctrl-close-before').innerHTML = SVG_ICONS.close;
+  
+  document.getElementById('side-reset-after').innerHTML = SVG_ICONS.reset;
+  document.getElementById('side-settings-after').innerHTML = SVG_ICONS.settings;
+  document.querySelector('#export-after .icon-slot').innerHTML = SVG_ICONS.export;
+  document.getElementById('ctrl-minus-after').innerHTML = SVG_ICONS.minus;
+  document.getElementById('ctrl-close-after').innerHTML = SVG_ICONS.close;
+  
+  // 注入 Toast 图标
+  const toastIconsBefore = document.querySelectorAll('#toast-before .demo-toast-icon');
+  toastIconsBefore[0].innerHTML = SVG_ICONS.check;
+  toastIconsBefore[1].innerHTML = SVG_ICONS.warning;
+  toastIconsBefore[2].innerHTML = SVG_ICONS.error;
+  toastIconsBefore[3].innerHTML = SVG_ICONS.info;
+  
+  const toastIconsAfter = document.querySelectorAll('#toast-after .demo-toast-icon');
+  toastIconsAfter[0].innerHTML = SVG_ICONS.check;
+  toastIconsAfter[1].innerHTML = SVG_ICONS.warning;
+  toastIconsAfter[2].innerHTML = SVG_ICONS.error;
+  toastIconsAfter[3].innerHTML = SVG_ICONS.info;
+  
+  // 注入设置面板图标
+  document.querySelector('#settings-before .settings-icon-slot').innerHTML = SVG_ICONS.settings;
+  document.querySelector('#settings-after .settings-icon-slot').innerHTML = SVG_ICONS.settings;
+  
+  // 注入编辑面板图标
+  document.getElementById('insp-minus-before').innerHTML = SVG_ICONS.minus;
+  document.getElementById('insp-close-before').innerHTML = SVG_ICONS.close;
+  document.querySelector('#group-reset-before .group-reset-icon').innerHTML = SVG_ICONS.reset;
+  document.getElementById('prop-reset-before').innerHTML = SVG_ICONS.reset;
+  
+  document.getElementById('insp-minus-after').innerHTML = SVG_ICONS.minus;
+  document.getElementById('insp-close-after').innerHTML = SVG_ICONS.close;
+  document.querySelector('#group-reset-after .group-reset-icon').innerHTML = SVG_ICONS.reset;
+  document.getElementById('prop-reset-after').innerHTML = SVG_ICONS.reset;
+  
+  // 注入单图标对比
+  document.getElementById('icon-reset-before').innerHTML = SVG_ICONS.reset;
+  document.getElementById('icon-settings-before').innerHTML = SVG_ICONS.settings;
+  document.getElementById('icon-export-before').innerHTML = SVG_ICONS.export;
+  document.getElementById('icon-close-before').innerHTML = SVG_ICONS.close;
+  document.getElementById('icon-check-before').innerHTML = SVG_ICONS.check;
+  document.getElementById('icon-warning-before').innerHTML = SVG_ICONS.warning;
+  
+  document.getElementById('icon-reset-after').innerHTML = SVG_ICONS.reset;
+  document.getElementById('icon-settings-after').innerHTML = SVG_ICONS.settings;
+  document.getElementById('icon-export-after').innerHTML = SVG_ICONS.export;
+  document.getElementById('icon-close-after').innerHTML = SVG_ICONS.close;
+  document.getElementById('icon-check-after').innerHTML = SVG_ICONS.check;
+  document.getElementById('icon-warning-after').innerHTML = SVG_ICONS.warning;
+</script>
+
+</body>
+</html>

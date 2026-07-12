@@ -57,20 +57,35 @@
 
 ```
 项目根目录/
-├── manifest.json          ← 扩展配置文件（有且只有一个）
-├── background/
-│   └── background.js      ← Service Worker
-├── content/
-│   ├── content.js         ← 页面内核心脚本
-│   └── content.css        ← 页面内样式
-├── icons/
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
-├── test-page.html         ← 本地测试页面
-├── Project_Rule.md        ← 本规范文档
-└── README.md              ← 项目说明（面向用户）
+├── extension/                   ← Chrome 扩展加载目录（核心发布文件）
+│   ├── manifest.json            ← 扩展配置文件（有且只有一个）
+│   ├── background/
+│   │   └── background.js        ← Service Worker
+│   ├── content/
+│   │   ├── content.js           ← 页面内核心脚本
+│   │   └── content.css          ← 页面内样式
+│   ├── icons/
+│   │   ├── icon16.png
+│   │   ├── icon48.png
+│   │   └── icon128.png
+│   └── README.md                ← 扩展说明（面向用户）
+│
+├── dev/                         ← 开发辅助资源
+│   ├── docs/                    ← 开发文档
+│   ├── tests/                   ← 测试页面与截图
+│   ├── pages/                   ← 预览/Demo 页面
+│   └── styles/                  ← 样式参考文件
+│
+├── design/                      ← 设计资源
+├── .trae/                       ← AI 辅助文件（隐藏目录）
+├── Project_Rule.md              ← 本规范文档
+└── .gitignore
 ```
+
+**关键原则**：
+- `extension/` 目录是 Chrome 扩展的实际加载目录，仅包含运行时必需文件
+- 开发/测试/设计资源全部放在 `extension/` 之外，避免增加扩展加载体积
+- 本文件（Project_Rule.md）固定在项目根目录，不随扩展发布
 
 ### 1.2 禁止创建的文件
 
@@ -448,7 +463,7 @@ node --check background/background.js
 | 12 | 保存修改    | 检查面板中点击"保存"             | 修改存入 sessionStorage   |
 | 13 | 生成 Diff | 点击"生成 Diff 文件"          | 下载 .md 和 .json 两个文件   |
 | 14 | 刷新页面    | F5 刷新 test-page.html    | 标记从 sessionStorage 恢复 |
-| 15 | 快捷键切换   | 按 Ctrl/Cmd + Shift + E  | 工具栏在隐藏/唤醒/激活三态间切换     |
+| 15 | 快捷键切换   | 按 Alt+E（Windows/Linux）/ Option+E（macOS） | 工具栏在隐藏/唤醒/激活三态间切换     |
 | 16 | 清除标记    | 点击"清除所有标记"              | 页面恢复初始状态              |
 
 ***
@@ -572,6 +587,75 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 
 ***
 
+## 十四、Git 分支管理规范
+
+### 14.1 分支结构
+```
+main          ← 生产分支（稳定）
+├── develop   ← 开发分支（集成）
+│   ├── fix/*        ← Bug 修复分支（临时）
+│   └── feature/*    ← 功能开发分支（临时）
+└── hotfix/*         ← 紧急修复分支（临时）
+```
+
+### 14.2 分支命名规范
+| 类型 | 创建来源 | 格式 | 示例 |
+|-----|---------|------|------|
+| Bug 修复 | develop | `fix/<issue-id>-<description>` | `fix/bug-001-select-panel` |
+| 功能开发 | develop | `feature/<feature-name>` | `feature/ui-toolbar-redesign` |
+| 紧急修复 | main | `hotfix/<version>` | `hotfix/v1.0.1` |
+
+### 14.3 开发流程
+1. 日常开发：从 develop 创建 fix/feature 分支
+2. 代码审查：提交 PR/MR 到 develop
+3. 合并：审查通过后合并回 develop（--no-ff）
+4. 发布：从 develop 合并到 main
+
+### 14.4 合并优先级规则
+- P0：hotfix/*（紧急修复，最高优先级）
+- P1：fix/*（Bug 修复分支，优先于功能开发）
+- P2：feature/*（功能开发/UI 迭代分支）
+
+### 14.5 合并规则
+- 使用 `--no-ff` 合并，保留分支历史
+- 合并后及时删除临时分支（`git branch -d <branch-name>`）
+- 禁止直接推送 main/develop 分支
+
+### 14.6 分支同步机制
+- 开发过程中建议每日同步 develop 最新代码（`git fetch && git merge origin/develop`）
+- PR/MR 前必须同步 develop，确保无冲突
+- 同步冲突由分支创建者负责解决
+
+### 14.7 版本号更新规范
+- 遵循 Semantic Versioning 规范：
+  - 修复 bug：第三位 +1（如 `1.0.0` → `1.0.1`）
+  - 新增功能：第二位 +1，第三位归零（如 `1.0.1` → `1.1.0`）
+  - 架构性变更：第一位 +1（如 `1.1.0` → `2.0.0`）
+- hotfix 分支创建后立即设置初始版本号
+- 开发过程中可根据需要调整版本号
+- 发布前冻结版本号，不再调整
+- 版本号更新需同步更新 manifest.json 和 README.md
+
+### 14.8 回滚操作流程
+- 普通提交回滚：`git revert <commit-hash>`
+- 合并提交回滚：`git revert -m 1 <merge-commit-hash>`
+- 回滚后需同步到相关分支
+
+### 14.9 分支保护规则
+- main 和 develop 分支设置保护规则，禁止直接推送
+- 必须通过 PR/MR 审查才能合并
+
+### 14.10 本地保护机制
+- 使用 pre-push 钩子脚本阻止直接推送到受保护分支
+
+### 14.11 Bug 报告迁移策略
+- 从 Bug 报告文件名提取标识作为 issue-id
+- 根据标识生成分支名：`fix/<issue-id>-<description>`
+- 在 Bug 报告中添加关联分支标记：`--- 关联分支: fix/xxx 状态: 待修复 ---`
+- 修复完成后更新状态为"已修复"并关联对应的 commit hash
+
+***
+
 ## 附录：历史问题记录
 
 > 记录本项目开发过程中遇到的典型问题，供后续参考。
@@ -653,6 +737,6 @@ README 中描述的功能**必须与实际代码一致**。每次代码变更后
 
 ***
 
-**文档版本**：1.5
-**最后更新**：2026-06-27
+**文档版本**：1.8
+**最后更新**：2026-07-11
 **适用项目**：HTML Diff Marker Chrome 扩展

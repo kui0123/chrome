@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>:not() 选择器特异性测试</title>
+<style>
+  /* 模拟恢复排版元素基础样式规则（content.css 第434-441行） */
+  .html-diff-marker-inspector div:not(.html-diff-marker-inspector-header):not(.html-diff-marker-inspector-title-row):not(.html-diff-marker-inspector-header-btns):not(.html-diff-marker-group-header):not(.html-diff-marker-group-actions):not(.html-diff-marker-unit-toggle):not(.html-diff-marker-style-prop-row):not(.html-diff-marker-style-prop-control):not(.html-diff-marker-style-header):not(.html-diff-marker-style-header-actions):not(.html-diff-marker-style-input-wrap):not(.html-diff-marker-inspector-actions):not(.html-diff-marker-group-child-item):not(.html-diff-marker-reset-all-wrap):not(.html-diff-marker-link-input-wrap):not(.html-diff-marker-element-info):not(.html-diff-marker-field-row):not(.html-diff-marker-style-section):not(.html-diff-marker-style-row):not(.html-diff-marker-child-row) {
+    display: block !important;
+    background: lightgreen;
+  }
+
+  /* 模拟折叠样式（content.css 第2201-2205行） */
+  .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-body,
+  .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-actions,
+  .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-resize-handle-se {
+    display: none !important;
+  }
+
+  /* 基础样式 */
+  .html-diff-marker-inspector {
+    width: 300px;
+    border: 2px solid #333;
+    padding: 10px;
+    margin: 20px;
+    font-family: sans-serif;
+  }
+  .html-diff-marker-inspector-header {
+    background: #70649A;
+    color: white;
+    padding: 8px;
+    font-weight: bold;
+  }
+  .html-diff-marker-inspector-body {
+    padding: 10px;
+    border: 1px dashed #999;
+  }
+  .html-diff-marker-inspector-actions {
+    padding: 8px;
+    background: #f0f0f0;
+    border-top: 1px solid #ccc;
+  }
+  .html-diff-marker-resize-handle-se {
+    width: 16px;
+    height: 16px;
+    background: #666;
+    margin-left: auto;
+  }
+
+  .test-label {
+    margin: 20px 20px 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  .result-banner {
+    margin: 10px 20px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .pass { background: #d4edda; color: #155724; }
+  .fail { background: #f8d7da; color: #721c24; }
+</style>
+</head>
+<body>
+
+<h2 style="margin: 20px;">:not() 选择器特异性测试 — 编辑面板折叠功能</h2>
+
+<div class="test-label">测试1：正常展开状态（无 collapsed 类）</div>
+<div class="html-diff-marker-inspector">
+  <div class="html-diff-marker-inspector-header">面板头部</div>
+  <div class="html-diff-marker-inspector-body">
+    主体内容（inspector-body）<br>
+    如果显示浅绿色背景，说明被 :not() 规则匹配到了
+  </div>
+  <div class="html-diff-marker-inspector-actions">底部操作栏（inspector-actions）</div>
+  <div class="html-diff-marker-resize-handle-se"></div>
+</div>
+
+<div class="test-label">测试2：折叠状态（有 collapsed 类）— body 应该被隐藏</div>
+<div class="html-diff-marker-inspector html-diff-marker-collapsed" id="collapsed-panel">
+  <div class="html-diff-marker-inspector-header">面板头部（折叠后应只显示这个）</div>
+  <div class="html-diff-marker-inspector-body" id="test-body">
+    主体内容（inspector-body）<br>
+    如果折叠状态下仍然可见，说明 :not() 规则覆盖了 display:none
+  </div>
+  <div class="html-diff-marker-inspector-actions" id="test-actions">底部操作栏（inspector-actions）</div>
+  <div class="html-diff-marker-resize-handle-se" id="test-resize"></div>
+</div>
+
+<div class="test-label">测试结果（JavaScript 计算）</div>
+<div id="results" style="margin: 0 20px; font-family: monospace; font-size: 12px;"></div>
+
+<script>
+  // 检查各元素的计算样式
+  const body = document.getElementById('test-body');
+  const actions = document.getElementById('test-actions');
+  const resize = document.getElementById('test-resize');
+
+  const bodyDisplay = getComputedStyle(body).display;
+  const actionsDisplay = getComputedStyle(actions).display;
+  const resizeDisplay = getComputedStyle(resize).display;
+
+  const results = document.getElementById('results');
+
+  let html = '';
+
+  // 计算特异性
+  // 规则1: .html-diff-marker-inspector div:not(.a):not(.b)... (20个not)
+  // 类选择器: 1 (.html-diff-marker-inspector) + 20 (:not中的类) = 21
+  // 元素选择器: 1 (div)
+  // 特异性: (0, 21, 1)
+
+  // 规则2: .html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-body
+  // 类选择器: 3
+  // 元素选择器: 0
+  // 特异性: (0, 3, 0)
+
+  html += '<p><strong>特异性对比：</strong></p>';
+  html += '<p>:not() 恢复规则: <code>(0, 21, 1)</code></p>';
+  html += '<p>折叠样式规则: <code>(0, 3, 0)</code></p>';
+  html += '<p><strong>结论: (0, 21, 1) > (0, 3, 0) — :not() 规则特异性更高！</strong></p>';
+  html += '<br>';
+
+  html += '<p><strong>实际计算值（折叠状态下）：</strong></p>';
+  html += '<p>inspector-body display: <code>' + bodyDisplay + '</code> ';
+  if (bodyDisplay === 'none') {
+    html += '<span style="color:green">[正确 - 已隐藏]</span>';
+  } else {
+    html += '<span style="color:red;font-weight:bold">[错误 - 未隐藏！被 :not() 规则覆盖]</span>';
+  }
+  html += '</p>';
+
+  html += '<p>inspector-actions display: <code>' + actionsDisplay + '</code> ';
+  if (actionsDisplay === 'none') {
+    html += '<span style="color:green">[正确 - 已隐藏]</span>';
+  } else {
+    html += '<span style="color:red;font-weight:bold">[错误 - 未隐藏]</span>';
+  }
+  html += '</p>';
+
+  html += '<p>resize-handle-se display: <code>' + resizeDisplay + '</code> ';
+  if (resizeDisplay === 'none') {
+    html += '<span style="color:green">[正确 - 已隐藏]</span>';
+  } else {
+    html += '<span style="color:red;font-weight:bold">[错误 - 未隐藏！被 :not() 规则覆盖]</span>';
+  }
+  html += '</p>';
+
+  // 原因分析
+  html += '<br><p><strong>原因分析：</strong></p>';
+  html += '<p>1. inspector-body 不在 :not() 排除列表中 → 被 :not() 规则匹配 → display:block 覆盖折叠样式的 display:none</p>';
+  html += '<p>2. inspector-actions 在 :not() 排除列表中 → 不被 :not() 规则匹配 → 折叠样式的 display:none 正常生效</p>';
+  html += '<p>3. resize-handle-se 不在 :not() 排除列表中 → 被 :not() 规则匹配 → display:block 覆盖折叠样式的 display:none</p>';
+
+  results.innerHTML = html;
+</script>
+
+</body>
+</html>

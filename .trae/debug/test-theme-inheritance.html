@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>主题变量继承测试</title>
+  <style>
+    :root {
+      --hdm-theme-primary: #70649A;
+      --hdm-theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+      --hdm-text-primary: #1F2937;
+    }
+
+    [data-theme="deep-cyan"] {
+      --hdm-theme-primary: #211E55;
+      --hdm-theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+    }
+
+    /* 模拟样式隔离 */
+    .test-panel {
+      all: initial !important;
+      box-sizing: border-box !important;
+      font-family: sans-serif !important;
+      font-size: 14px !important;
+      color: var(--hdm-text-primary) !important;
+    }
+
+    .test-panel * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+
+    .test-panel button {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      padding: 8px 16px !important;
+      border-radius: 8px !important;
+      border: none !important;
+      background: var(--hdm-theme-gradient) !important;
+      color: white !important;
+      font-size: 14px !important;
+    }
+
+    .test-panel .top-bar {
+      display: block !important;
+      height: 3px !important;
+      background: var(--hdm-theme-primary) !important;
+      width: 100% !important;
+    }
+
+    .test-panel .header {
+      display: flex !important;
+      padding: 12px 16px !important;
+      background: #fff !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
+
+    .test-panel .body {
+      display: block !important;
+      padding: 16px !important;
+      background: #f9fafb !important;
+    }
+
+    .color-indicator {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: var(--hdm-theme-primary);
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    /* 测试场景 */
+    .scenario {
+      margin: 20px;
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .scenario h3 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body data-theme="deep-cyan">
+  <h1>主题变量继承测试</h1>
+
+  <div class="scenario">
+    <h3>场景1：无 all:initial — 直接在 body 上测试</h3>
+    <div>
+      <span>主题色：</span>
+      <span class="color-indicator"></span>
+      <span>var(--hdm-theme-primary) 应显示深海蓝 #211E55</span>
+    </div>
+    <br>
+    <button style="background: var(--hdm-theme-gradient); color: white; padding: 8px 16px; border: none; border-radius: 8px;">
+      测试按钮
+    </button>
+  </div>
+
+  <div class="scenario">
+    <h3>场景2：有 all:initial 的面板（模拟 inspector）</h3>
+    <div class="test-panel" style="display: block; width: 300px; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+      <div class="top-bar"></div>
+      <div class="header">
+        <span>面板标题</span>
+        <button>保存</button>
+      </div>
+      <div class="body">
+        <span>主题色变量是否有效？</span>
+      </div>
+    </div>
+    <p><small>如果 all:initial 切断了 CSS 变量继承，顶部色条和按钮背景会是默认/透明色</small></p>
+  </div>
+
+  <div class="scenario">
+    <h3>场景3：body 上通过 style.setProperty 设置自定义变量</h3>
+    <button onclick="applyCustomColor()">应用自定义颜色 #E74C3C</button>
+    <button onclick="resetTheme()">重置为 data-theme 方式</button>
+    <div id="custom-result"></div>
+  </div>
+
+  <script>
+    function applyCustomColor() {
+      document.body.style.setProperty('--hdm-theme-primary', '#E74C3C');
+      document.body.style.setProperty('--hdm-theme-gradient', 'linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%)');
+      document.body.setAttribute('data-theme', 'custom');
+      document.getElementById('custom-result').innerHTML = 
+        '已应用自定义颜色到 body.style，检查上面两个场景的颜色变化';
+    }
+
+    function resetTheme() {
+      document.body.style.removeProperty('--hdm-theme-primary');
+      document.body.style.removeProperty('--hdm-theme-gradient');
+      document.body.setAttribute('data-theme', 'deep-cyan');
+      document.getElementById('custom-result').innerHTML = 
+        '已重置为 data-theme="deep-cyan" 方式';
+    }
+  </script>
+</body>
+</html>

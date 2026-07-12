@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG 图标显示问题调试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 40px;
+      background: #f3f4f6;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #1f2937;
+    }
+    
+    .test-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .test-label {
+      font-size: 12px;
+      color: #6b7280;
+      min-width: 150px;
+    }
+    
+    .test-btn {
+      width: 36px;
+      height: 40px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    
+    /* ===== 模拟 all:unset 场景 ===== */
+    .test-unset * {
+      all: unset !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* ===== 恢复方案 1：只恢复 svg 元素 ===== */
+    .test-unset.recovery-1 svg {
+      display: inline-block !important;
+      width: 14px !important;
+      height: 14px !important;
+      fill: currentColor !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    /* ===== 恢复方案 2：恢复 svg 及其所有子元素 ===== */
+    .test-unset.recovery-2 svg,
+    .test-unset.recovery-2 svg * {
+      display: block !important;
+      width: 14px !important;
+      height: 14px !important;
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    /* ===== 恢复方案 3：带命名空间的 svg * 选择器 ===== */
+    .test-unset.recovery-3 svg,
+    .test-unset.recovery-3 svg path,
+    .test-unset.recovery-3 svg circle,
+    .test-unset.recovery-3 svg line,
+    .test-unset.recovery-3 svg polyline,
+    .test-unset.recovery-3 svg rect {
+      fill: none !important;
+      stroke: #6b7280 !important;
+      stroke-width: 2 !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+    
+    .test-unset.recovery-3 svg {
+      width: 14px !important;
+      height: 14px !important;
+      display: block !important;
+    }
+    
+    .note {
+      font-size: 11px;
+      color: #ef4444;
+      margin-top: 4px;
+    }
+    .note.ok {
+      color: #16a34a;
+    }
+    
+    .console-output {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: 20px; margin-bottom: 24px;">SVG 图标显示问题深度调试</h1>
+  
+  <!-- 正常状态 -->
+  <div class="test-section">
+    <h2>1. 正常状态（无 all:unset）</h2>
+    <div class="test-row">
+      <span class="test-label">SVG 图标：</span>
+      <button class="test-btn" id="normal-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="note ok">✓ 预期：应该能看到设置图标（齿轮形状）</div>
+  </div>
+  
+  <!-- all:unset 无恢复 -->
+  <div class="test-section">
+    <h2>2. all:unset 后（无恢复）</h2>
+    <div class="test-row test-unset" id="no-recovery">
+      <span class="test-label">SVG 图标：</span>
+      <button class="test-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="note">✗ 预期：图标可能消失或异常</div>
+  </div>
+  
+  <!-- 恢复方案 1：只恢复 svg -->
+  <div class="test-section">
+    <h2>3. 恢复方案 1：只恢复 svg 元素（不包含子元素）</h2>
+    <div class="test-row test-unset recovery-1" id="recovery-1">
+      <span class="test-label">SVG 图标：</span>
+      <button class="test-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="note">? 测试：仅设置 svg 的 stroke，子元素是否能继承？</div>
+  </div>
+  
+  <!-- 恢复方案 2：svg + svg * -->
+  <div class="test-section">
+    <h2>4. 恢复方案 2：svg + svg *（通配符选择器）</h2>
+    <div class="test-row test-unset recovery-2" id="recovery-2">
+      <span class="test-label">SVG 图标：</span>
+      <button class="test-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="note">? 测试：svg * 选择器能否匹配 SVG 内部元素？</div>
+  </div>
+  
+  <!-- 恢复方案 3：显式标签选择器 -->
+  <div class="test-section">
+    <h2>5. 恢复方案 3：显式标签选择器（path, circle, line...）</h2>
+    <div class="test-row test-unset recovery-3" id="recovery-3">
+      <span class="test-label">SVG 图标：</span>
+      <button class="test-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="note">? 测试：显式标签选择器是否更可靠？</div>
+  </div>
+  
+  <!-- 控制台输出 -->
+  <div class="test-section">
+    <h2>6. 计算样式检测结果</h2>
+    <div class="console-output" id="console-output">正在检测...</div>
+  </div>
+
+  <script>
+    function getStyleInfo(selector, label) {
+      const container = document.querySelector(selector);
+      if (!container) return label + ': 未找到元素\n';
+      
+      const svg = container.querySelector('svg');
+      const path = container.querySelector('path');
+      const circle = container.querySelector('circle');
+      
+      let result = '=== ' + label + ' ===\n';
+      
+      if (svg) {
+        const svgStyle = getComputedStyle(svg);
+        result += '  SVG:\n';
+        result += '    display: ' + svgStyle.display + '\n';
+        result += '    width: ' + svgStyle.width + '\n';
+        result += '    height: ' + svgStyle.height + '\n';
+        result += '    stroke: ' + svgStyle.stroke + '\n';
+        result += '    strokeWidth: ' + svgStyle.strokeWidth + '\n';
+        result += '    fill: ' + svgStyle.fill + '\n';
+      }
+      
+      if (path) {
+        const pathStyle = getComputedStyle(path);
+        result += '  PATH:\n';
+        result += '    display: ' + pathStyle.display + '\n';
+        result += '    stroke: ' + pathStyle.stroke + '\n';
+        result += '    strokeWidth: ' + pathStyle.strokeWidth + '\n';
+        result += '    strokeLinecap: ' + pathStyle.strokeLinecap + '\n';
+        result += '    fill: ' + pathStyle.fill + '\n';
+        result += '    visibility: ' + pathStyle.visibility + '\n';
+        result += '    opacity: ' + pathStyle.opacity + '\n';
+      }
+      
+      if (circle) {
+        const circleStyle = getComputedStyle(circle);
+        result += '  CIRCLE:\n';
+        result += '    stroke: ' + circleStyle.stroke + '\n';
+        result += '    strokeWidth: ' + circleStyle.strokeWidth + '\n';
+        result += '    fill: ' + circleStyle.fill + '\n';
+      }
+      
+      result += '\n';
+      return result;
+    }
+    
+    function runTests() {
+      let output = '';
+      output += getStyleInfo('#normal-btn', '正常状态');
+      output += getStyleInfo('#no-recovery', 'all:unset 无恢复');
+      output += getStyleInfo('#recovery-1', '方案1: 仅 svg');
+      output += getStyleInfo('#recovery-2', '方案2: svg + svg *');
+      output += getStyleInfo('#recovery-3', '方案3: 显式标签');
+      
+      // 检查 path 的 stroke 是否为 none
+      const noRecoveryPath = document.querySelector('#no-recovery path');
+      const noRecoveryStroke = getComputedStyle(noRecoveryPath).stroke;
+      
+      if (noRecoveryStroke === 'none' || noRecoveryStroke === 'rgba(0, 0, 0, 0)') {
+        output += '\n=== 关键发现 ===\n';
+        output += 'all:unset 后 path 的 stroke 变为: ' + noRecoveryStroke + '\n';
+        output += '这说明 stroke 是不可继承属性，被重置为初始值 none\n';
+      }
+      
+      // 检查各方案是否恢复成功
+      output += '\n=== 恢复效果评估 ===\n';
+      
+      ['#recovery-1', '#recovery-2', '#recovery-3'].forEach((sel, idx) => {
+        const path = document.querySelector(sel + ' path');
+        if (path) {
+          const stroke = getComputedStyle(path).stroke;
+          const sw = getComputedStyle(path).strokeWidth;
+          const visible = stroke !== 'none' && stroke !== 'rgba(0, 0, 0, 0)' && sw !== '0px';
+          output += '方案 ' + (idx + 1) + ': ' + (visible ? '✅ 成功' : '❌ 失败') + ' (stroke: ' + stroke + ', stroke-width: ' + sw + ')\n';
+        }
+      });
+      
+      document.getElementById('console-output').textContent = output;
+    }
+    
+    setTimeout(runTests, 100);
+  </script>
+</body>
+</html>

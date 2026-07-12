@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG 图标根因排查 - 最简测试</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 30px;
+      background: #f3f4f6;
+    }
+    h1 { font-size: 20px; margin-bottom: 20px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h2 { font-size: 15px; margin-bottom: 12px; color: #111827; }
+    .row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .label { font-size: 12px; color: #6b7280; min-width: 100px; }
+    .box {
+      width: 60px; height: 60px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #1f2937;
+      background: white;
+    }
+    .console {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .console .key { color: #93c5fd; }
+    .console .val { color: #86efac; }
+    .console .bad { color: #fca5a5; }
+    .console .good { color: #86efac; }
+    .test-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .test-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .test-item .name { font-size: 11px; color: #6b7280; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>🔍 SVG 图标根因排查 - 最简测试</h1>
+
+<div class="card">
+  <h2>第 1 步：纯 SVG（无任何 CSS 干扰）</h2>
+  <div class="row">
+    <span class="label">预期可见：</span>
+    <div class="box" id="test-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>第 2 步：all:unset 后（无恢复）</h2>
+  <div class="row">
+    <span class="label">理论上不可见：</span>
+    <div class="box" id="test-2-wrapper" style="all: unset;">
+      <div class="box-inner" id="test-2" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;border:2px dashed #d1d5db;border-radius:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>第 3 步：CSS 恢复方案（svg + svg *）</h2>
+  <style>
+    #test-3-wrapper * { all: unset !important; box-sizing: border-box !important; }
+    #test-3-wrapper svg,
+    #test-3-wrapper svg * {
+      fill: none !important;
+      stroke: #1f2937 !important;
+      stroke-width: 2px !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      display: block !important;
+    }
+    #test-3-wrapper svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+  </style>
+  <div class="row">
+    <span class="label">CSS 恢复：</span>
+    <div class="box" id="test-3-wrapper">
+      <div id="test-3" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;border:2px dashed #d1d5db;border-radius:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>第 4 步：JS 内联样式方案（终极方案）</h2>
+  <style>
+    #test-4-wrapper * { all: unset !important; box-sizing: border-box !important; }
+  </style>
+  <div class="row">
+    <span class="label">JS 内联：</span>
+    <div class="box" id="test-4-wrapper">
+      <div id="test-4" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;border:2px dashed #d1d5db;border-radius:8px;">
+        <svg id="svg4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📊 检测结果（computed style 读取）</h2>
+  <div class="console" id="console">正在检测...</div>
+</div>
+
+<script>
+  // 第 4 步：JS 内联样式
+  (function() {
+    const svg = document.getElementById('svg4');
+    const children = svg.querySelectorAll('*');
+    
+    svg.style.setProperty('display', 'block', 'important');
+    svg.style.setProperty('width', '24px', 'important');
+    svg.style.setProperty('height', '24px', 'important');
+    svg.style.setProperty('fill', 'none', 'important');
+    svg.style.setProperty('stroke', '#1f2937', 'important');
+    svg.style.setProperty('stroke-width', '2px', 'important');
+    svg.style.setProperty('stroke-linecap', 'round', 'important');
+    svg.style.setProperty('stroke-linejoin', 'round', 'important');
+    
+    children.forEach(child => {
+      child.style.setProperty('fill', 'none', 'important');
+      child.style.setProperty('stroke', '#1f2937', 'important');
+      child.style.setProperty('stroke-width', '2px', 'important');
+      child.style.setProperty('stroke-linecap', 'round', 'important');
+      child.style.setProperty('stroke-linejoin', 'round', 'important');
+    });
+  })();
+  
+  // 检测函数
+  function analyze(selector, label) {
+    const container = document.querySelector(selector);
+    if (!container) return label + ': 未找到\n';
+    
+    const svg = container.querySelector('svg');
+    const circle = container.querySelector('circle');
+    const path = container.querySelector('path');
+    
+    let out = `======== ${label} ========\n`;
+    
+    if (svg) {
+      const s = getComputedStyle(svg);
+      out += `  SVG:\n`;
+      out += `    display:       ${s.display}\n`;
+      out += `    width:         ${s.width}\n`;
+      out += `    height:        ${s.height}\n`;
+      out += `    fill:          ${s.fill}\n`;
+      out += `    stroke:        ${s.stroke}\n`;
+      out += `    strokeWidth:   ${s.strokeWidth}\n`;
+      out += `    strokeLinecap: ${s.strokeLinecap}\n`;
+      out += `    color:         ${s.color}\n`;
+    } else {
+      out += `  SVG: 未找到\n`;
+    }
+    
+    if (circle) {
+      const s = getComputedStyle(circle);
+      const hasStroke = s.stroke !== 'none' && s.stroke !== 'rgba(0, 0, 0, 0)';
+      const hasWidth = parseFloat(s.strokeWidth) > 0;
+      const visible = hasStroke && hasWidth;
+      
+      out += `  CIRCLE:\n`;
+      out += `    stroke:        ${s.stroke} ${hasStroke ? '' : '(=none)'}\n`;
+      out += `    strokeWidth:   ${s.strokeWidth} ${hasWidth ? '' : '(=0)'}\n`;
+      out += `    fill:          ${s.fill}\n`;
+      out += `    visibility:    ${s.visibility}\n`;
+      out += `    opacity:       ${s.opacity}\n`;
+      out += `    display:       ${s.display}\n`;
+      out += `    可见性:        ${visible ? '✅ 可见' : '❌ 不可见'}\n`;
+    }
+    
+    out += '\n';
+    return out;
+  }
+  
+  function runDetection() {
+    let out = '';
+    out += analyze('#test-1', '第1步: 纯 SVG（无干扰）');
+    out += analyze('#test-2-wrapper', '第2步: all:unset 无恢复');
+    out += analyze('#test-3-wrapper', '第3步: CSS 恢复方案');
+    out += analyze('#test-4-wrapper', '第4步: JS 内联样式');
+    
+    document.getElementById('console').textContent = out;
+  }
+  
+  setTimeout(runDetection, 300);
+</script>
+
+</body>
+</html>

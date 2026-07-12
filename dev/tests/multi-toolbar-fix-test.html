@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多选工具栏调试 - Multi Toolbar Debug</title>
+  <link rel="stylesheet" href="../../extension/content/content.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+      margin: 0;
+    }
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .test-section:last-child {
+      border-bottom: none;
+    }
+    .test-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .test-element {
+      display: inline-block;
+      padding: 20px 40px;
+      background: #e8f5e9;
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      margin: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .test-element.multi {
+      background: #f3e5f5;
+      border-color: #9c27b0;
+      border-style: dashed;
+    }
+    .debug-info {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .btn {
+      padding: 8px 16px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn:hover {
+      background: #e0e0e0;
+    }
+    .btn--primary {
+      background: #7c6cf2;
+      color: white;
+      border-color: #7c6cf2;
+    }
+    .btn--primary:hover {
+      background: #6a5bf0;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .status-ok { background: #e8f5e9; color: #2e7d32; }
+    .status-warn { background: #fff3e0; color: #e65100; }
+    .status-err { background: #ffebee; color: #c62828; }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 style="margin-top:0;">🔍 多选工具栏调试页面（修复后）</h1>
+    <p style="color:#666;">用于验证多选工具栏不可见问题的修复效果</p>
+
+    <div class="test-section">
+      <div class="test-title">
+        测试1：纯 CSS 恢复（仅 CSS，无 JS 内联样式）
+        <span id="status1" class="status-badge status-warn">待测试</span>
+      </div>
+      <button class="btn" onclick="createToolbarCSSOnly()">创建（纯CSS）</button>
+      <button class="btn" onclick="showToolbarCSSOnly()">显示</button>
+      <button class="btn" onclick="hideToolbarCSSOnly()">隐藏</button>
+      <p style="font-size:12px;color:#888;margin-top:8px;">
+        验证：只依靠 content.css 中的样式规则，工具栏是否可见？
+      </p>
+    </div>
+
+    <div class="test-section">
+      <div class="test-title">
+        测试2：CSS + JS 内联样式（完整修复方案）
+        <span id="status2" class="status-badge status-warn">待测试</span>
+      </div>
+      <button class="btn btn--primary" onclick="createToolbarFull()">创建（完整修复）</button>
+      <button class="btn" onclick="showToolbarFull()">显示</button>
+      <button class="btn" onclick="hideToolbarFull()">隐藏</button>
+      <button class="btn" onclick="checkToolbarStylesFull()">检查样式</button>
+      <p style="font-size:12px;color:#888;margin-top:8px;">
+        验证：JS 注入内联 !important 样式后，工具栏是否可见？
+      </p>
+    </div>
+
+    <div class="test-section">
+      <div class="test-title">
+        测试3：模拟多选选中元素（集成测试）
+        <span id="status3" class="status-badge status-warn">待测试</span>
+      </div>
+      <p style="color:#666;font-size:13px;">按住 Shift + 点击下方元素来测试多选效果</p>
+      <div class="test-element" data-id="1">元素 1</div>
+      <div class="test-element" data-id="2">元素 2</div>
+      <div class="test-element" data-id="3">元素 3</div>
+      <div class="test-element" data-id="4">元素 4</div>
+    </div>
+
+    <div class="test-section">
+      <div class="test-title">调试信息</div>
+      <div id="debugInfo" class="debug-info">点击上方按钮开始测试...</div>
+    </div>
+  </div>
+
+  <script>
+    let debugLogs = [];
+    let multiToolbarCSS = null;
+    let multiToolbarFull = null;
+    let selectedEls = [];
+
+    function log(msg, type) {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type ? `[${type.toUpperCase()}]` : '[LOG]';
+      debugLogs.push(`${timestamp} ${prefix} ${msg}`);
+      document.getElementById('debugInfo').textContent = debugLogs.join('\n');
+      document.getElementById('debugInfo').scrollTop = document.getElementById('debugInfo').scrollHeight;
+    }
+
+    function setStatus(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'status-badge status-' + type;
+    }
+
+    function hdmSetStyle(el, prop, value) {
+      if (!el) return;
+      var cssProperty = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+      el.style.setProperty(cssProperty, value, 'important');
+    }
+
+    function hdmSetStyles(el, styles) {
+      if (!el || !styles) return;
+      Object.keys(styles).forEach(function(prop) {
+        hdmSetStyle(el, prop, styles[prop]);
+      });
+    }
+
+    const SVG_ICONS = {
+      duplicate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+      trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>'
+    };
+
+    function enforceSvgIconStyles(svgEl) {
+      if (!svgEl) return;
+      var children = svgEl.querySelectorAll('*');
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        var attrs = child.attributes;
+        for (var j = 0; j < attrs.length; j++) {
+          var attr = attrs[j];
+          var name = attr.name;
+          var value = attr.value;
+          if (name === 'fill' && value !== 'none') {
+            child.style.setProperty('fill', value, 'important');
+          }
+          if (name === 'stroke') {
+            child.style.setProperty('stroke', value, 'important');
+          }
+          if (name === 'stroke-width') {
+            child.style.setProperty('stroke-width', value, 'important');
+          }
+          if (name === 'stroke-linecap') {
+            child.style.setProperty('stroke-linecap', value, 'important');
+          }
+          if (name === 'stroke-linejoin') {
+            child.style.setProperty('stroke-linejoin', value, 'important');
+          }
+          if (name === 'd') {
+            child.style.setProperty('d', value, 'important');
+          }
+          if (name === 'r') {
+            child.style.setProperty('r', value, 'important');
+          }
+          if (name === 'cx') {
+            child.style.setProperty('cx', value, 'important');
+          }
+          if (name === 'cy') {
+            child.style.setProperty('cy', value, 'important');
+          }
+          if (name === 'x') {
+            child.style.setProperty('x', value, 'important');
+          }
+          if (name === 'y') {
+            child.style.setProperty('y', value, 'important');
+          }
+          if (name === 'width') {
+            child.style.setProperty('width', value, 'important');
+          }
+          if (name === 'height') {
+            child.style.setProperty('height', value, 'important');
+          }
+          if (name === 'rx') {
+            child.style.setProperty('rx', value, 'important');
+          }
+          if (name === 'ry') {
+            child.style.setProperty('ry', value, 'important');
+          }
+          if (name === 'x1') child.style.setProperty('x1', value, 'important');
+          if (name === 'y1') child.style.setProperty('y1', value, 'important');
+          if (name === 'x2') child.style.setProperty('x2', value, 'important');
+          if (name === 'y2') child.style.setProperty('y2', value, 'important');
+        }
+        child.style.setProperty('display', 'block', 'important');
+      }
+      svgEl.style.setProperty('width', '14px', 'important');
+      svgEl.style.setProperty('height', '14px', 'important');
+      svgEl.style.setProperty('display', 'inline-block', 'important');
+    }
+
+    function insertSvgIcon(container, svgHtml) {
+      container.innerHTML = svgHtml;
+      var svg = container.querySelector('svg');
+      if (svg) {
+        enforceSvgIconStyles(svg);
+      }
+      return svg;
+    }
+
+    function buildToolbarHTML(bar) {
+      // 组合标记按钮
+      const markBtn = document.createElement('button');
+      markBtn.className = 'html-diff-marker-multi-btn html-diff-marker-multi-btn--primary';
+      markBtn.textContent = '组合标记';
+      bar.appendChild(markBtn);
+
+      // 复制按钮
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'html-diff-marker-multi-btn html-diff-marker-multi-btn--secondary';
+      copyBtn.innerHTML = '<span class="multi-btn-icon"></span><span>复制选中</span>';
+      insertSvgIcon(copyBtn.querySelector('.multi-btn-icon'), SVG_ICONS.duplicate);
+      bar.appendChild(copyBtn);
+
+      // 删除按钮
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'html-diff-marker-multi-btn html-diff-marker-multi-btn--danger';
+      deleteBtn.innerHTML = '<span class="multi-btn-icon"></span><span>删除选中</span>';
+      insertSvgIcon(deleteBtn.querySelector('.multi-btn-icon'), SVG_ICONS.trash);
+      bar.appendChild(deleteBtn);
+
+      // 取消选择按钮
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'html-diff-marker-multi-btn html-diff-marker-multi-btn--ghost';
+      cancelBtn.textContent = '取消选择';
+      bar.appendChild(cancelBtn);
+
+      const countLabel = document.createElement('span');
+      countLabel.className = 'html-diff-marker-multi-count';
+      countLabel.innerHTML = '已选 <b>0</b>';
+      bar.appendChild(countLabel);
+      bar._countLabel = countLabel;
+    }
+
+    // ===== 测试1：纯 CSS 恢复 =====
+    function createToolbarCSSOnly() {
+      log('=== 测试1：纯CSS恢复 ===');
+      log('开始创建多选工具栏（纯CSS，无JS内联样式）...');
+      
+      try {
+        if (multiToolbarCSS) {
+          multiToolbarCSS.remove();
+        }
+        
+        const bar = document.createElement('div');
+        bar.className = 'html-diff-marker-multi-toolbar';
+        buildToolbarHTML(bar);
+        document.body.appendChild(bar);
+        multiToolbarCSS = bar;
+        
+        hdmSetStyle(bar, 'display', 'none');
+        
+        setStatus('1', '创建成功', 'ok');
+        log('多选工具栏创建完成（纯CSS版本）', 'ok');
+        
+        setTimeout(function() {
+          checkVisibility(multiToolbarCSS, '纯CSS版本');
+        }, 100);
+        
+      } catch (e) {
+        log('创建失败: ' + e.message, 'error');
+        setStatus('1', '创建失败', 'err');
+      }
+    }
+
+    function showToolbarCSSOnly() {
+      if (!multiToolbarCSS) {
+        log('请先创建工具栏', 'warn');
+        return;
+      }
+      log('显示工具栏（纯CSS版本）...');
+      hdmSetStyle(multiToolbarCSS, 'display', 'flex');
+      
+      setTimeout(function() {
+        checkVisibility(multiToolbarCSS, '纯CSS版本');
+      }, 100);
+    }
+
+    function hideToolbarCSSOnly() {
+      if (!multiToolbarCSS) return;
+      log('隐藏工具栏（纯CSS版本）');
+      hdmSetStyle(multiToolbarCSS, 'display', 'none');
+    }
+
+    // ===== 测试2：CSS + JS 内联样式（完整修复） =====
+    function createToolbarFull() {
+      log('=== 测试2：CSS + JS内联样式（完整修复） ===');
+      log('开始创建多选工具栏（完整修复方案）...');
+      
+      try {
+        if (multiToolbarFull) {
+          multiToolbarFull.remove();
+        }
+        
+        const bar = document.createElement('div');
+        bar.className = 'html-diff-marker-multi-toolbar';
+        
+        hdmSetStyles(bar, {
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          zIndex: '2147483646',
+          background: '#ffffff',
+          color: '#1F2937',
+          border: '1px solid #E5E7EB',
+          borderRadius: '8px',
+          padding: '6px 10px',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+          fontSize: '11px',
+          lineHeight: '1.5',
+          visibility: 'visible',
+          opacity: '1',
+          boxSizing: 'border-box'
+        });
+        
+        buildToolbarHTML(bar);
+        document.body.appendChild(bar);
+        multiToolbarFull = bar;
+        
+        hdmSetStyle(bar, 'display', 'none');
+        
+        setStatus('2', '创建成功', 'ok');
+        log('多选工具栏创建完成（完整修复版本）', 'ok');
+        
+        setTimeout(function() {
+          checkVisibility(multiToolbarFull, '完整修复版本');
+        }, 100);
+        
+      } catch (e) {
+        log('创建失败: ' + e.message, 'error');
+        setStatus('2', '创建失败', 'err');
+      }
+    }
+
+    function showToolbarFull() {
+      if (!multiToolbarFull) {
+        log('请先创建工具栏', 'warn');
+        return;
+      }
+      log('显示工具栏（完整修复版本）...');
+      hdmSetStyle(multiToolbarFull, 'display', 'flex');
+      hdmSetStyle(multiToolbarFull, 'transform', 'translateX(-50%)');
+      
+      setTimeout(function() {
+        checkVisibility(multiToolbarFull, '完整修复版本');
+      }, 100);
+    }
+
+    function hideToolbarFull() {
+      if (!multiToolbarFull) return;
+      log('隐藏工具栏（完整修复版本）');
+      hdmSetStyle(multiToolbarFull, 'display', 'none');
+    }
+
+    function checkToolbarStylesFull() {
+      if (!multiToolbarFull) {
+        log('请先创建工具栏', 'warn');
+        return;
+      }
+      checkVisibility(multiToolbarFull, '完整修复版本');
+    }
+
+    // ===== 可见性检查 =====
+    function checkVisibility(bar, label) {
+      log(`--- ${label} 可见性检查 ---`);
+      
+      const computed = window.getComputedStyle(bar);
+      const rect = bar.getBoundingClientRect();
+      
+      log(`  display: ${computed.display}`);
+      log(`  position: ${computed.position}`);
+      log(`  visibility: ${computed.visibility}`);
+      log(`  opacity: ${computed.opacity}`);
+      log(`  z-index: ${computed.zIndex}`);
+      log(`  width: ${computed.width}`);
+      log(`  height: ${computed.height}`);
+      log(`  background: ${computed.backgroundColor}`);
+      log(`  color: ${computed.color}`);
+      log(`  boundingRect: left=${rect.left.toFixed(1)}, top=${rect.top.toFixed(1)}, right=${rect.right.toFixed(1)}, bottom=${rect.bottom.toFixed(1)}`);
+      
+      const inViewport = rect.top < window.innerHeight && rect.bottom > 0 &&
+                         rect.left < window.innerWidth && rect.right > 0;
+      log(`  在视口内: ${inViewport ? '✅ 是' : '❌ 否'}`);
+      
+      const hasSize = rect.width > 0 && rect.height > 0;
+      log(`  有尺寸: ${hasSize ? '✅ 是' : '❌ 否'}`);
+      
+      const isVisible = inViewport && hasSize && computed.display !== 'none' && 
+                        computed.visibility === 'visible' && parseFloat(computed.opacity) > 0;
+      log(`  综合可见: ${isVisible ? '✅ 可见' : '❌ 不可见'}`, isVisible ? 'ok' : 'error');
+      
+      const btns = bar.querySelectorAll('button');
+      log(`  按钮数量: ${btns.length}`);
+      btns.forEach((btn, i) => {
+        const btnComputed = window.getComputedStyle(btn);
+        const btnRect = btn.getBoundingClientRect();
+        log(`  按钮${i}: display=${btnComputed.display}, width=${btnRect.width.toFixed(1)}, height=${btnRect.height.toFixed(1)}, color=${btnComputed.color}, bg=${btnComputed.backgroundColor}`);
+      });
+      
+      const svgs = bar.querySelectorAll('svg');
+      log(`  SVG数量: ${svgs.length}`);
+      svgs.forEach((svg, i) => {
+        const svgRect = svg.getBoundingClientRect();
+        log(`  SVG${i}: width=${svgRect.width.toFixed(1)}, height=${svgRect.height.toFixed(1)}`);
+      });
+      
+      log(`--- 检查完成 ---`);
+    }
+
+    // ===== 测试3：集成测试 =====
+    function getMultiSelectBounds() {
+      if (selectedEls.length === 0) return null;
+      let minLeft = Infinity, minTop = Infinity;
+      let maxRight = -Infinity, maxBottom = -Infinity;
+      selectedEls.forEach(function(el) {
+        const r = el.getBoundingClientRect();
+        if (r.left < minLeft) minLeft = r.left;
+        if (r.top < minTop) minTop = r.top;
+        if (r.right > maxRight) maxRight = r.right;
+        if (r.bottom > maxBottom) maxBottom = r.bottom;
+      });
+      return { left: minLeft, top: minTop, width: maxRight - minLeft, height: maxBottom - minTop };
+    }
+
+    function updatePosition(bar) {
+      const bounds = getMultiSelectBounds();
+      if (!bounds) return;
+      
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      hdmSetStyle(bar, 'transform', 'none');
+      
+      requestAnimationFrame(function() {
+        const barRect = bar.getBoundingClientRect();
+        const barHeight = barRect.height || 40;
+        const barWidth = bar.offsetWidth || barRect.width || 300;
+        let topPos = bounds.top - barHeight - 8;
+        let flipped = false;
+        if (topPos < 8) {
+          topPos = bounds.bottom + 8;
+          flipped = true;
+        }
+        if (topPos + barHeight > vh - 8) {
+          if (flipped) {
+            topPos = Math.max(8, bounds.top - barHeight - 8);
+          } else {
+            topPos = Math.max(8, vh - barHeight - 8);
+          }
+        }
+        if (topPos < 8) topPos = 8;
+        hdmSetStyle(bar, 'top', topPos + 'px');
+        let leftPos = bounds.left + bounds.width / 2 - barWidth / 2;
+        if (leftPos < 8) leftPos = 8;
+        if (leftPos + barWidth > vw - 8) {
+          leftPos = vw - barWidth - 8;
+        }
+        if (leftPos < 8) leftPos = 8;
+        hdmSetStyle(bar, 'left', leftPos + 'px');
+        
+        log(`工具栏定位: top=${topPos.toFixed(0)}px, left=${leftPos.toFixed(0)}px, size=${barWidth.toFixed(0)}x${barHeight.toFixed(0)}`);
+      });
+    }
+
+    document.querySelectorAll('.test-element').forEach(el => {
+      el.addEventListener('click', function(e) {
+        if (e.shiftKey) {
+          e.preventDefault();
+          
+          if (selectedEls.indexOf(el) >= 0) {
+            selectedEls = selectedEls.filter(x => x !== el);
+            el.classList.remove('html-diff-marker-multi-selected');
+            el.classList.remove('multi');
+          } else {
+            selectedEls.push(el);
+            el.classList.add('html-diff-marker-multi-selected');
+            el.classList.add('multi');
+          }
+          
+          log(`选中元素数量: ${selectedEls.length}`);
+          
+          if (!multiToolbarFull) {
+            createToolbarFull();
+          }
+          
+          if (selectedEls.length > 0) {
+            if (multiToolbarFull._countLabel) {
+              multiToolbarFull._countLabel.innerHTML = '已选 <b>' + selectedEls.length + '</b>';
+            }
+            hdmSetStyle(multiToolbarFull, 'display', 'flex');
+            updatePosition(multiToolbarFull);
+          } else {
+            hdmSetStyle(multiToolbarFull, 'display', 'none');
+          }
+          
+          setStatus('3', `已选 ${selectedEls.length} 个`, selectedEls.length > 0 ? 'ok' : 'warn');
+        }
+      });
+    });
+
+    window.addEventListener('load', function() {
+      log('页面加载完成');
+      log('请先点击"创建（完整修复）"按钮测试');
+    });
+  </script>
+</body>
+</html>

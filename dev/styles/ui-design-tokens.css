@@ -1,0 +1,297 @@
+/* ============================================================
+   UI Design Tokens — 柔雾紫主题 (Misty Purple)
+   ============================================================
+   版本：v3.2
+   主题：方案2 — 柔雾紫
+   适用项目：HTML Diff Marker Chrome 扩展
+   ⚠️ 重要说明：本文件为设计令牌参考文档，不直接注入页面。
+        实际变量定义在 content/content.css 的 :root 中。
+        本文件仅供设计参考，保持与 content.css 变量一致。
+   ============================================================ */
+
+:root {
+
+  /* ============================================================
+     1. 颜色系统 — 品牌色 (Brand Colors)
+     ============================================================ */
+
+  /* 主色：柔雾紫 */
+  --hdm-primary: #8B5CF6;
+  --hdm-primary-hover: #7C3AED;
+  --hdm-primary-dark: #6D28D9;
+  --hdm-primary-light: #A78BFA;
+  --hdm-primary-bg: #EDE9FE;
+  --hdm-primary-50: #F5F3FF;
+  --hdm-primary-bg-soft: #F5F3FF;
+
+  /* ============================================================
+     2. 颜色系统 — 渐变色 (Gradients)
+     ============================================================ */
+
+  --hdm-gradient-primary: linear-gradient(135deg, #A78BFA, #7C3AED);
+  --hdm-gradient-header: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
+  --hdm-gradient-btn-primary: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  --hdm-gradient-btn-primary-hover: linear-gradient(135deg, #A78BFA, #8B5CF6);
+  --hdm-gradient-btn-primary-active: linear-gradient(135deg, #7C3AED, #6D28D9);
+
+  /* Toast 渐变色（4 种类型） */
+  --hdm-gradient-toast-info: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+  --hdm-gradient-toast-success: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  --hdm-gradient-toast-warning: linear-gradient(135deg, #92400E 0%, #D97706 100%);
+  --hdm-gradient-toast-error: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);
+
+  /* ============================================================
+     3. 颜色系统 — 中性色 (Neutral Colors)
+     ============================================================ */
+
+  /* 文字 — 3 级体系 */
+  --hdm-text-primary: #1F2937;    /* 主要文字：标题、正文 */
+  --hdm-text-secondary: #4B5563;   /* 次级文字：标签、说明 */
+  --hdm-text-tertiary: #6B7280;    /* 辅助文字：占位符、次要信息 */
+  --hdm-text-disabled: #9CA3AF;    /* 禁用文字 */
+  --hdm-text-white: #FFFFFF;       /* 白色文字（渐变头部） */
+  --hdm-text-white-sub: rgba(255, 255, 255, 0.75);   /* 头部次级文字 */
+  --hdm-text-white-dim: rgba(255, 255, 255, 0.55);   /* 头部最弱文字 */
+
+  /* 背景 — 3 级体系 */
+  --hdm-bg-white: #FFFFFF;         /* 白色背景：面板、卡片 */
+  --hdm-bg-secondary: #F9FAFB;     /* 次级背景：底部栏、分组区 */
+  --hdm-bg-surface: #F3F4F6;       /* 表面背景：hover 态、禁用态 */
+  --hdm-bg-hover: #F3F4F6;         /* hover 背景灰 */
+  --hdm-bg-disabled: #F3F4F6;      /* 禁用背景 */
+
+  /* 边框 — 2 级体系 */
+  --hdm-border: #E5E7EB;           /* 默认边框 */
+  --hdm-border-hover: #D1D5DB;     /* hover 边框 */
+  --hdm-divider: #F3F4F6;          /* 分隔线（浅色） */
+
+  /* ============================================================
+     4. 颜色系统 — 功能语义色 (Semantic Colors)
+     ============================================================ */
+
+  /* 成功 Success */
+  --hdm-success: #10B981;
+  --hdm-success-hover: #059669;
+  --hdm-success-active: #047857;
+  --hdm-success-bg: #ECFDF5;
+  --hdm-success-bg-hover: #D1FAE5;
+  --hdm-success-border: #A7F3D0;
+  --hdm-success-text: #065F46;
+  --hdm-success-disabled: #6EE7B7;
+
+  /* 警告 Warning */
+  --hdm-warning: #F59E0B;
+  --hdm-warning-bg: #FFFBEB;
+  --hdm-warning-border: #FDE68A;
+  --hdm-warning-text: #92400E;
+
+  /* 错误 Error */
+  --hdm-error: #EF4444;
+  --hdm-error-hover: #DC2626;
+  --hdm-error-active: #B91C1B;
+  --hdm-error-bg: #FEF2F2;
+  --hdm-error-bg-hover: #FEE2E2;
+  --hdm-error-border: #FECACA;
+  --hdm-error-text: #991B1B;
+  --hdm-error-disabled: #FCA5A5;
+
+  /* 信息 Info */
+  --hdm-info: #3B82F6;
+  --hdm-info-bg: #EFF6FF;
+  --hdm-info-border: #BFDBFE;
+  --hdm-info-text: #1E40AF;
+
+  /* ============================================================
+     5. 颜色系统 — 标记状态色 (Mark Status Colors)
+     ============================================================ */
+
+  --hdm-mark-selected: #10B981;       /* 已选中：绿 */
+  --hdm-mark-modified: #F59E0B;       /* 已修改：橙 */
+  --hdm-mark-removed: #EF4444;        /* 已删除：红 */
+
+  /* 标记高亮背景（透明叠加色） */
+  --hdm-mark-hover-bg: rgba(167, 139, 250, 0.08);     /* 悬停高亮背景 */
+  --hdm-mark-selected-bg: rgba(16, 185, 129, 0.06);   /* 选中态背景 */
+  --hdm-mark-modified-bg: rgba(245, 158, 11, 0.06);   /* 修改态背景 */
+  --hdm-mark-multi-bg: rgba(139, 92, 246, 0.1);       /* 多选态背景 */
+  --hdm-mark-group-bg: rgba(139, 92, 246, 0.04);      /* 组合标记背景 */
+
+  /* 标记组件专用色 */
+  --hdm-mark-size-display-bg: rgba(49, 18, 92, 0.95); /* 尺寸信息浮窗背景 */
+  --hdm-mark-guide-shadow: 0 0 4px rgba(239, 68, 68, 0.5); /* 辅助线阴影 */
+
+  /* ============================================================
+     6. 圆角系统 (Border Radius)
+     ============================================================ */
+
+  --hdm-radius-xs: 4px;     /* 小标签、微调按钮 */
+  --hdm-radius-sm: 6px;     /* 输入框、小按钮 */
+  --hdm-radius-md: 8px;     /* 按钮、卡片 */
+  --hdm-radius-lg: 10px;    /* 面板内容区 */
+  --hdm-radius-xl: 12px;    /* 工具栏、编辑面板、模态框 */
+  --hdm-radius-2xl: 16px;   /* 大卡片、宣传位 */
+  --hdm-radius-full: 9999px; /* 圆形、胶囊形 */
+
+  /* ============================================================
+     7. 阴影系统 (Shadows)
+     ============================================================ */
+
+  --hdm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --hdm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --hdm-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --hdm-shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --hdm-shadow-lg: 0 8px 28px rgba(139, 92, 246, 0.15);
+  --hdm-shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.18);
+
+  /* 聚焦环 */
+  --hdm-shadow-focus-ring: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  --hdm-shadow-focus-ring-error: 0 0 0 3px rgba(239, 68, 68, 0.12);
+
+  /* 主色阴影（按钮/组件用） */
+  --hdm-shadow-primary: 0 4px 12px rgba(139, 92, 246, 0.3);
+  --hdm-shadow-primary-hover: 0 4px 16px rgba(139, 92, 246, 0.4);
+  --hdm-shadow-primary-active: 0 2px 8px rgba(139, 92, 246, 0.3);
+  --hdm-shadow-error-hover: 0 4px 12px rgba(239, 68, 68, 0.15);
+
+  /* Toast 阴影（4 种类型） */
+  --hdm-shadow-toast-info: 0 6px 20px rgba(109, 40, 217, 0.35);     /* 信息 Toast 阴影 */
+  --hdm-shadow-toast-success: 0 6px 20px rgba(16, 185, 129, 0.35);  /* 成功 Toast 阴影 */
+  --hdm-shadow-toast-warning: 0 6px 20px rgba(245, 158, 11, 0.35);  /* 警告 Toast 阴影 */
+  --hdm-shadow-toast-error: 0 6px 20px rgba(239, 68, 68, 0.35);     /* 错误 Toast 阴影 */
+
+  /* ============================================================
+     7.5 半透明颜色系统 (Alpha Colors)
+     ============================================================ */
+
+  /* 白色半透明 */
+  --hdm-white-alpha-10: rgba(255, 255, 255, 0.1);    /* 最弱白色透明 */
+  --hdm-white-alpha-15: rgba(255, 255, 255, 0.15);
+  --hdm-white-alpha-20: rgba(255, 255, 255, 0.2);
+  --hdm-white-alpha-25: rgba(255, 255, 255, 0.25);   /* 弱白色透明 */
+  --hdm-white-alpha-28: rgba(255, 255, 255, 0.28);
+  --hdm-white-alpha-38: rgba(255, 255, 255, 0.38);
+  --hdm-white-alpha-70: rgba(255, 255, 255, 0.7);    /* 强白色透明（文字用） */
+
+  /* 黑色半透明 */
+  --hdm-black-alpha-20: rgba(0, 0, 0, 0.2);
+  --hdm-black-alpha-25: rgba(0, 0, 0, 0.25);
+  --hdm-black-alpha-30: rgba(0, 0, 0, 0.3);
+
+  /* 主色半透明（紫） */
+  --hdm-primary-alpha-10: rgba(139, 92, 246, 0.1);
+  --hdm-primary-alpha-15: rgba(139, 92, 246, 0.15);
+  --hdm-primary-alpha-30: rgba(139, 92, 246, 0.3);
+  --hdm-primary-alpha-40: rgba(139, 92, 246, 0.4);
+  --hdm-primary-alpha-50: rgba(139, 92, 246, 0.5);
+
+  /* 错误色半透明（红） */
+  --hdm-error-alpha-15: rgba(239, 68, 68, 0.15);
+
+  /* 模态遮罩 */
+  --hdm-modal-overlay: rgba(15, 23, 42, 0.6);
+
+  /* ============================================================
+     8. 间距系统 (Spacing) — 4px 基准
+     ============================================================ */
+
+  --hdm-space-1: 4px;    /* 图标内边距、微间距 */
+  --hdm-space-2: 8px;    /* 小按钮内边距、小间隙 */
+  --hdm-space-3: 12px;   /* 输入框内边距、中等间距 */
+  --hdm-space-4: 16px;   /* 面板内边距、大间距 */
+  --hdm-space-5: 20px;   /* 面板头部内边距 */
+  --hdm-space-6: 24px;   /* 大区块间距 */
+  --hdm-space-8: 32px;   /* 超大间距 */
+
+  /* ============================================================
+     9. 字体系统 (Typography)
+     ============================================================ */
+
+  /* 字体族 */
+  --hdm-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  --hdm-font-mono: "SF Mono", Menlo, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  /* 字号 — 6 级 */
+  --hdm-font-xs: 10px;    /* 最小辅助文字、快捷键提示 */
+  --hdm-font-sm: 11px;    /* 标签、说明文字、提示条 */
+  --hdm-font-base: 12px;  /* 正文、按钮、输入框 */
+  --hdm-font-md: 13px;    /* 分组标题、稍大正文 */
+  --hdm-font-lg: 14px;    /* 面板/工具栏标题 */
+  --hdm-font-xl: 16px;    /* 大标题（极少用） */
+
+  /* 字重 — 4 级 */
+  --hdm-font-regular: 400;
+  --hdm-font-medium: 500;
+  --hdm-font-semibold: 600;
+  --hdm-font-bold: 700;
+
+  /* ============================================================
+     10. 过渡动画 (Transitions)
+     ============================================================ */
+
+  --hdm-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hdm-transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hdm-transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ============================================================
+     11. 尺寸规范 (Sizing)
+     ============================================================ */
+
+  /* 按钮高度 */
+  --hdm-btn-height-sm: 28px;
+  --hdm-btn-height-md: 36px;
+
+  /* 输入框高度 */
+  --hdm-input-height-sm: 30px;
+  --hdm-input-height-md: 36px;
+
+}
+
+/* ============================================================
+   附录：组件速查表 (Component Cheat Sheet)
+   ============================================================
+   按钮类名：
+     .html-diff-marker-btn              — 基础样式
+     .html-diff-marker-btn--primary     — 主按钮（渐变紫）
+     .html-diff-marker-btn--secondary   — 次要按钮（白底灰字）
+     .html-diff-marker-btn--danger      — 危险按钮（白底红字）
+     .html-diff-marker-btn--ghost       — 幽灵按钮（小尺寸）
+     .html-diff-marker-btn--success     — 成功按钮（白底绿字）
+     .html-diff-marker-btn--icon        — 图标按钮
+     .html-diff-marker-btn--disabled    — 禁用态类名
+     状态伪类：:hover / :active / :disabled
+
+   输入框类名：
+     .html-diff-marker-input            — 文本输入框
+     .html-diff-marker-input--sm        — 小型输入框（样式编辑区）
+     .html-diff-marker-input--error     — 错误态
+     .html-diff-marker-textarea         — 文本域
+     .html-diff-marker-textarea--mono   — 等宽字体文本域
+     .html-diff-marker-textarea--error  — 错误态
+
+   下拉框类名（原生 select + 外层包装）：
+     .html-diff-marker-select-wrap      — 外层包装容器
+     .html-diff-marker-select-wrap--sm  — 小型下拉框
+     .html-diff-marker-select-wrap--disabled — 禁用态
+     .html-diff-marker-select-wrap--error    — 错误态
+     .html-diff-marker-select           — 原生 select（透明化）
+     .html-diff-marker-select-arrow     — 自定义箭头
+
+   复选框类名：
+     .html-diff-marker-checkbox-wrap    — 外层包装（label）
+     .html-diff-marker-checkbox         — 原生 checkbox（隐藏）
+     .html-diff-marker-checkbox-custom  — 自定义外观
+     .html-diff-marker-checkbox-wrap--disabled — 禁用态
+
+   Toast 类名：
+     .html-diff-marker-toast            — 基础样式
+     .html-diff-marker-toast--info      — 信息（默认）
+     .html-diff-marker-toast--success   — 成功
+     .html-diff-marker-toast--warning   — 警告
+     .html-diff-marker-toast--error     — 错误
+     .html-diff-marker-toast-icon       — 图标
+     .html-diff-marker-toast-message    — 文字内容
+     .html-diff-marker-toast-close      — 关闭按钮
+     .html-diff-marker-toast--leaving   — 退场动画
+   ============================================================ */

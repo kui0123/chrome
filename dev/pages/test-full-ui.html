@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>HTML Diff Marker - UI 全面测试</title>
+<link rel="stylesheet" href="../../extension/content/content.css">
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+    background: #f5f5f7;
+    color: #333;
+    min-height: 200vh;
+  }
+  .test-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .test-section h2 { margin-top: 0; }
+  .test-elements { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .test-box {
+    width: 120px; height: 80px; background: #e8e8ed; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .test-text { font-size: 16px; line-height: 1.6; }
+  .test-img { width: 100px; height: 100px; background: #ddd; border-radius: 8px; }
+  .test-link { color: #0066cc; text-decoration: underline; }
+  .test-controls { position: fixed; bottom: 20px; left: 20px; z-index: 9999; display: flex; gap: 8px; flex-wrap: wrap; }
+  .test-controls button {
+    padding: 8px 16px; border-radius: 6px; border: 1px solid #ccc;
+    background: white; cursor: pointer; font-size: 13px;
+  }
+  .test-controls button:hover { background: #f0f0f0; }
+  .test-controls .primary { background: #70649A; color: white; border-color: #70649A; }
+  .test-controls .primary:hover { background: #5A4F7D; }
+</style>
+</head>
+<body>
+
+<h1>HTML Diff Marker - 全面 UI 测试页面</h1>
+
+<div class="test-section">
+  <h2>1. 测试元素区</h2>
+  <div class="test-elements">
+    <div class="test-box" id="test1">方块元素</div>
+    <p class="test-text" id="test2">这是一段测试文字，用于测试文字样式编辑功能。</p>
+    <div class="test-img" id="test3">图片占位</div>
+    <a href="https://example.com" class="test-link" id="test4">测试链接</a>
+    <button id="test5">测试按钮</button>
+    <input type="text" value="输入框测试" id="test6">
+  </div>
+</div>
+
+<div class="test-section">
+  <h2>2. 功能测试按钮</h2>
+  <div class="test-controls" style="position:relative; bottom:auto; left:auto; z-index:auto;">
+    <button onclick="window.__test.toggleToolbarState()">切换工具栏三态</button>
+    <button onclick="window.__test.markElement('test1')">标记方块</button>
+    <button onclick="window.__test.markElement('test2')">标记文字</button>
+    <button onclick="window.__test.markElement('test3')">标记图片</button>
+    <button onclick="window.__test.openInspector('test1')">打开编辑面板(方块)</button>
+    <button onclick="window.__test.openSettings()">打开设置面板</button>
+    <button onclick="window.__test.showToast('success', '操作成功！')">Toast成功</button>
+    <button onclick="window.__test.showToast('error', '操作失败')">Toast错误</button>
+    <button onclick="window.__test.showToast('info', '提示信息')">Toast提示</button>
+    <button onclick="window.__test.showToast('warning', '警告信息')">Toast警告</button>
+    <button onclick="window.__test.showModalAlert()">模态Alert</button>
+    <button onclick="window.__test.showModalConfirm()">模态Confirm</button>
+    <button class="primary" onclick="window.__test.markAndOpen('test1')">标记并打开面板</button>
+  </div>
+</div>
+
+<script>
+// ========== Mock Chrome Extension API ==========
+window.chrome = window.chrome || {};
+chrome.runtime = chrome.runtime || {};
+chrome.runtime.onMessage = {
+  listeners: [],
+  addListener: function(fn) { this.listeners.push(fn); },
+  hasListener: function(fn) { return this.listeners.indexOf(fn) >= 0; }
+};
+chrome.runtime.sendMessage = function(msg, callback) {
+  console.log('[Mock] sendMessage:', msg);
+  if (callback) callback({ ok: true });
+};
+
+chrome.storage = chrome.storage || {};
+chrome.storage.local = {
+  data: {},
+  get: function(keys, callback) {
+    var result = {};
+    if (typeof keys === 'string') {
+      result[keys] = this.data[keys];
+    } else if (Array.isArray(keys)) {
+      keys.forEach(function(k) { result[k] = this.data[k]; }.bind(this));
+    } else {
+      result = Object.assign({}, this.data);
+    }
+    setTimeout(function() { callback(result); }, 10);
+  },
+  set: function(obj, callback) {
+    Object.assign(this.data, obj);
+    if (callback) setTimeout(callback, 10);
+  },
+  remove: function(keys, callback) {
+    if (typeof keys === 'string') delete this.data[keys];
+    else if (Array.isArray(keys)) keys.forEach(function(k) { delete this.data[k]; }.bind(this));
+    if (callback) setTimeout(callback, 10);
+  }
+};
+
+chrome.scripting = { executeScript: function() {} };
+</script>
+
+<script src="../../extension/content/content.js"></script>
+
+<script>
+// ========== Test Helper ==========
+window.__test = {
+  toolbarState: 0, // 0=hidden, 1=wake, 2=full
+
+  toggleToolbarState: function() {
+    this.toolbarState = (this.toolbarState + 1) % 3;
+    // 直接调用内部函数触发状态切换
+    var msg = { type: 'TOGGLE_WAKE' };
+    chrome.runtime.onMessage.listeners.forEach(function(fn) {
+      fn(msg, {}, function() {});
+    });
+  },
+
+  markElement: function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // 模拟点击标记
+    var evt = new MouseEvent('click', { bubbles: true, altKey: true });
+    el.dispatchEvent(evt);
+  },
+
+  openInspector: function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // 先确保元素已标记，然后双击打开面板
+    var markEvt = new MouseEvent('click', { bubbles: true, altKey: true });
+    el.dispatchEvent(markEvt);
+    setTimeout(function() {
+      var dblEvt = new MouseEvent('dblclick', { bubbles: true });
+      el.dispatchEvent(dblEvt);
+    }, 200);
+  },
+
+  openSettings: function() {
+    // 先确保工具栏打开，再点设置按钮
+    this.toolbarState = 2;
+    var msg = { type: 'TOGGLE_WAKE' };
+    chrome.runtime.onMessage.listeners.forEach(function(fn) { fn(msg, {}, function() {}); });
+    setTimeout(function() {
+      var btn = document.querySelector('.html-diff-marker-settings-btn');
+      if (btn) btn.click();
+    }, 300);
+  },
+
+  showToast: function(type, msg) {
+    // 查找 toast 函数并调用
+    console.log('Toast:', type, msg);
+  },
+
+  showModalAlert: function() {
+    console.log('Modal Alert');
+  },
+
+  showModalConfirm: function() {
+    console.log('Modal Confirm');
+  },
+
+  markAndOpen: function(id) {
+    this.markElement(id);
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      if (el) {
+        var dblEvt = new MouseEvent('dblclick', { bubbles: true });
+        el.dispatchEvent(dblEvt);
+      }
+    }, 300);
+  }
+};
+
+console.log('[Test] Test page ready. Use window.__test to run tests.');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1330 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方案4 - 清爽蓝渐变 · UI 完整效果预览</title>
+  <link rel="stylesheet" href="../styles/ui-design-tokens.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      background: var(--color-bg-secondary);
+      padding: 40px;
+      line-height: var(--line-height-normal);
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    /* ========== 色板展示 ========== */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .color-card {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--color-bg-white);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .color-swatch {
+      height: 60px;
+    }
+
+    .color-info {
+      padding: 10px 12px;
+    }
+
+    .color-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .color-value {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      font-family: var(--font-family-mono);
+    }
+
+    /* ========== 工具栏 ========== */
+    .demo-toolbar {
+      width: 380px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      background: var(--color-bg-white);
+    }
+
+    .demo-toolbar-header {
+      background: var(--gradient-header);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .demo-toolbar-title {
+      color: var(--color-header-text);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-toolbar-badge {
+      background: var(--color-header-btn-bg);
+      color: var(--color-header-text);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+    }
+
+    .demo-toolbar-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .demo-toolbar-icon-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      background: var(--color-header-btn-bg);
+      color: var(--color-header-text);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: background var(--transition-fast);
+    }
+
+    .demo-toolbar-icon-btn:hover {
+      background: var(--color-header-btn-hover);
+    }
+
+    .demo-toolbar-body {
+      padding: 10px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .demo-toolbar-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .demo-toolbar-btn.primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .demo-toolbar-btn.primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .demo-toolbar-btn.secondary {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .demo-toolbar-btn.secondary:hover {
+      background: var(--color-primary-100);
+    }
+
+    .demo-toolbar-btn.ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+    }
+
+    .demo-toolbar-btn.ghost:hover {
+      background: var(--color-bg-surface);
+      color: var(--color-text-primary);
+    }
+
+    .demo-toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--color-border);
+      margin: 0 4px;
+    }
+
+    .demo-toolbar-shortcut {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-left: auto;
+    }
+
+    /* ========== 检查面板 ========== */
+    .demo-inspector {
+      width: 340px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      background: var(--color-bg-white);
+    }
+
+    .demo-inspector-header {
+      background: var(--gradient-header);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .demo-inspector-title {
+      color: var(--color-header-text);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .demo-inspector-subtitle {
+      color: var(--color-header-text-secondary);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .demo-inspector-close {
+      display: flex;
+      gap: 6px;
+    }
+
+    .demo-inspector-body {
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .demo-form-group {
+      margin-bottom: 16px;
+    }
+
+    .demo-form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .demo-form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .demo-form-hint {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 4px;
+    }
+
+    .demo-form-hint.warning {
+      color: var(--color-warning-text);
+      background: var(--color-warning-bg);
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      margin-top: 6px;
+      border-left: 3px solid var(--color-warning);
+    }
+
+    .demo-input {
+      width: 100%;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--color-text-primary);
+      background: var(--color-bg-white);
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .demo-input:focus {
+      outline: none;
+      border-color: var(--color-border-focus);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .demo-input.error {
+      border-color: var(--color-error);
+    }
+
+    .demo-input.error:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .demo-select {
+      width: 100%;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--color-text-primary);
+      background: var(--color-bg-white);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 32px;
+      font-family: inherit;
+    }
+
+    .demo-select:focus {
+      outline: none;
+      border-color: var(--color-border-focus);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .demo-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-slider {
+      flex: 1;
+      height: 4px;
+      border-radius: var(--radius-full);
+      background: var(--color-bg-surface);
+      position: relative;
+    }
+
+    .demo-slider-fill {
+      height: 100%;
+      width: 65%;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+    }
+
+    .demo-slider-thumb {
+      position: absolute;
+      left: 65%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--color-bg-white);
+      border: 2px solid var(--color-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .demo-slider-value {
+      width: 44px;
+      height: 28px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      text-align: center;
+      color: var(--color-text-primary);
+      background: var(--color-bg-white);
+      font-family: var(--font-family-mono);
+    }
+
+    .demo-color-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-color-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      height: 34px;
+    }
+
+    .demo-color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+
+    .demo-color-text {
+      flex: 1;
+      font-size: 12px;
+      font-family: var(--font-family-mono);
+      color: var(--color-text-primary);
+    }
+
+    .demo-reset-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-white);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+    }
+
+    .demo-reset-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    .demo-section-divider {
+      height: 1px;
+      background: var(--color-border-light);
+      margin: 16px 0;
+    }
+
+    .demo-inspector-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      gap: 8px;
+      background: var(--color-bg-secondary);
+    }
+
+    .demo-footer-btn {
+      flex: 1;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .demo-footer-btn.primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .demo-footer-btn.primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .demo-footer-btn.danger {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+      border: 1px solid var(--color-error-border);
+    }
+
+    .demo-footer-btn.danger:hover {
+      background: var(--color-error);
+      color: #fff;
+      border-color: var(--color-error);
+    }
+
+    /* ========== 模态弹窗 ========== */
+    .demo-modal {
+      width: 420px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-modal);
+      background: var(--color-bg-white);
+    }
+
+    .demo-modal-header {
+      background: var(--gradient-header);
+      padding: 20px 24px;
+    }
+
+    .demo-modal-title {
+      color: var(--color-header-text);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .demo-modal-body {
+      padding: 24px;
+    }
+
+    .demo-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      background: var(--color-bg-secondary);
+    }
+
+    .demo-modal-btn {
+      padding: 8px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .demo-modal-btn.cancel {
+      background: var(--color-bg-white);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .demo-modal-btn.cancel:hover {
+      background: var(--color-bg-surface);
+      color: var(--color-text-primary);
+    }
+
+    .demo-modal-btn.confirm {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .demo-modal-btn.confirm:hover {
+      background: var(--color-primary-hover);
+    }
+
+    /* ========== 按钮组 ========== */
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .button-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .button-row-label {
+      width: 80px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .demo-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+
+    .demo-btn.primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .demo-btn.primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .demo-btn.primary:disabled {
+      background: var(--color-primary-200);
+      cursor: not-allowed;
+    }
+
+    .demo-btn.secondary {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .demo-btn.secondary:hover {
+      background: var(--color-primary-100);
+    }
+
+    .demo-btn.secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .demo-btn.outline {
+      background: transparent;
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+
+    .demo-btn.outline:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .demo-btn.ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+    }
+
+    .demo-btn.ghost:hover {
+      background: var(--color-bg-surface);
+      color: var(--color-text-primary);
+    }
+
+    .demo-btn.danger {
+      background: var(--color-error);
+      color: #fff;
+    }
+
+    .demo-btn.danger:hover {
+      background: #DC2626;
+    }
+
+    .demo-btn.danger-outline {
+      background: transparent;
+      color: var(--color-error);
+      border: 1px solid var(--color-error-border);
+    }
+
+    .demo-btn.danger-outline:hover {
+      background: var(--color-error-bg);
+    }
+
+    .demo-btn.sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .demo-btn.lg {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+
+    .demo-btn-icon {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ========== 提示条 ========== */
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .demo-alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-left: 4px solid;
+    }
+
+    .demo-alert-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: -1px;
+    }
+
+    .demo-alert-content {
+      flex: 1;
+    }
+
+    .demo-alert-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .demo-alert-desc {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .demo-alert.success {
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+      border-color: var(--color-success);
+    }
+
+    .demo-alert.warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning-text);
+      border-color: var(--color-warning);
+    }
+
+    .demo-alert.error {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+      border-color: var(--color-error);
+    }
+
+    .demo-alert.info {
+      background: var(--color-info-bg);
+      color: var(--color-info-text);
+      border-color: var(--color-info);
+    }
+
+    /* ========== 徽章 ========== */
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .demo-badge.primary {
+      background: var(--color-primary);
+    }
+
+    .demo-badge.warning {
+      background: var(--color-warning);
+    }
+
+    .demo-badge.error {
+      background: var(--color-error);
+    }
+
+    .demo-badge.success {
+      background: var(--color-success);
+    }
+
+    .demo-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .demo-tag.primary {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .demo-tag.warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning-text);
+    }
+
+    .demo-tag.error {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+    }
+
+    .demo-tag.success {
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+    }
+
+    /* ========== 多选工具栏 ========== */
+    .demo-multi-toolbar {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-bg-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 8px 10px;
+      gap: 6px;
+      border: 1px solid var(--color-border-light);
+    }
+
+    .demo-multi-count {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      padding: 0 6px;
+    }
+
+    .demo-multi-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+    }
+
+    .demo-multi-btn:hover {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .demo-multi-btn.danger:hover {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+    }
+
+    .demo-multi-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--color-border);
+      margin: 0 2px;
+    }
+
+    /* ========== 拖拽把手 ========== */
+    .demo-handle-wrapper {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .demo-element {
+      position: relative;
+      width: 180px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-white);
+      border: 2px solid var(--color-primary);
+      box-shadow: var(--shadow-card);
+    }
+
+    .demo-element-text {
+      font-size: 13px;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .demo-element-sub {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+    }
+
+    .demo-handle-badge {
+      position: absolute;
+      top: -11px;
+      left: -11px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .demo-handle-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-bg-white);
+      border: 2px solid var(--color-primary);
+    }
+
+    .demo-handle-dot.tl { top: -4px; left: -4px; }
+    .demo-handle-dot.tr { top: -4px; right: -4px; }
+    .demo-handle-dot.bl { bottom: -4px; left: -4px; }
+    .demo-handle-dot.br { bottom: -4px; right: -4px; }
+    .demo-handle-dot.tc { top: -4px; left: 50%; transform: translateX(-50%); }
+    .demo-handle-dot.bc { bottom: -4px; left: 50%; transform: translateX(-50%); }
+    .demo-handle-dot.ml { left: -4px; top: 50%; transform: translateY(-50%); }
+    .demo-handle-dot.mr { right: -4px; top: 50%; transform: translateY(-50%); }
+
+    /* ========== 布局：两列展示 ========== */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .demo-column {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .demo-card-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ========== 页脚 ========== */
+    .page-footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--color-border-light);
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>🎨 方案4 · 清爽蓝渐变</h1>
+    <p>HTML 排版插件 UI 设计迭代 · 完整效果预览</p>
+  </div>
+
+  <!-- 1. 色板展示 -->
+  <div class="section">
+    <div class="section-title">1. 色彩系统</div>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #D0E9FA;"></div>
+        <div class="color-info">
+          <div class="color-name">渐变起始</div>
+          <div class="color-value">#D0E9FA</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #93C5FD;"></div>
+        <div class="color-info">
+          <div class="color-name">渐变结束</div>
+          <div class="color-value">#93C5FD</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #3B82F6;"></div>
+        <div class="color-info">
+          <div class="color-name">主色 Primary</div>
+          <div class="color-value">#3B82F6</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #2563EB;"></div>
+        <div class="color-info">
+          <div class="color-name">主色 Hover</div>
+          <div class="color-value">#2563EB</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #EFF6FF;"></div>
+        <div class="color-info">
+          <div class="color-name">浅色背景</div>
+          <div class="color-value">#EFF6FF</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #1E3A5F;"></div>
+        <div class="color-info">
+          <div class="color-name">标题文字</div>
+          <div class="color-value">#1E3A5F</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #10B981;"></div>
+        <div class="color-info">
+          <div class="color-name">成功</div>
+          <div class="color-value">#10B981</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #F59E0B;"></div>
+        <div class="color-info">
+          <div class="color-name">警告</div>
+          <div class="color-value">#F59E0B</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #EF4444;"></div>
+        <div class="color-info">
+          <div class="color-name">错误</div>
+          <div class="color-value">#EF4444</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #111827;"></div>
+        <div class="color-info">
+          <div class="color-name">文字主色</div>
+          <div class="color-value">#111827</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #6B7280;"></div>
+        <div class="color-info">
+          <div class="color-name">文字次色</div>
+          <div class="color-value">#6B7280</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background: #E5E7EB;"></div>
+        <div class="color-info">
+          <div class="color-name">边框</div>
+          <div class="color-value">#E5E7EB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 主要组件 -->
+  <div class="demo-grid">
+    <div class="demo-column">
+
+      <!-- 工具栏 -->
+      <div class="section">
+        <div class="section-title">2.1 工具栏</div>
+        <div class="demo-card-wrapper">
+          <div class="demo-toolbar">
+            <div class="demo-toolbar-header">
+              <div class="demo-toolbar-title">
+                HTML 排版
+                <span class="demo-toolbar-badge">3</span>
+              </div>
+              <div class="demo-toolbar-actions">
+                <button class="demo-toolbar-icon-btn" title="设置">⚙</button>
+                <button class="demo-toolbar-icon-btn" title="最小化">−</button>
+                <button class="demo-toolbar-icon-btn" title="关闭">×</button>
+              </div>
+            </div>
+            <div class="demo-toolbar-body">
+              <button class="demo-toolbar-btn primary">选择元素</button>
+              <button class="demo-toolbar-btn secondary">导出 Diff</button>
+              <div class="demo-toolbar-divider"></div>
+              <button class="demo-toolbar-btn ghost">复制</button>
+              <button class="demo-toolbar-btn ghost">删除</button>
+              <button class="demo-toolbar-btn ghost">↺</button>
+              <span class="demo-toolbar-shortcut">Alt + S</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 多选工具栏 -->
+      <div class="section">
+        <div class="section-title">2.2 多选工具栏</div>
+        <div class="demo-card-wrapper">
+          <div class="demo-multi-toolbar">
+            <span class="demo-multi-count">已选 3 个</span>
+            <div class="demo-multi-divider"></div>
+            <button class="demo-multi-btn" title="复制">📋</button>
+            <button class="demo-multi-btn danger" title="删除">🗑</button>
+            <div class="demo-multi-divider"></div>
+            <button class="demo-multi-btn" title="取消选择">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 按钮 -->
+      <div class="section">
+        <div class="section-title">2.3 按钮</div>
+        <div class="button-row">
+          <span class="button-row-label">主要</span>
+          <button class="demo-btn primary sm">小按钮</button>
+          <button class="demo-btn primary">默认按钮</button>
+          <button class="demo-btn primary lg">大按钮</button>
+          <button class="demo-btn primary" disabled>禁用</button>
+        </div>
+        <div class="button-row">
+          <span class="button-row-label">次要</span>
+          <button class="demo-btn secondary">次要按钮</button>
+          <button class="demo-btn outline">边框按钮</button>
+          <button class="demo-btn ghost">幽灵按钮</button>
+        </div>
+        <div class="button-row">
+          <span class="button-row-label">危险</span>
+          <button class="demo-btn danger">危险按钮</button>
+          <button class="demo-btn danger-outline">危险边框</button>
+          <button class="demo-btn demo-btn-icon primary">✓</button>
+          <button class="demo-btn demo-btn-icon ghost">⚙</button>
+        </div>
+      </div>
+
+      <!-- 徽章 & 标签 -->
+      <div class="section">
+        <div class="section-title">2.4 徽章 & 标签</div>
+        <div class="badge-row" style="margin-bottom: 16px;">
+          <span style="font-size: 12px; color: var(--color-text-secondary); width: 80px;">编号徽章：</span>
+          <span class="demo-badge primary">1</span>
+          <span class="demo-badge primary">12</span>
+          <span class="demo-badge warning">!</span>
+          <span class="demo-badge error">×</span>
+          <span class="demo-badge success">✓</span>
+        </div>
+        <div class="badge-row">
+          <span style="font-size: 12px; color: var(--color-text-secondary); width: 80px;">标签：</span>
+          <span class="demo-tag primary">新增</span>
+          <span class="demo-tag warning">待处理</span>
+          <span class="demo-tag error">错误</span>
+          <span class="demo-tag success">已完成</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="demo-column">
+
+      <!-- 检查面板 -->
+      <div class="section">
+        <div class="section-title">2.5 检查面板</div>
+        <div class="demo-card-wrapper">
+          <div class="demo-inspector">
+            <div class="demo-inspector-header">
+              <div>
+                <div class="demo-inspector-title">编辑面板</div>
+                <div class="demo-inspector-subtitle">#28 主导航栏</div>
+              </div>
+              <div class="demo-inspector-close">
+                <button class="demo-toolbar-icon-btn" style="width:28px;height:28px;">−</button>
+                <button class="demo-toolbar-icon-btn" style="width:28px;height:28px;">×</button>
+              </div>
+            </div>
+            <div class="demo-inspector-body">
+              <div class="demo-form-group">
+                <label class="demo-form-label">组件标签</label>
+                <input type="text" class="demo-input" value="主导航栏">
+              </div>
+
+              <div class="demo-form-group">
+                <label class="demo-form-label">修改说明</label>
+                <textarea class="demo-input" style="height: 60px; padding: 8px 12px; resize: none;">调整导航栏高度至 64px，背景色改为蓝色渐变</textarea>
+              </div>
+
+              <div class="demo-section-divider"></div>
+
+              <div class="demo-form-group">
+                <label class="demo-form-label">字体</label>
+                <select class="demo-select">
+                  <option>思源黑体 - 现代商务</option>
+                  <option>微软雅黑 - 经典办公</option>
+                  <option>苹方 - 简洁优雅</option>
+                </select>
+                <div class="demo-form-hint warning">
+                  ⚠ 字体预览不可用，系统中未检测到此字体
+                </div>
+              </div>
+
+              <div class="demo-form-group">
+                <label class="demo-form-label">字号</label>
+                <div class="demo-slider-row">
+                  <div class="demo-slider">
+                    <div class="demo-slider-fill" style="width: 50%;"></div>
+                    <div class="demo-slider-thumb" style="left: 50%;"></div>
+                  </div>
+                  <input type="text" class="demo-slider-value" value="16">
+                  <button class="demo-reset-btn" title="重置">↺</button>
+                </div>
+              </div>
+
+              <div class="demo-form-group">
+                <label class="demo-form-label">文字颜色</label>
+                <div class="demo-color-row">
+                  <div class="demo-color-input">
+                    <div class="demo-color-swatch" style="background: #111827;"></div>
+                    <span class="demo-color-text">#111827</span>
+                  </div>
+                  <button class="demo-reset-btn" title="重置">↺</button>
+                </div>
+              </div>
+            </div>
+            <div class="demo-inspector-footer">
+              <button class="demo-footer-btn primary">复制 HTML</button>
+              <button class="demo-footer-btn danger">删除标记</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模态弹窗 -->
+      <div class="section">
+        <div class="section-title">2.6 模态弹窗</div>
+        <div class="demo-card-wrapper">
+          <div class="demo-modal">
+            <div class="demo-modal-header">
+              <div class="demo-modal-title">添加自定义字体</div>
+            </div>
+            <div class="demo-modal-body">
+              <div class="demo-form-group">
+                <label class="demo-form-label">字体显示名称</label>
+                <input type="text" class="demo-input" placeholder="如：我最喜欢的字体">
+                <div class="demo-form-hint">在字体下拉列表中显示的名称</div>
+              </div>
+              <div class="demo-form-group">
+                <label class="demo-form-label">字体 CSS 值 (font-family)</label>
+                <input type="text" class="demo-input" placeholder='如："MyFont", sans-serif'>
+                <div class="demo-form-hint">系统中已安装的字体名称，多个字体用逗号分隔</div>
+              </div>
+            </div>
+            <div class="demo-modal-footer">
+              <button class="demo-modal-btn cancel">取消</button>
+              <button class="demo-modal-btn confirm">确定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. 表单与提示 -->
+  <div class="demo-grid">
+    <div class="demo-column">
+
+      <!-- 表单元素 -->
+      <div class="section">
+        <div class="section-title">3.1 表单元素</div>
+        <div class="demo-form-group">
+          <label class="demo-form-label">输入框 - 默认</label>
+          <input type="text" class="demo-input" value="默认状态">
+        </div>
+        <div class="demo-form-group">
+          <label class="demo-form-label">输入框 - 聚焦</label>
+          <input type="text" class="demo-input" value="聚焦状态" style="border-color: var(--color-border-focus); box-shadow: var(--shadow-focus);">
+        </div>
+        <div class="demo-form-group">
+          <label class="demo-form-label">输入框 - 禁用</label>
+          <input type="text" class="demo-input" value="禁用状态" disabled style="background: var(--color-bg-surface); color: var(--color-text-tertiary); cursor: not-allowed;">
+        </div>
+        <div class="demo-form-group">
+          <label class="demo-form-label">输入框 - 错误</label>
+          <input type="text" class="demo-input error" value="错误状态">
+          <div class="demo-form-hint" style="color: var(--color-error);">此字段为必填项</div>
+        </div>
+        <div class="demo-form-group">
+          <label class="demo-form-label">下拉选择框</label>
+          <select class="demo-select">
+            <option>选项 A</option>
+            <option>选项 B</option>
+            <option>选项 C</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <div class="demo-column">
+
+      <!-- 提示条 -->
+      <div class="section">
+        <div class="section-title">3.2 提示条（警示用色）</div>
+        <div class="alert-list">
+          <div class="demo-alert success">
+            <span class="demo-alert-icon">✓</span>
+            <div class="demo-alert-content">
+              <div class="demo-alert-title">操作成功</div>
+              <div class="demo-alert-desc">标记已成功保存，刷新页面后仍然有效</div>
+            </div>
+          </div>
+          <div class="demo-alert info">
+            <span class="demo-alert-icon">ℹ</span>
+            <div class="demo-alert-content">
+              <div class="demo-alert-title">温馨提示</div>
+              <div class="demo-alert-desc">点击页面任意元素即可开始编辑</div>
+            </div>
+          </div>
+          <div class="demo-alert warning">
+            <span class="demo-alert-icon">⚠</span>
+            <div class="demo-alert-content">
+              <div class="demo-alert-title">注意</div>
+              <div class="demo-alert-desc">字体预览不可用，系统中未检测到此字体</div>
+            </div>
+          </div>
+          <div class="demo-alert error">
+            <span class="demo-alert-icon">✕</span>
+            <div class="demo-alert-content">
+              <div class="demo-alert-title">操作失败</div>
+              <div class="demo-alert-desc">导出失败，请检查网络连接后重试</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 拖拽把手 -->
+      <div class="section">
+        <div class="section-title">3.3 元素选中态 & 拖拽把手</div>
+        <div class="demo-handle-wrapper">
+          <div class="demo-element">
+            <div class="demo-handle-badge">1</div>
+            <div class="demo-handle-dot tl"></div>
+            <div class="demo-handle-dot tc"></div>
+            <div class="demo-handle-dot tr"></div>
+            <div class="demo-handle-dot ml"></div>
+            <div class="demo-handle-dot mr"></div>
+            <div class="demo-handle-dot bl"></div>
+            <div class="demo-handle-dot bc"></div>
+            <div class="demo-handle-dot br"></div>
+            <div class="demo-element-text">导航栏</div>
+            <div class="demo-element-sub">#navbar.main-nav</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="page-footer">
+    HTML Diff Marker · UI Design Tokens v1.6.0 · 方案4 清爽蓝渐变
+  </div>
+
+</body>
+</html>

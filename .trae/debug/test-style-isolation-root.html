@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>样式隔离根因验证</title>
+<style>
+  /* 模拟宿主页面样式 */
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f5f5f5;
+  }
+  
+  .test-result {
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: white;
+    border-left: 4px solid #ccc;
+  }
+  .test-result.pass { border-left-color: #10b981; }
+  .test-result.fail { border-left-color: #ef4444; background: #fef2f2; }
+  
+  /* ============= 模拟插件样式隔离 ============= */
+  
+  /* 根容器重置 */
+  .test-toolbar {
+    all: initial !important;
+    box-sizing: border-box !important;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 12px !important;
+    color: #333 !important;
+  }
+  
+  /* 子元素重置 */
+  .test-toolbar * {
+    all: unset !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 工具栏具体样式 */
+  .test-toolbar {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 300px !important;
+    background: white !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important;
+    z-index: 2147483600 !important;
+  }
+  
+  .test-toolbar .title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    display: block !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .test-toolbar .content {
+    font-size: 12px !important;
+    color: #666 !important;
+    display: block !important;
+    line-height: 1.5 !important;
+  }
+</style>
+</head>
+<body>
+  <h1>样式隔离对 JS 内联样式的影响测试</h1>
+  <p>测试 <code>all: initial !important</code> 是否会覆盖 JS 设置的内联样式</p>
+  
+  <div id="results"></div>
+  
+  <div class="test-toolbar" id="toolbar1">
+    <div class="title">测试工具栏 1 (CSS 默认位置)</div>
+    <div class="content">CSS: top:20px, right:20px</div>
+  </div>
+  
+  <div class="test-toolbar" id="toolbar2">
+    <div class="title">测试工具栏 2 (JS 设置 left/top 不带 !important)</div>
+    <div class="content">JS: left:100px, top:100px</div>
+  </div>
+  
+  <div class="test-toolbar" id="toolbar3">
+    <div class="title">测试工具栏 3 (JS setProperty 带 !important)</div>
+    <div class="content">JS setProperty: left:200px, top:200px, important</div>
+  </div>
+
+<script>
+  function logResult(testName, actual, expected, pass) {
+    const results = document.getElementById('results');
+    const div = document.createElement('div');
+    div.className = 'test-result ' + (pass ? 'pass' : 'fail');
+    div.innerHTML = `<strong>${testName}</strong><br>实际: ${actual}<br>期望: ${expected}<br>结果: ${pass ? '✅ 通过' : '❌ 失败'}`;
+    results.appendChild(div);
+  }
+  
+  // 测试 1: CSS 默认位置
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      const t1 = document.getElementById('toolbar1');
+      const t1Rect = t1.getBoundingClientRect();
+      const t1Style = getComputedStyle(t1);
+      logResult(
+        '测试1: CSS 默认位置 (right:20px)',
+        `top:${Math.round(t1Rect.top)}px, right:${Math.round(window.innerWidth - t1Rect.right)}px`,
+        'top:20px, right:20px',
+        Math.abs(t1Rect.top - 20) < 2 && Math.abs(window.innerWidth - t1Rect.right - 20) < 2
+      );
+      
+      // 测试 2: JS 设置 left/top 不带 !important
+      const t2 = document.getElementById('toolbar2');
+      t2.style.left = '100px';
+      t2.style.top = '100px';
+      t2.style.right = 'auto';
+      t2.style.bottom = 'auto';
+      
+      const t2Rect = t2.getBoundingClientRect();
+      const t2Style = getComputedStyle(t2);
+      logResult(
+        '测试2: JS el.style.left/top 不带 !important',
+        `left:${Math.round(t2Rect.left)}px (inline:${t2.style.left}), top:${Math.round(t2Rect.top)}px (inline:${t2.style.top})`,
+        'left:100px, top:100px (如果被 all:initial 覆盖则是 CSS 默认值)',
+        Math.abs(t2Rect.left - 100) < 2 && Math.abs(t2Rect.top - 100) < 2
+      );
+      
+      // 测试 3: JS setProperty 带 !important
+      const t3 = document.getElementById('toolbar3');
+      t3.style.setProperty('left', '200px', 'important');
+      t3.style.setProperty('top', '200px', 'important');
+      t3.style.setProperty('right', 'auto', 'important');
+      t3.style.setProperty('bottom', 'auto', 'important');
+      
+      const t3Rect = t3.getBoundingClientRect();
+      logResult(
+        '测试3: JS setProperty 带 !important',
+        `left:${Math.round(t3Rect.left)}px, top:${Math.round(t3Rect.top)}px`,
+        'left:200px, top:200px',
+        Math.abs(t3Rect.left - 200) < 2 && Math.abs(t3Rect.top - 200) < 2
+      );
+      
+      // 测试 4: 内联样式 vs all:initial 的优先级
+      logResult(
+        '关键验证: all:initial !important 是否覆盖不带 !important 的内联样式',
+        '测试2的实际位置 = CSS 默认值？' + (Math.abs(t2Rect.top - 20) < 2 ? '是 (被覆盖)' : '否 (未被覆盖)'),
+        '如果 all:initial !important 覆盖内联样式，则测试2失败',
+        Math.abs(t2Rect.top - 20) >= 2  // 如果 top 不是 20px，说明内联样式生效了
+      );
+      
+    }, 100);
+  });
+</script>
+</body>
+</html>

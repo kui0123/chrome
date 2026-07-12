@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Diff Marker UI 预览 — 柔雾紫主题</title>
+<link rel="stylesheet" href="../../extension/content/content.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #f3e8ff 100%);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .preview-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .preview-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6d28d9;
+    margin-bottom: 8px;
+  }
+  .preview-header p {
+    font-size: 14px;
+    color: #7c3aed;
+    opacity: 0.8;
+  }
+  .preview-section {
+    max-width: 1200px;
+    margin: 0 auto 60px;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4c1d95;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 4px solid #8b5cf6;
+  }
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .preview-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+  }
+  .preview-card-label {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #7c3aed;
+    opacity: 0.7;
+  }
+  .toolbar-wrapper {
+    position: relative;
+    width: 280px;
+  }
+  .inspector-wrapper {
+    position: relative;
+    width: 440px;
+  }
+  .wake-btn-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .buttons-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
+  .button-group-label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .input-demo {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .input-row label {
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 500;
+    min-width: 80px;
+  }
+  .toast-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .toast-static {
+    position: static !important;
+    transform: none !important;
+    width: 100%;
+  }
+  .color-palette-demo {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+  .color-swatch {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  .color-swatch.dark-text {
+    color: #1f2937;
+    text-shadow: none;
+  }
+  .modal-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    background: rgba(15, 23, 42, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .multi-toolbar-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-header">
+  <h1>✨ HTML Diff Marker UI 预览</h1>
+  <p>柔雾紫主题 (Misty Purple) v3.0 — 当前实现状态</p>
+</div>
+
+<!-- 1. 工具栏 -->
+<div class="preview-section">
+  <div class="section-title">1. 工具栏 (Toolbar)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">完整工具栏</div>
+      <div class="toolbar-wrapper">
+        <div class="html-diff-marker-toolbar" style="position: static; box-shadow: 0 8px 28px rgba(139, 92, 246, 0.2);">
+          <div class="html-diff-marker-toolbar-header">
+            <div class="html-diff-marker-toolbar-title-row">
+              <div class="html-diff-marker-toolbar-title">
+                <span class="html-diff-marker-toolbar-title-icon">✨</span>
+                HTML Diff Marker
+              </div>
+              <div class="html-diff-marker-toolbar-controls">
+                <button class="html-diff-marker-toolbar-ctrl-btn">−</button>
+                <button class="html-diff-marker-toolbar-ctrl-btn">×</button>
+              </div>
+            </div>
+            <div class="html-diff-marker-toolbar-status-row">
+              <div class="html-diff-marker-toolbar-status-left">
+                <span class="html-diff-marker-toolbar-status-dot"></span>
+                <span>已激活</span>
+              </div>
+              <div class="html-diff-marker-toolbar-status-count">
+                <span>3 标记</span>
+                <span class="html-diff-marker-toolbar-status-modified">/ 2 修改</span>
+              </div>
+            </div>
+          </div>
+          <div class="html-diff-marker-toolbar-body">
+            <div class="html-diff-marker-toolbar-btn-row">
+              <button class="html-diff-marker-toolbar-action-btn html-diff-marker-btn--active">
+                <span class="html-diff-marker-toolbar-action-btn-icon">🎯</span>
+                选择元素
+              </button>
+              <button class="html-diff-marker-toolbar-action-btn">
+                <span class="html-diff-marker-toolbar-action-btn-icon">📋</span>
+                复制当前
+              </button>
+              <button class="html-diff-marker-toolbar-action-btn">
+                <span class="html-diff-marker-toolbar-action-btn-icon">➕</span>
+                添加元素
+              </button>
+              <button class="html-diff-marker-toolbar-action-btn html-diff-marker-btn--danger">
+                <span class="html-diff-marker-toolbar-action-btn-icon">🗑</span>
+                删除当前
+              </button>
+            </div>
+            <div class="html-diff-marker-toolbar-big-btn-row">
+              <button class="html-diff-marker-btn html-diff-marker-btn--secondary" style="flex:1; height: 40px;">
+                🗑 清空所有
+              </button>
+              <button class="html-diff-marker-btn html-diff-marker-btn--primary" style="flex:1; height: 40px;">
+                📄 导出 Diff
+              </button>
+            </div>
+          </div>
+          <div class="html-diff-marker-toolbar-footer">
+            <div class="html-diff-marker-toolbar-counts">
+              共 5 个标记
+              <span class="html-diff-marker-toolbar-counts-modified">· 2 个已修改</span>
+            </div>
+            <div class="html-diff-marker-toolbar-shortcut">⌥E 切换</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">唤醒按钮</div>
+      <div class="wake-btn-wrapper">
+        <div class="html-diff-marker-wake-btn" style="position: static;">
+          ✎
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">多选工具栏</div>
+      <div class="multi-toolbar-wrapper">
+        <div class="html-diff-marker-multi-toolbar" style="position: static;">
+          <button class="html-diff-marker-multi-btn html-diff-marker-multi-btn--primary">
+            🔗 组合标记
+          </button>
+          <button class="html-diff-marker-multi-btn html-diff-marker-multi-btn--secondary">
+            📋 复制选中
+          </button>
+          <button class="html-diff-marker-multi-btn html-diff-marker-multi-btn--danger">
+            🗑 删除选中
+          </button>
+          <button class="html-diff-marker-multi-btn html-diff-marker-multi-btn--ghost">
+            ✕ 取消选择
+          </button>
+          <span class="html-diff-marker-multi-count">
+            已选 <span class="html-diff-marker-multi-count-num">3</span> 个
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. 检查面板 -->
+<div class="preview-section">
+  <div class="section-title">2. 检查面板 (Inspector Panel)</div>
+  <div class="preview-grid" style="grid-template-columns: 1fr;">
+    <div class="preview-card">
+      <div class="preview-card-label">编辑面板（完整）</div>
+      <div class="inspector-wrapper">
+        <div class="html-diff-marker-inspector" style="position: static; height: auto; max-height: 700px;">
+          <div class="html-diff-marker-inspector-header">
+            <div class="html-diff-marker-inspector-title-row">
+              <div class="html-diff-marker-inspector-title">编辑组件 #1 (div)</div>
+              <div class="html-diff-marker-header-btns">
+                <button class="html-diff-marker-collapse-btn">−</button>
+                <button class="html-diff-marker-close-btn">×</button>
+              </div>
+            </div>
+            <div class="html-diff-marker-inspector-selector-row">
+              <span class="html-diff-marker-inspector-selector-text">.container &gt; .card &gt; .header</span>
+              <button class="html-diff-marker-inspector-copy-btn">📋</button>
+            </div>
+          </div>
+          <div class="html-diff-marker-inspector-body" style="max-height: 500px;">
+
+            <!-- 大小调整选项 -->
+            <div class="html-diff-marker-style-section">
+              <div class="html-diff-marker-style-header">
+                <label>⚙️ 大小调整选项</label>
+              </div>
+              <label class="html-diff-marker-checkbox-wrap">
+                <input type="checkbox" class="html-diff-marker-checkbox" checked>
+                <span class="html-diff-marker-checkbox-custom"></span>
+                <span>同步缩放子元素（滚轮缩放/拖拽大小时，子元素样式同步缩放）</span>
+              </label>
+            </div>
+
+            <!-- 组件标签 -->
+            <div class="html-diff-marker-field-row">
+              <label>组件标签</label>
+              <input type="text" class="html-diff-marker-input" placeholder="输入自定义标签名..." value="主卡片容器">
+            </div>
+
+            <!-- 修改说明 -->
+            <div class="html-diff-marker-field-row">
+              <div class="html-diff-marker-field-header">
+                <label>修改说明（给 AI Agent 看）</label>
+                <button class="html-diff-marker-style-reset-all" style="height: 22px; padding: 0 10px; font-size: 10px;">
+                  🔗 预览链接
+                </button>
+              </div>
+              <textarea class="html-diff-marker-textarea" placeholder="支持 Markdown 链接格式，如 [点击查看](https://example.com)...">将标题字号从 18px 调整为 20px，颜色改为品牌紫色，增加底部间距。</textarea>
+            </div>
+
+            <!-- 跳转链接 -->
+            <div class="html-diff-marker-field-row">
+              <label>跳转链接</label>
+              <input type="text" class="html-diff-marker-input" placeholder="输入链接地址，如 https://example.com（为空则不跳转）" value="https://example.com">
+            </div>
+
+            <!-- 样式编辑 -->
+            <div class="html-diff-marker-style-section">
+              <div class="html-diff-marker-style-header">
+                <label>🎨 样式编辑</label>
+                <button class="html-diff-marker-style-reset-all">↺ 重置全部</button>
+              </div>
+
+              <!-- 背景颜色 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">背景颜色</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <div class="html-diff-marker-color-wrap" style="background-color: #ffffff;">
+                    <input type="color" class="html-diff-marker-style-color" value="#ffffff">
+                  </div>
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="#ffffff">
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <!-- 文本颜色 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">文本颜色</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <div class="html-diff-marker-color-wrap" style="background-color: #8B5CF6;">
+                    <input type="color" class="html-diff-marker-style-color" value="#8B5CF6">
+                  </div>
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="#8B5CF6">
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <!-- 字体 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">字体</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <div class="html-diff-marker-select-wrap html-diff-marker-select-wrap--sm">
+                    <select class="html-diff-marker-select">
+                      <option>苹方 - 现代简约</option>
+                      <option>微软雅黑 - 经典商务</option>
+                      <option>思源黑体 - 开源专业</option>
+                    </select>
+                    <span class="html-diff-marker-select-arrow">▾</span>
+                  </div>
+                  <button class="html-diff-marker-add-font-btn">+</button>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+                <div class="html-diff-marker-font-hint success">
+                  <span>✓</span>
+                  <span>字体预览正常</span>
+                </div>
+              </div>
+
+              <!-- 字体粗细 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">字体粗细</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <div class="html-diff-marker-select-wrap html-diff-marker-select-wrap--sm">
+                    <select class="html-diff-marker-select">
+                      <option>600 - 半粗 (Semibold)</option>
+                      <option>400 - 常规 (Normal)</option>
+                      <option>700 - 粗体 (Bold)</option>
+                    </select>
+                    <span class="html-diff-marker-select-arrow">▾</span>
+                  </div>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <!-- 字体大小 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">字体大小</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="20px">
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <!-- 圆角 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">圆角</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="12px">
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <!-- 显示方式 -->
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">显示方式</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <div class="html-diff-marker-select-wrap html-diff-marker-select-wrap--sm">
+                    <select class="html-diff-marker-select">
+                      <option>(默认)</option>
+                      <option>block - 块级元素</option>
+                      <option>flex - 弹性布局</option>
+                    </select>
+                    <span class="html-diff-marker-select-arrow">▾</span>
+                  </div>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+
+              <div class="html-diff-marker-style-stats">
+                已修改 4 个样式属性
+              </div>
+            </div>
+
+            <!-- 位置调整 -->
+            <div class="html-diff-marker-style-section">
+              <div class="html-diff-marker-style-header">
+                <label>📍 位置调整</label>
+                <button class="html-diff-marker-style-reset-all">↺ 重置</button>
+              </div>
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">X (左偏移)</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="0px">
+                  <button class="html-diff-marker-nudge-btn">-10</button>
+                  <button class="html-diff-marker-nudge-btn">-1</button>
+                  <button class="html-diff-marker-nudge-btn">+1</button>
+                  <button class="html-diff-marker-nudge-btn">+10</button>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">Y (上偏移)</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="5px">
+                  <button class="html-diff-marker-nudge-btn">-10</button>
+                  <button class="html-diff-marker-nudge-btn">-1</button>
+                  <button class="html-diff-marker-nudge-btn">+1</button>
+                  <button class="html-diff-marker-nudge-btn">+10</button>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 大小调整 -->
+            <div class="html-diff-marker-style-section">
+              <div class="html-diff-marker-style-header">
+                <label>📐 大小调整</label>
+                <div class="html-diff-marker-style-header-actions">
+                  <button class="html-diff-marker-style-reset-all" style="height: 22px; padding: 0 8px; font-size: 10px;">px</button>
+                  <button class="html-diff-marker-style-reset-all">↺ 重置</button>
+                </div>
+              </div>
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">宽度</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="320px">
+                  <button class="html-diff-marker-nudge-btn">-10</button>
+                  <button class="html-diff-marker-nudge-btn">-1</button>
+                  <button class="html-diff-marker-nudge-btn">+1</button>
+                  <button class="html-diff-marker-nudge-btn">+10</button>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+              <div class="html-diff-marker-style-row">
+                <label class="html-diff-marker-style-label">高度</label>
+                <div class="html-diff-marker-style-input-wrap">
+                  <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="auto">
+                  <button class="html-diff-marker-nudge-btn">-10</button>
+                  <button class="html-diff-marker-nudge-btn">-1</button>
+                  <button class="html-diff-marker-nudge-btn">+1</button>
+                  <button class="html-diff-marker-nudge-btn">+10</button>
+                  <button class="html-diff-marker-style-reset">↺</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- HTML 编辑区 -->
+            <div class="html-diff-marker-field-row">
+              <label>原始 HTML（参考）</label>
+              <textarea class="html-diff-marker-textarea html-diff-marker-textarea--mono" style="background: #f9fafb; color: #6b7280;" readonly>&lt;div class="card header"&gt;
+  &lt;h2&gt;标题文字&lt;/h2&gt;
+&lt;/div&gt;</textarea>
+            </div>
+            <div class="html-diff-marker-field-row">
+              <label>修改后的 HTML</label>
+              <textarea class="html-diff-marker-textarea html-diff-marker-textarea--mono" placeholder="在此输入修改后的 HTML 代码...">&lt;div class="card header"&gt;
+  &lt;h2 class="title"&gt;标题文字&lt;/h2&gt;
+&lt;/div&gt;</textarea>
+            </div>
+
+            <!-- 元素信息区 -->
+            <div class="html-diff-marker-element-info">
+              DIV.card-header | selector: .container &gt; .card &gt; .header
+            </div>
+          </div>
+
+          <!-- 底部操作栏 -->
+          <div class="html-diff-marker-inspector-actions">
+            <button class="html-diff-marker-btn html-diff-marker-btn--danger">
+              🗑 删除
+            </button>
+            <button class="html-diff-marker-btn html-diff-marker-btn--primary">
+              ✓ 保存修改
+            </button>
+          </div>
+
+          <div class="html-diff-marker-resize-handle-se"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 按钮系统 -->
+<div class="preview-section">
+  <div class="section-title">3. 按钮系统 (Buttons)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">主按钮 Primary</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--primary">保存修改</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--primary" style="opacity: 0.5;">Disabled</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">次要按钮 Secondary</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--secondary">取消操作</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--secondary" style="opacity: 0.5;">Disabled</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">危险按钮 Danger</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--danger">删除元素</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--danger" style="opacity: 0.5;">Disabled</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">幽灵/小按钮 Ghost</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--ghost">↺ 重置</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--ghost" style="opacity: 0.5;">Disabled</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">成功按钮 Success</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--success">✓ 已完成</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--success" style="opacity: 0.5;">Disabled</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">图标按钮 Icon</div>
+      <div class="buttons-demo">
+        <button class="html-diff-marker-btn html-diff-marker-btn--icon">⚙</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--icon">✕</button>
+        <button class="html-diff-marker-btn html-diff-marker-btn--icon">📋</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. 输入框系统 -->
+<div class="preview-section">
+  <div class="section-title">4. 输入框系统 (Inputs)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">文本输入框</div>
+      <div class="input-demo">
+        <div class="input-row">
+          <label>默认</label>
+          <input type="text" class="html-diff-marker-input" placeholder="请输入内容..." style="flex:1;">
+        </div>
+        <div class="input-row">
+          <label>聚焦</label>
+          <input type="text" class="html-diff-marker-input" value="聚焦状态" style="flex:1; border-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);">
+        </div>
+        <div class="input-row">
+          <label>错误</label>
+          <input type="text" class="html-diff-marker-input html-diff-marker-input--error" value="错误状态" style="flex:1;">
+        </div>
+        <div class="input-row">
+          <label>禁用</label>
+          <input type="text" class="html-diff-marker-input" value="禁用状态" disabled style="flex:1;">
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">文本域 Textarea</div>
+      <div class="input-demo">
+        <textarea class="html-diff-marker-textarea" placeholder="请输入多行文本...">这是一段示例文本内容。</textarea>
+        <textarea class="html-diff-marker-textarea html-diff-marker-textarea--mono" placeholder="等宽字体文本域...">// 代码示例
+function hello() {
+  return 'world';
+}</textarea>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">下拉框 Select</div>
+      <div class="input-demo">
+        <div class="input-row">
+          <label>默认</label>
+          <div class="html-diff-marker-select-wrap" style="flex:1;">
+            <select class="html-diff-marker-select">
+              <option>请选择选项</option>
+              <option>选项一</option>
+              <option>选项二</option>
+            </select>
+            <span class="html-diff-marker-select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <label>小型</label>
+          <div class="html-diff-marker-select-wrap html-diff-marker-select-wrap--sm" style="flex:1;">
+            <select class="html-diff-marker-select">
+              <option>小尺寸下拉框</option>
+              <option>选项一</option>
+            </select>
+            <span class="html-diff-marker-select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <label>禁用</label>
+          <div class="html-diff-marker-select-wrap html-diff-marker-select-wrap--disabled" style="flex:1;">
+            <select class="html-diff-marker-select" disabled>
+              <option>禁用状态</option>
+            </select>
+            <span class="html-diff-marker-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">复选框 Checkbox</div>
+      <div class="input-demo" style="gap: 16px;">
+        <label class="html-diff-marker-checkbox-wrap">
+          <input type="checkbox" class="html-diff-marker-checkbox">
+          <span class="html-diff-marker-checkbox-custom"></span>
+          <span>未选中状态</span>
+        </label>
+        <label class="html-diff-marker-checkbox-wrap">
+          <input type="checkbox" class="html-diff-marker-checkbox" checked>
+          <span class="html-diff-marker-checkbox-custom"></span>
+          <span>已选中状态</span>
+        </label>
+        <label class="html-diff-marker-checkbox-wrap html-diff-marker-checkbox-wrap--disabled">
+          <input type="checkbox" class="html-diff-marker-checkbox" disabled checked>
+          <span class="html-diff-marker-checkbox-custom"></span>
+          <span>禁用已选中</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">颜色选择器</div>
+      <div class="input-demo">
+        <div class="input-row">
+          <label>紫色</label>
+          <div class="html-diff-marker-color-wrap" style="background-color: #8B5CF6;">
+            <input type="color" class="html-diff-marker-style-color" value="#8B5CF6">
+          </div>
+          <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="#8B5CF6" style="flex:1;">
+        </div>
+        <div class="input-row">
+          <label>绿色</label>
+          <div class="html-diff-marker-color-wrap" style="background-color: #10B981;">
+            <input type="color" class="html-diff-marker-style-color" value="#10B981">
+          </div>
+          <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="#10B981" style="flex:1;">
+        </div>
+        <div class="input-row">
+          <label>白色</label>
+          <div class="html-diff-marker-color-wrap" style="background-color: #ffffff;">
+            <input type="color" class="html-diff-marker-style-color" value="#ffffff">
+          </div>
+          <input type="text" class="html-diff-marker-input html-diff-marker-input--sm" value="#ffffff" style="flex:1;">
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">微调按钮 Nudge</div>
+      <div class="input-demo">
+        <div class="input-row">
+          <label>一组</label>
+          <div style="display: flex; gap: 6px;">
+            <button class="html-diff-marker-nudge-btn">-10</button>
+            <button class="html-diff-marker-nudge-btn">-1</button>
+            <button class="html-diff-marker-nudge-btn">+1</button>
+            <button class="html-diff-marker-nudge-btn">+10</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Toast 提示 -->
+<div class="preview-section">
+  <div class="section-title">5. Toast 提示 (Feedback)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">信息 Info</div>
+      <div class="toast-demo">
+        <div class="html-diff-marker-toast html-diff-marker-toast--info toast-static">
+          <span class="html-diff-marker-toast-icon">ℹ</span>
+          <span class="html-diff-marker-toast-message">这是一条信息提示</span>
+          <button class="html-diff-marker-toast-close">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">成功 Success</div>
+      <div class="toast-demo">
+        <div class="html-diff-marker-toast html-diff-marker-toast--success toast-static">
+          <span class="html-diff-marker-toast-icon">✓</span>
+          <span class="html-diff-marker-toast-message">操作成功完成</span>
+          <button class="html-diff-marker-toast-close">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">警告 Warning</div>
+      <div class="toast-demo">
+        <div class="html-diff-marker-toast html-diff-marker-toast--warning toast-static">
+          <span class="html-diff-marker-toast-icon">⚠</span>
+          <span class="html-diff-marker-toast-message">请注意检查输入内容</span>
+          <button class="html-diff-marker-toast-close">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">错误 Error</div>
+      <div class="toast-demo">
+        <div class="html-diff-marker-toast html-diff-marker-toast--error toast-static">
+          <span class="html-diff-marker-toast-icon">✕</span>
+          <span class="html-diff-marker-toast-message">操作失败，请重试</span>
+          <button class="html-diff-marker-toast-close">×</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 模态弹窗 -->
+<div class="preview-section">
+  <div class="section-title">6. 模态弹窗 (Modal)</div>
+  <div class="preview-grid">
+    <div class="preview-card" style="grid-column: 1 / -1;">
+      <div class="preview-card-label">确认弹窗</div>
+      <div class="modal-wrapper">
+        <div class="html-diff-marker-modal" style="position: static; animation: none; min-width: 380px;">
+          <div class="html-diff-marker-modal-header">
+            <div class="html-diff-marker-modal-header-title">
+              <span>⚠</span>
+              <span>确认删除</span>
+            </div>
+            <button class="html-diff-marker-modal-header-close">×</button>
+          </div>
+          <div class="html-diff-marker-modal-body">
+            <p style="margin-bottom: 12px;">确定要删除选中的 3 个标记吗？</p>
+            <p style="font-size: 12px; color: #6b7280;">此操作不可撤销，删除后标记将永久丢失。</p>
+          </div>
+          <div class="html-diff-marker-modal-footer">
+            <button class="html-diff-marker-modal-btn html-diff-marker-modal-btn-cancel">取消</button>
+            <button class="html-diff-marker-modal-btn html-diff-marker-modal-btn-confirm">确认删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. 颜色色板 -->
+<div class="preview-section">
+  <div class="section-title">7. 颜色色板 (Color Palette) — 柔雾紫主题</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">品牌紫色系</div>
+      <div class="color-palette-demo">
+        <div class="color-swatch" style="background: #F5F3FF;">50</div>
+        <div class="color-swatch dark-text" style="background: #EDE9FE;">100</div>
+        <div class="color-swatch" style="background: #A78BFA;">300</div>
+        <div class="color-swatch" style="background: #8B5CF6;">500</div>
+        <div class="color-swatch" style="background: #7C3AED;">600</div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">功能语义色</div>
+      <div class="color-palette-demo">
+        <div class="color-swatch" style="background: #10B981;">成功</div>
+        <div class="color-swatch" style="background: #F59E0B;">警告</div>
+        <div class="color-swatch" style="background: #EF4444;">错误</div>
+        <div class="color-swatch" style="background: #3B82F6;">信息</div>
+        <div class="color-swatch dark-text" style="background: #E5E7EB;">边框</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. 页面标记视觉 -->
+<div class="preview-section">
+  <div class="section-title">8. 页面标记视觉 (Mark Visuals)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">悬停高亮</div>
+      <div style="width: 100%; padding: 20px; background: white; border-radius: 8px;">
+        <div class="html-diff-marker-highlight-hover" style="padding: 16px; background: rgba(167, 139, 250, 0.08); outline-offset: 0;">
+          <p style="font-size: 14px; color: #4B5563;">鼠标悬停时的高亮效果</p>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">已选中</div>
+      <div style="width: 100%; padding: 20px; background: white; border-radius: 8px;">
+        <div class="html-diff-marker-selected" style="padding: 16px; position: relative; outline-offset: 0;">
+          <p style="font-size: 14px; color: #4B5563;">已选中的元素标记</p>
+          <span class="html-diff-marker-badge">1</span>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">已修改</div>
+      <div style="width: 100%; padding: 20px; background: white; border-radius: 8px;">
+        <div class="html-diff-marker-modified" style="padding: 16px; position: relative; outline-offset: 0;">
+          <p style="font-size: 14px; color: #4B5563;">已修改的元素标记</p>
+          <span class="html-diff-marker-badge modified">2</span>
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">多选状态</div>
+      <div style="width: 100%; padding: 20px; background: white; border-radius: 8px;">
+        <div class="html-diff-marker-multi-selected" style="padding: 16px; outline-offset: 0;">
+          <p style="font-size: 14px; color: #4B5563;">多选高亮（虚线紫色边框）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. 拖拽与间距 -->
+<div class="preview-section">
+  <div class="section-title">9. 拖拽与间距 (Drag & Spacing)</div>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-label">拖拽把手（8方向）</div>
+      <div style="position: relative; width: 200px; height: 150px; background: #EDE9FE; border: 2px solid #8B5CF6; border-radius: 8px; margin: 20px;">
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-n" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-s" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-e" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-w" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-ne" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-nw" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-se" style="position: absolute;"></div>
+        <div class="html-diff-marker-resize-handle html-diff-marker-handle-sw" style="position: absolute;"></div>
+        <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; color: #7C3AED; font-weight: 500;">8方向拖拽</p>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">尺寸信息浮窗</div>
+      <div style="position: relative; width: 100%; height: 100px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <div class="html-diff-marker-size-display" style="position: static;">
+          320 × 180 px
+        </div>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-label">删除角标</div>
+      <div style="position: relative; width: 120px; height: 80px; background: white; border: 2px solid #EF4444; border-radius: 8px; margin: 20px;">
+        <span class="html-diff-marker-remove-badge" style="position: absolute;">×</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; padding: 40px 0; color: #7c3aed; font-size: 13px; opacity: 0.7;">
+  — HTML Diff Marker · 柔雾紫主题 UI 预览 · v3.0 —
+</div>
+
+</body>
+</html>

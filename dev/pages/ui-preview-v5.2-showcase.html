@@ -1,0 +1,4203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Diff Marker V5.2 — UI 设计路演手册</title>
+<style>
+/* ================================================================
+   HTML Diff Marker V5.2 UI Showcase
+   路演级完整 UI 预览页面
+   ================================================================ */
+
+/* ===== 全局重置与基础样式 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ================================================================
+   主题变量体系（默认暮紫）
+   ================================================================ */
+:root {
+  /* 主题主色系 */
+  --theme-primary: #70649A;
+  --theme-primary-light: #8B7FB3;
+  --theme-primary-dark: #5A4F7D;
+  --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --theme-soft-bg: #F0EEF7;
+  --theme-soft-text: #5A4F7D;
+  --theme-count-text: #70649A;
+  --theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+
+  /* 中性色 */
+  --text-primary: #1F2937;
+  --text-secondary: #4B5563;
+  --text-tertiary: #6B7280;
+  --text-disabled: #9CA3AF;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-tertiary: #F3F4F6;
+  --bg-hover: #F9FAFB;
+  --border: #D1D5DB;
+  --border-light: #E5E7EB;
+  --border-lighter: #F3F4F6;
+  --divider: #F3F4F6;
+
+  /* 功能语义色 */
+  --success: #10B981;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --success-text: #065F46;
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-text: #92400E;
+  --error: #EF4444;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --error-text: #991B1B;
+  --info: #3B82F6;
+  --info-bg: #EFF6FF;
+  --info-border: #BFDBFE;
+  --info-text: #1E40AF;
+
+  /* 圆角 */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+  --shadow-modal: 0 25px 50px -12px rgba(0,0,0,0.25);
+  --shadow-focus: 0 0 0 3px rgba(139,92,246,0.15);
+
+  /* 间距 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* z-index — 双层架构：base（面板层） + floating（浮层层） */
+  --z-base: 2147483000;
+  --z-floating: var(--z-base);
+  --z-handles: calc(var(--z-floating) + 0);
+  --z-badge: calc(var(--z-floating) + 10);
+  --z-remove: calc(var(--z-floating) + 20);
+  --z-panel: calc(var(--z-base) + 500);
+  --z-toolbar: calc(var(--z-base) + 600);
+  --z-settings: calc(var(--z-base) + 650);
+  --z-toast: calc(var(--z-base) + 680);
+  --z-modal: calc(var(--z-base) + 700);
+
+  /* 过渡 */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 四套预设主题 */
+[data-theme="deep-cyan"] {
+  --theme-primary: #211E55;
+  --theme-primary-light: #3D3A75;
+  --theme-primary-dark: #15133D;
+  --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+  --theme-soft-bg: #EDECF5;
+  --theme-soft-text: #15133D;
+  --theme-count-text: #211E55;
+  --theme-shadow: 0 2px 8px rgba(33,30,85,0.3);
+}
+[data-theme="gray-green"] {
+  --theme-primary: #6A8372;
+  --theme-primary-light: #8A9E8F;
+  --theme-primary-dark: #526958;
+  --theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);
+  --theme-soft-bg: #EEF2EF;
+  --theme-soft-text: #526958;
+  --theme-count-text: #6A8372;
+  --theme-shadow: 0 2px 8px rgba(106,131,114,0.3);
+}
+[data-theme="dusk-purple"] {
+  --theme-primary: #70649A;
+  --theme-primary-light: #8B7FB3;
+  --theme-primary-dark: #5A4F7D;
+  --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --theme-soft-bg: #F0EEF7;
+  --theme-soft-text: #5A4F7D;
+  --theme-count-text: #70649A;
+  --theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+}
+[data-theme="warm-brown"] {
+  --theme-primary: #9E7A7A;
+  --theme-primary-light: #B89595;
+  --theme-primary-dark: #7E5E5E;
+  --theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);
+  --theme-soft-bg: #F5EFEF;
+  --theme-soft-text: #7E5E5E;
+  --theme-count-text: #9E7A7A;
+  --theme-shadow: 0 2px 8px rgba(158,122,122,0.3);
+}
+
+/* ================================================================
+   页面布局框架
+   ================================================================ */
+.showcase-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== 侧边导航 ===== */
+.side-nav {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid var(--border-light);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 24px 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 16px;
+}
+.nav-brand h1 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.nav-brand p {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.nav-section {
+  padding: 8px 0;
+}
+.nav-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 20px;
+}
+.nav-item {
+  display: block;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border-left: 2px solid transparent;
+}
+.nav-item:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+.nav-item.active {
+  color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+  border-left-color: var(--theme-primary);
+}
+
+/* ===== 主内容区 ===== */
+.main-content {
+  margin-left: 260px;
+  flex: 1;
+  padding: 40px 48px;
+}
+
+/* ===== 页面头部 ===== */
+.page-hero {
+  text-align: center;
+  padding: 60px 20px 50px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+  border-radius: var(--radius-xl);
+  margin-bottom: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.page-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: var(--theme-gradient);
+  opacity: 0.08;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.page-hero h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  position: relative;
+}
+.page-hero .version-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--theme-soft-bg);
+  color: var(--theme-primary);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  margin-bottom: 16px;
+  position: relative;
+}
+.page-hero p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* 主题切换器 */
+.theme-switcher-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  position: relative;
+}
+.theme-switcher-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+}
+.theme-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.theme-dot:hover {
+  transform: scale(1.1);
+}
+.theme-dot.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--theme-primary);
+}
+.theme-dot[data-theme-target="deep-cyan"] { background: linear-gradient(135deg, #3D3A75, #211E55); }
+.theme-dot[data-theme-target="gray-green"] { background: linear-gradient(135deg, #8A9E8F, #6A8372); }
+.theme-dot[data-theme-target="dusk-purple"] { background: linear-gradient(135deg, #8B7FB3, #70649A); }
+.theme-dot[data-theme-target="warm-brown"] { background: linear-gradient(135deg, #B89595, #9E7A7A); }
+
+/* ===== 章节通用样式 ===== */
+.section {
+  margin-bottom: 60px;
+}
+.section-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+.section-number {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  background: var(--theme-gradient);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  margin-right: 12px;
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+}
+.section-desc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  margin-left: 40px;
+}
+
+/* ===== 组件展示卡片 ===== */
+.component-card {
+  background: #fff;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.component-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.component-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.component-card-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--theme-soft-bg);
+  color: var(--theme-primary);
+  border-radius: var(--radius-xs);
+  font-weight: 500;
+}
+.component-card-body {
+  padding: 24px;
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+.component-preview {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.component-preview-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.component-info {
+  flex: 1;
+}
+.component-info h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.component-info p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.component-info ul {
+  list-style: none;
+  padding: 0;
+}
+.component-info li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  padding-left: 16px;
+  position: relative;
+}
+.component-info li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  background: var(--theme-primary);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* ===== 双列网格 ===== */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ================================================================
+   设计令牌展示
+   ================================================================ */
+
+/* 色板卡片 */
+.color-palette-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-xs);
+  text-align: center;
+}
+.color-swatch-large {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.color-swatch-large::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.1));
+}
+.color-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.color-hex {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* 主题色阶 */
+.color-scale-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+.color-scale-item {
+  flex: 1;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  position: relative;
+}
+.color-scale-item span {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* z-index 层级图 */
+.zindex-visual {
+  position: relative;
+  height: 280px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+.zindex-bar {
+  width: 56px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 10px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  transition: all var(--transition-base);
+  position: relative;
+}
+.zindex-bar:hover {
+  transform: translateY(-4px);
+}
+.zindex-bar .level-num {
+  font-size: 9px;
+  opacity: 0.8;
+  margin-top: 4px;
+  font-family: "SF Mono", monospace;
+}
+.zindex-bar.handles { height: 40px; background: linear-gradient(180deg, #9CA3AF, #6B7280); }
+.zindex-bar.badge { height: 70px; background: linear-gradient(180deg, var(--theme-primary-light), var(--theme-primary)); }
+.zindex-bar.remove { height: 100px; background: linear-gradient(180deg, #F87171, #EF4444); }
+.zindex-bar.panel { height: 150px; background: linear-gradient(180deg, #60A5FA, #3B82F6); }
+.zindex-bar.toolbar { height: 190px; background: linear-gradient(180deg, #34D399, #10B981); }
+.zindex-bar.settings { height: 220px; background: linear-gradient(180deg, #FBBF24, #F59E0B); }
+.zindex-bar.toast { height: 250px; background: linear-gradient(180deg, #A78BFA, #8B5CF6); }
+.zindex-bar.modal { height: 280px; background: linear-gradient(180deg, #F472B6, #EC4899); }
+
+/* 令牌规格表 */
+.token-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.token-spec-table th,
+.token-spec-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+.token-spec-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.token-spec-table td {
+  color: var(--text-primary);
+}
+.token-spec-table .token-name {
+  font-family: "SF Mono", Menlo, monospace;
+  color: var(--theme-primary);
+  font-size: 11px;
+}
+.token-spec-table .token-value {
+  font-family: "SF Mono", Menlo, monospace;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+.token-preview {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xs);
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* ================================================================
+   工具栏 V5 组件样式
+   ================================================================ */
+.hdm-toolbar {
+  width: 300px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  font-family: inherit;
+}
+
+/* 渐变头部 */
+.hdm-toolbar-header {
+  background: var(--theme-gradient);
+  padding: 14px 16px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: #fff;
+}
+.hdm-toolbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.hdm-toolbar-window-ctrl {
+  display: flex;
+  gap: 6px;
+}
+.hdm-ctrl-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background var(--transition-fast);
+}
+.hdm-ctrl-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* 按钮区域 */
+.hdm-toolbar-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 四按钮行 */
+.hdm-btn-row {
+  display: flex;
+  gap: 8px;
+}
+.hdm-action-btn {
+  flex: 1;
+  height: 34px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+.hdm-action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+.hdm-action-btn:active {
+  background: var(--bg-tertiary);
+}
+.hdm-action-btn.active {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+  color: #fff;
+}
+.hdm-action-btn.active:hover {
+  background: var(--theme-primary-dark);
+  border-color: var(--theme-primary-dark);
+}
+.hdm-action-btn.danger {
+  color: var(--error);
+  border-color: var(--error-border);
+}
+.hdm-action-btn.danger:hover {
+  background: var(--error-bg);
+  border-color: #fca5a5;
+}
+
+/* 导出按钮行 */
+.hdm-export-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hdm-side-btn {
+  width: 36px;
+  height: 40px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.hdm-side-btn:hover {
+  border-color: var(--theme-primary-light);
+  color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+}
+.hdm-side-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+.hdm-export-btn {
+  flex: 1;
+  height: 40px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+.hdm-export-btn:hover {
+  border-color: var(--theme-primary-light);
+  color: var(--theme-primary);
+}
+.hdm-export-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+/* 底部信息行 */
+.hdm-toolbar-footer {
+  padding: 8px 14px;
+  background: #fafafa;
+  border-top: 1px solid var(--border-lighter);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hdm-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hdm-kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: "SF Mono", Menlo, monospace;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.hdm-counts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.hdm-counts b {
+  color: var(--theme-count-text);
+  font-weight: 600;
+}
+.hdm-counts-sep { color: #d1d5db; }
+
+/* ================================================================
+   编辑面板 V5 组件样式
+   ================================================================ */
+.hdm-inspector {
+  width: 340px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  font-family: inherit;
+  max-height: 620px;
+  overflow-y: auto;
+}
+
+/* 顶部色条 */
+.hdm-inspector-topline {
+  height: 3px;
+  background: var(--theme-primary);
+}
+
+/* 面板头部 */
+.hdm-inspector-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-lighter);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hdm-inspector-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+/* 选择器徽章（已移除，保留样式兼容） */
+.hdm-inspector-selector {
+  display: none;
+  font-size: 11px;
+  color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: "SF Mono", Menlo, monospace;
+}
+
+/* 分组 */
+.hdm-group {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-lighter);
+}
+.hdm-group:last-child { border-bottom: none; }
+
+.hdm-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.hdm-group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 重置按钮 */
+.hdm-reset-btn {
+  font-size: 11px;
+  color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-fast);
+}
+.hdm-reset-btn:hover { background: #e9e4f3; }
+
+/* 单位切换 */
+.hdm-unit-toggle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hdm-unit-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+}
+.hdm-unit-btn.active {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+  color: #fff;
+}
+
+/* 滑块行 */
+.hdm-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+}
+.hdm-slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.hdm-slider-label { color: var(--text-tertiary); }
+.hdm-slider-value {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", Menlo, monospace;
+  cursor: text;
+  padding: 1px 4px;
+  border-radius: 3px;
+  transition: background var(--transition-fast);
+}
+.hdm-slider-value:hover { background: var(--bg-tertiary); }
+
+/* 滑块数值编辑输入框 */
+.hdm-slider-value-input {
+  width: 52px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1.5px solid var(--theme-primary);
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: "SF Mono", Menlo, monospace;
+  color: var(--text-primary);
+  background: #fff;
+  outline: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px rgba(139,92,246,0.12);
+  margin: -1px 0;
+}
+
+/* 滑块轨道 */
+.hdm-slider-track {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+.hdm-slider-fill {
+  height: 100%;
+  background: var(--theme-primary);
+  border-radius: 2px;
+}
+.hdm-slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border: 2px solid var(--theme-primary);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+
+/* 简单输入行 */
+.hdm-input-row {
+  margin-bottom: 10px;
+}
+.hdm-input-row:last-child { margin-bottom: 0; }
+.hdm-input-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.hdm-text-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: #fff;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+.hdm-text-input:focus {
+  border-color: var(--theme-primary);
+  box-shadow: var(--shadow-focus);
+}
+.hdm-text-input.mono {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 11px;
+}
+
+/* 样式编辑属性行 */
+.hdm-prop-row {
+  margin-bottom: 12px;
+}
+.hdm-prop-row:last-child { margin-bottom: 0; }
+.hdm-prop-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  display: block;
+}
+.hdm-prop-control {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hdm-prop-control .hdm-text-input { flex: 1; height: 30px; }
+
+/* 颜色选择器 */
+.hdm-color-picker {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hdm-color-picker::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 3px;
+  background: var(--theme-primary);
+}
+.hdm-color-picker:hover { border-color: var(--theme-primary); }
+
+/* 属性重置小按钮 */
+.hdm-prop-reset {
+  width: 28px;
+  height: 28px;
+  background: var(--theme-soft-bg);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--theme-primary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.hdm-prop-reset:hover {
+  background: #e9e4f3;
+  color: var(--theme-primary-dark);
+}
+
+/* 下拉选择框 */
+.hdm-select {
+  flex: 1;
+  height: 30px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: #fff;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+}
+.hdm-select:focus {
+  border-color: var(--theme-primary);
+  box-shadow: var(--shadow-focus);
+}
+.hdm-select-wrap {
+  flex: 1;
+  position: relative;
+}
+.hdm-select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--text-tertiary);
+  border-bottom: 1.5px solid var(--text-tertiary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* 添加字体按钮 */
+.hdm-add-font-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: 4px;
+  color: var(--success);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.hdm-add-font-btn:hover { background: #D1FAE5; }
+
+/* 样式统计条 */
+.hdm-style-stats {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--theme-soft-bg);
+  color: var(--theme-soft-text);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 背景图分组 */
+.hdm-bg-image-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+}
+.hdm-bg-image-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hdm-bg-preview {
+  width: 100%;
+  height: 120px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.hdm-bg-info {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+.hdm-bg-info b { color: var(--text-secondary); }
+.hdm-bg-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+.hdm-bg-btn {
+  flex: 1;
+  min-height: 28px;
+  height: auto;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.hdm-bg-btn.primary {
+  background: var(--theme-soft-bg);
+  color: var(--theme-primary);
+  border-color: var(--theme-soft-bg);
+}
+.hdm-bg-btn.primary:hover { opacity: 0.8; }
+.hdm-bg-btn.danger {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error-bg);
+}
+.hdm-bg-btn.danger:hover { opacity: 0.8; }
+.hdm-bg-reset-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* 修改说明文本域 */
+.hdm-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: #fff;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+}
+.hdm-textarea:focus {
+  border-color: var(--theme-primary);
+  box-shadow: var(--shadow-focus);
+}
+.hdm-textarea.mono {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 11px;
+}
+.hdm-textarea.readonly {
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+}
+
+/* 底部操作栏 */
+.hdm-inspector-footer {
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: 10px;
+}
+.hdm-footer-btn {
+  height: 38px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 0 12px;
+}
+.hdm-footer-btn.delete {
+  flex: 1;
+  background: #fff;
+  color: var(--error);
+  border: 1px solid var(--error-border);
+}
+.hdm-footer-btn.delete:hover {
+  background: var(--error-bg);
+}
+.hdm-footer-btn.save {
+  flex: 1.2;
+  background: var(--theme-gradient);
+  color: #fff;
+  box-shadow: var(--theme-shadow);
+}
+.hdm-footer-btn.save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(112,100,154,0.4);
+}
+
+/* 拖拽把手 */
+.hdm-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--theme-primary-light) 50%);
+}
+.hdm-resize-handle:hover {
+  background: linear-gradient(135deg, transparent 50%, var(--theme-primary) 50%);
+}
+
+/* ================================================================
+   元素标记视觉
+   ================================================================ */
+.hdm-mark-demo {
+  width: 260px;
+  height: 180px;
+  background: #f9fafb;
+  border: 1px dashed var(--border-light);
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.hdm-mark-element {
+  position: absolute;
+  left: 60px;
+  top: 50px;
+  width: 140px;
+  height: 80px;
+  background: #fff;
+  border: 2px solid var(--theme-primary);
+  border-radius: 4px;
+}
+
+/* 拖拽把手 */
+.hdm-mark-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border: 1.5px solid var(--theme-primary);
+  border-radius: 2px;
+  z-index: 2;
+}
+.hdm-mark-handle.tl { top: -5px; left: -5px; cursor: nwse-resize; }
+.hdm-mark-handle.tr { top: -5px; right: -5px; cursor: nesw-resize; }
+.hdm-mark-handle.bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.hdm-mark-handle.br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.hdm-mark-handle.t { top: -5px; left: calc(50% - 4px); cursor: ns-resize; }
+.hdm-mark-handle.b { bottom: -5px; left: calc(50% - 4px); cursor: ns-resize; }
+.hdm-mark-handle.l { top: calc(50% - 4px); left: -5px; cursor: ew-resize; }
+.hdm-mark-handle.r { top: calc(50% - 4px); right: -5px; cursor: ew-resize; }
+
+/* 删除角标 */
+.hdm-mark-remove {
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  width: 18px;
+  height: 18px;
+  background: var(--error);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(239,68,68,0.3);
+  z-index: 3;
+}
+
+/* 编号徽章 */
+.hdm-mark-badge {
+  position: absolute;
+  top: -11px;
+  right: -11px;
+  width: 24px;
+  height: 24px;
+  background: var(--theme-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  z-index: 10;
+}
+
+/* 层级关系图 */
+.z-index-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+.z-index-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: var(--shadow-xs);
+}
+.z-index-item .icon-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #fff;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.z-index-item .info {
+  flex: 1;
+}
+.z-index-item .name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.z-index-item .desc {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.z-index-item .level {
+  font-size: 10px;
+  font-family: "SF Mono", monospace;
+  color: var(--text-tertiary);
+}
+
+/* ================================================================
+   设置面板
+   ================================================================ */
+.hdm-settings-panel {
+  width: 260px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  font-family: inherit;
+}
+
+/* 设置头部 */
+.hdm-settings-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-lighter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hdm-settings-header svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+}
+
+/* 开关行 */
+.hdm-switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--border-lighter);
+}
+.hdm-switch-row:last-child { border-bottom: none; }
+.hdm-switch-label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+/* iOS 风格开关 */
+.hdm-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #e5e7eb;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition-base);
+  flex-shrink: 0;
+}
+.hdm-switch.on {
+  background: var(--theme-primary);
+}
+.hdm-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform var(--transition-base);
+}
+.hdm-switch.on .hdm-switch-thumb {
+  transform: translateX(20px);
+}
+
+/* 主题选择区域 */
+.hdm-theme-section {
+  background: #fafafa;
+  border-top: 1px solid var(--border-lighter);
+  padding: 12px 16px;
+}
+.hdm-theme-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.hdm-theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.hdm-theme-card {
+  background: #fff;
+  border: 1.5px solid var(--border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.hdm-theme-card:hover {
+  border-color: var(--border);
+}
+.hdm-theme-card.active {
+  border-color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+}
+.hdm-theme-preview {
+  height: 32px;
+  border-radius: 6px 6px 0 0;
+}
+.hdm-theme-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  padding: 6px 8px 2px;
+}
+.hdm-theme-hex {
+  font-size: 10px;
+  font-family: "SF Mono", monospace;
+  color: var(--text-tertiary);
+  padding: 0 8px 8px;
+}
+
+/* 自定义颜色 */
+.hdm-custom-color-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hdm-custom-color-preview {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.hdm-custom-color-input {
+  flex: 1;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: "SF Mono", monospace;
+  outline: none;
+  background: #fff;
+}
+.hdm-custom-color-input:focus {
+  border-color: var(--theme-primary);
+}
+.hdm-custom-color-apply {
+  width: 28px;
+  height: 28px;
+  background: var(--theme-primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   Toast 通知
+   ================================================================ */
+.hdm-toast-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hdm-toast {
+  width: 300px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-family: inherit;
+  position: relative;
+}
+.hdm-toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 6px 0 0 6px;
+}
+.hdm-toast-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.hdm-toast-text {
+  flex: 1;
+}
+.hdm-toast--success {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+.hdm-toast--success::before { background: var(--success); }
+.hdm-toast--success .hdm-toast-icon { color: var(--success); }
+
+.hdm-toast--warning {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+.hdm-toast--warning::before { background: var(--warning); }
+.hdm-toast--warning .hdm-toast-icon { color: var(--warning); }
+
+.hdm-toast--error {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+.hdm-toast--error::before { background: var(--error); }
+.hdm-toast--error .hdm-toast-icon { color: var(--error); }
+
+.hdm-toast--info {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+.hdm-toast--info::before { background: var(--info); }
+.hdm-toast--info .hdm-toast-icon { color: var(--info); }
+
+/* ================================================================
+   模态弹窗
+   ================================================================ */
+.hdm-modal-demo {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.hdm-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hdm-modal {
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-modal);
+  font-family: inherit;
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.hdm-modal-header {
+  background: var(--theme-gradient);
+  padding: 14px 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.hdm-modal-body {
+  padding: 20px;
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+.hdm-modal-footer {
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.hdm-modal-btn {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hdm-modal-btn.cancel {
+  background: #fff;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.hdm-modal-btn.cancel:hover { background: var(--bg-hover); }
+.hdm-modal-btn.confirm {
+  background: var(--theme-gradient);
+  color: #fff;
+}
+.hdm-modal-btn.confirm:hover { opacity: 0.9; }
+
+/* ================================================================
+   多选工具栏 & 唤醒按钮
+   ================================================================ */
+.hdm-multi-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+.hdm-multi-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hdm-multi-btn.primary {
+  background: var(--theme-gradient);
+  color: #fff;
+}
+.hdm-multi-btn.secondary {
+  background: #fff;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.hdm-multi-btn.secondary:hover { background: var(--bg-hover); }
+.hdm-multi-btn.danger {
+  background: #fff;
+  color: var(--error);
+  border: 1px solid var(--error-border);
+}
+.hdm-multi-btn.danger:hover { background: var(--error-bg); }
+.hdm-multi-btn.ghost {
+  background: transparent;
+  color: var(--text-tertiary);
+}
+.hdm-multi-btn.ghost:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.hdm-multi-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding-left: 4px;
+  border-left: 1px solid var(--border-light);
+  margin-left: 4px;
+}
+.hdm-multi-count b {
+  color: var(--theme-primary);
+  font-weight: 500;
+}
+
+.hdm-wake-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--theme-gradient);
+  box-shadow: 0 6px 20px rgba(112,100,154,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.hdm-wake-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(112,100,154,0.5);
+}
+.hdm-wake-btn:active { transform: scale(0.95); }
+.hdm-wake-btn svg { width: 18px; height: 18px; }
+
+/* ================================================================
+   页面底部
+   ================================================================ */
+.page-footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  border-top: 1px solid var(--border-light);
+  margin-top: 60px;
+}
+.page-footer strong {
+  color: var(--text-secondary);
+}
+
+/* ================================================================
+   自定义复选框
+   ================================================================ */
+.hdm-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+.hdm-checkbox {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.hdm-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  margin: 0;
+}
+.hdm-checkbox-box {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 3px;
+  background: #fff;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hdm-checkbox input:checked + .hdm-checkbox-box {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+}
+.hdm-checkbox input:checked + .hdm-checkbox-box::after {
+  content: '';
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.hdm-checkbox input:hover + .hdm-checkbox-box {
+  border-color: var(--theme-primary);
+}
+.hdm-checkbox input:disabled + .hdm-checkbox-box {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.hdm-checkbox-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* ================================================================
+   尺寸信息浮窗
+   ================================================================ */
+.hdm-size-tooltip {
+  background: rgba(30, 27, 75, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  pointer-events: none;
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+.hdm-size-tooltip span {
+  opacity: 0.7;
+  font-weight: 400;
+  margin: 0 2px;
+}
+
+/* ================================================================
+   对齐辅助线
+   ================================================================ */
+.hdm-align-guides-demo {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hdm-guide-line-v {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background: #EF4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+  top: 0;
+}
+.hdm-guide-line-h {
+  position: absolute;
+  height: 1px;
+  width: 100%;
+  background: #EF4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+  left: 0;
+}
+.hdm-guide-demo-box {
+  position: absolute;
+  width: 60px;
+  height: 40px;
+  background: #fff;
+  border: 1px solid var(--theme-primary);
+  border-radius: 4px;
+}
+
+/* ================================================================
+   字体三态提示条
+   ================================================================ */
+.hdm-font-hint {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.hdm-font-hint-icon {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.hdm-font-hint-text {
+  flex: 1;
+}
+.hdm-font-hint--warning {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+}
+.hdm-font-hint--info {
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+}
+.hdm-font-hint--success {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
+}
+.hdm-font-del-btn {
+  width: 100%;
+  height: 28px;
+  margin-top: 6px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 4px;
+  color: var(--error);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+.hdm-font-del-btn:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+}
+
+/* ===== 滚动条美化 ===== */
+.hdm-inspector::-webkit-scrollbar,
+.side-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.hdm-inspector::-webkit-scrollbar-track,
+.side-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hdm-inspector::-webkit-scrollbar-thumb,
+.side-nav::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+.hdm-inspector::-webkit-scrollbar-thumb:hover,
+.side-nav::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 1200px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .side-nav { display: none; }
+  .main-content { margin-left: 0; padding: 24px; }
+  .component-card-body { flex-direction: column; }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-theme="dusk-purple">
+
+<!-- ===== 侧边导航 ===== -->
+<nav class="side-nav">
+  <div class="nav-brand">
+    <h1>HTML Diff Marker</h1>
+    <p>UI 设计系统 · V5.2</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">设计基础</div>
+    <a href="#design-tokens" class="nav-item active">设计令牌</a>
+    <a href="#color-system" class="nav-item">颜色系统</a>
+    <a href="#zindex-layer" class="nav-item">Z-Index 层级</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">核心组件</div>
+    <a href="#toolbar" class="nav-item">工具栏 V5</a>
+    <a href="#inspector" class="nav-item">编辑面板 V5</a>
+    <a href="#mark-element" class="nav-item">元素标记</a>
+    <a href="#settings" class="nav-item">设置面板</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">反馈与交互</div>
+    <a href="#toast" class="nav-item">Toast 通知</a>
+    <a href="#modal" class="nav-item">模态弹窗</a>
+    <a href="#other-components" class="nav-item">其他组件</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">交互逻辑</div>
+    <a href="#theme-logic" class="nav-item">主题切换机制</a>
+    <a href="#slider-logic" class="nav-item">滑块交互逻辑</a>
+  </div>
+</nav>
+
+<!-- ===== 主内容区 ===== -->
+<main class="main-content">
+
+  <!-- 页面顶部 -->
+  <section class="page-hero">
+    <span class="version-tag">V5.2 最终版</span>
+    <h1>HTML Diff Marker UI 设计系统</h1>
+    <p>完整的产品 UI 设计路演手册 — 覆盖设计令牌、核心组件、交互逻辑与四套主题</p>
+    <div class="theme-switcher-bar">
+      <span class="theme-switcher-label">切换主题预览：</span>
+      <div class="theme-dot active" data-theme-target="dusk-purple" title="暮紫（默认）"></div>
+      <div class="theme-dot" data-theme-target="deep-cyan" title="深藏青"></div>
+      <div class="theme-dot" data-theme-target="gray-green" title="灰绿"></div>
+      <div class="theme-dot" data-theme-target="warm-brown" title="暖棕"></div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       1. 设计令牌
+       ================================================================ -->
+  <section id="design-tokens" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">1</span>设计令牌 Design Tokens</h2>
+      <p class="section-desc">设计系统的原子单位，所有组件均基于以下令牌构建，确保视觉一致性</p>
+    </div>
+
+    <!-- 颜色系统 -->
+    <div id="color-system" class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">颜色系统 — 四套预设主题</span>
+        <span class="component-card-tag">Theming</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-info" style="flex: 1; min-width: 260px;">
+          <h4>主题化架构</h4>
+          <p>基于 CSS 变量的主题系统，通过 <code style="font-size:11px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">data-theme</code> 属性切换，支持四套预设 + 自定义颜色。</p>
+          <ul>
+            <li>8 个主题变量统一管理主色、浅色、深色、渐变、柔和背景等</li>
+            <li>自定义主题通过 HSL 色彩空间计算衍生色，本地完成无网络依赖</li>
+            <li>优先级：内联自定义 > data-theme 预设 > :root 默认</li>
+            <li>纯黑/纯白极端颜色有兜底保护机制</li>
+          </ul>
+          <h4 style="margin-top: 16px;">主题色阶说明</h4>
+          <p>每套主题包含 5 个关键色阶：主色（Primary）、浅色（Light）、深色（Dark）、柔和背景（Soft BG）、渐变（Gradient）。</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; flex: 1.5; min-width: 300px;">
+          <div class="grid-4">
+            <div class="color-palette-card">
+              <div class="color-swatch-large" style="background: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);"></div>
+              <div class="color-name">深藏青</div>
+              <div class="color-hex">#211E55</div>
+              <div class="color-scale-row">
+                <div class="color-scale-item" style="background: #EDECF5;"><span>soft</span></div>
+                <div class="color-scale-item" style="background: #3D3A75;"><span>light</span></div>
+                <div class="color-scale-item" style="background: #211E55;"><span>main</span></div>
+                <div class="color-scale-item" style="background: #15133D;"><span>dark</span></div>
+              </div>
+            </div>
+            <div class="color-palette-card">
+              <div class="color-swatch-large" style="background: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);"></div>
+              <div class="color-name">灰绿</div>
+              <div class="color-hex">#6A8372</div>
+              <div class="color-scale-row">
+                <div class="color-scale-item" style="background: #EEF2EF;"><span>soft</span></div>
+                <div class="color-scale-item" style="background: #8A9E8F;"><span>light</span></div>
+                <div class="color-scale-item" style="background: #6A8372;"><span>main</span></div>
+                <div class="color-scale-item" style="background: #526958;"><span>dark</span></div>
+              </div>
+            </div>
+            <div class="color-palette-card">
+              <div class="color-swatch-large" style="background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);"></div>
+              <div class="color-name">暮紫 <span style="font-size: 9px; background: var(--theme-soft-bg); color: var(--theme-primary); padding: 1px 4px; border-radius: 3px;">默认</span></div>
+              <div class="color-hex">#70649A</div>
+              <div class="color-scale-row">
+                <div class="color-scale-item" style="background: #F0EEF7;"><span>soft</span></div>
+                <div class="color-scale-item" style="background: #8B7FB3;"><span>light</span></div>
+                <div class="color-scale-item" style="background: #70649A;"><span>main</span></div>
+                <div class="color-scale-item" style="background: #5A4F7D;"><span>dark</span></div>
+              </div>
+            </div>
+            <div class="color-palette-card">
+              <div class="color-swatch-large" style="background: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);"></div>
+              <div class="color-name">暖棕</div>
+              <div class="color-hex">#9E7A7A</div>
+              <div class="color-scale-row">
+                <div class="color-scale-item" style="background: #F5EFEF;"><span>soft</span></div>
+                <div class="color-scale-item" style="background: #B89595;"><span>light</span></div>
+                <div class="color-scale-item" style="background: #9E7A7A;"><span>main</span></div>
+                <div class="color-scale-item" style="background: #7E5E5E;"><span>dark</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Z-Index 层级 -->
+    <div id="zindex-layer" class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">Z-Index 统一层级体系</span>
+        <span class="component-card-tag">Layout</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview" style="flex: 1.2;">
+          <div class="zindex-visual">
+            <div class="zindex-bar handles">
+              把手
+              <span class="level-num">+0</span>
+            </div>
+            <div class="zindex-bar badge">
+              徽章
+              <span class="level-num">+10</span>
+            </div>
+            <div class="zindex-bar remove">
+              删除
+              <span class="level-num">+20</span>
+            </div>
+            <div class="zindex-bar panel">
+              编辑面板
+              <span class="level-num">+500</span>
+            </div>
+            <div class="zindex-bar toolbar">
+              工具栏
+              <span class="level-num">+600</span>
+            </div>
+            <div class="zindex-bar settings">
+              设置面板
+              <span class="level-num">+650</span>
+            </div>
+            <div class="zindex-bar toast">
+              Toast
+              <span class="level-num">+680</span>
+            </div>
+            <div class="zindex-bar modal">
+              模态弹窗
+              <span class="level-num">+700</span>
+            </div>
+          </div>
+          <div class="component-preview-label">双层架构：Floating 层（把手/徽章/删除） + Base 层（面板/工具栏/设置/Toast/模态）</div>
+        </div>
+        <div class="component-info">
+          <h4>双层架构设计</h4>
+          <p>以 <code style="font-size:11px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">--z-base</code> 和 <code style="font-size:11px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">--z-floating</code> 为双基准值（初始均为 2147483000），浮层组件基于 floating 计算，面板组件基于 base 计算，确保层级隔离。</p>
+          <ul>
+            <li><strong>Floating 层</strong>：把手（+0）→ 徽章（+10）→ 删除角标（+20），差 10 级</li>
+            <li><strong>Base 层 - 面板</strong>：编辑面板，+500 基线上浮</li>
+            <li><strong>Base 层 - 工具栏</strong>：始终在编辑面板之上，+600</li>
+            <li><strong>Base 层 - 设置面板</strong>：从工具栏弹出，在工具栏之上，+650</li>
+            <li><strong>Base 层 - Toast</strong>：全局通知，+680</li>
+            <li><strong>Base 层 - 模态</strong>：最高层级，+700</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 其他令牌规格 -->
+    <div class="grid-2">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">圆角 & 阴影</span>
+          <span class="component-card-tag">Shape</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column;">
+          <table class="token-spec-table">
+            <thead>
+              <tr><th>类别</th><th>变量名</th><th>值</th><th>预览</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="4">圆角</td>
+                <td class="token-name">--radius-xs</td>
+                <td class="token-value">4px</td>
+                <td><span class="token-preview" style="border-radius: 4px; background: var(--theme-primary-light);"></span></td>
+              </tr>
+              <tr>
+                <td class="token-name">--radius-md</td>
+                <td class="token-value">8px</td>
+                <td><span class="token-preview" style="border-radius: 8px; background: var(--theme-primary-light);"></span></td>
+              </tr>
+              <tr>
+                <td class="token-name">--radius-lg</td>
+                <td class="token-value">10px</td>
+                <td><span class="token-preview" style="border-radius: 10px; background: var(--theme-primary-light);"></span></td>
+              </tr>
+              <tr>
+                <td class="token-name">--radius-full</td>
+                <td class="token-value">9999px</td>
+                <td><span class="token-preview" style="border-radius: 50%; background: var(--theme-primary-light);"></span></td>
+              </tr>
+              <tr>
+                <td rowspan="3">阴影</td>
+                <td class="token-name">--shadow-sm</td>
+                <td class="token-value">0 1px 3px</td>
+                <td><span class="token-preview" style="box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: #fff;"></span></td>
+              </tr>
+              <tr>
+                <td class="token-name">--shadow-md</td>
+                <td class="token-value">0 4px 12px</td>
+                <td><span class="token-preview" style="box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: #fff;"></span></td>
+              </tr>
+              <tr>
+                <td class="token-name">--theme-shadow</td>
+                <td class="token-value">主题色阴影</td>
+                <td><span class="token-preview" style="box-shadow: var(--theme-shadow); background: #fff;"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">间距 & 字体</span>
+          <span class="component-card-tag">Typography</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column;">
+          <table class="token-spec-table">
+            <thead>
+              <tr><th>类别</th><th>变量名</th><th>值</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="4">间距</td>
+                <td class="token-name">--space-2</td>
+                <td class="token-value">8px</td>
+              </tr>
+              <tr>
+                <td class="token-name">--space-3</td>
+                <td class="token-value">12px</td>
+              </tr>
+              <tr>
+                <td class="token-name">--space-4</td>
+                <td class="token-value">16px</td>
+              </tr>
+              <tr>
+                <td class="token-name">--space-5</td>
+                <td class="token-value">20px</td>
+              </tr>
+              <tr>
+                <td rowspan="4">字号</td>
+                <td class="token-name">xs</td>
+                <td class="token-value">10px (辅助/说明)</td>
+              </tr>
+              <tr>
+                <td class="token-name">sm</td>
+                <td class="token-value">12px (正文/标签)</td>
+              </tr>
+              <tr>
+                <td class="token-name">base</td>
+                <td class="token-value">13px (按钮/标题)</td>
+              </tr>
+              <tr>
+                <td class="token-name">lg</td>
+                <td class="token-value">15px (工具栏标题)</td>
+              </tr>
+              <tr>
+                <td rowspan="2">过渡</td>
+                <td class="token-name">--transition-fast</td>
+                <td class="token-value">120ms</td>
+              </tr>
+              <tr>
+                <td class="token-name">--transition-base</td>
+                <td class="token-value">180ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       2. 工具栏 V5
+       ================================================================ -->
+  <section id="toolbar" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">2</span>工具栏 Toolbar V5</h2>
+      <p class="section-desc">Mac 风格渐变头部 + 四操作按钮 + 导出行 + 底部信息栏</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">工具栏完整结构</span>
+        <span class="component-card-tag">Core Component</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-toolbar">
+            <div class="hdm-toolbar-header">
+              <div class="hdm-toolbar-title">HTML Diff Marker</div>
+              <div class="hdm-toolbar-window-ctrl">
+                <button class="hdm-ctrl-btn">−</button>
+                <button class="hdm-ctrl-btn">×</button>
+              </div>
+            </div>
+            <div class="hdm-toolbar-body">
+              <div class="hdm-btn-row">
+                <button class="hdm-action-btn active">选择</button>
+                <button class="hdm-action-btn">复制</button>
+                <button class="hdm-action-btn">新增</button>
+                <button class="hdm-action-btn danger">删除</button>
+              </div>
+              <div class="hdm-export-row">
+                <button class="hdm-side-btn" title="重置">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                </button>
+                <button class="hdm-export-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 19V5"/>
+                    <path d="m5 12 7-7 7 7"/>
+                  </svg>
+                  导出 Diff
+                </button>
+                <button class="hdm-side-btn" title="设置">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="hdm-toolbar-footer">
+              <div class="hdm-shortcut">
+                <span class="hdm-kbd">⌥</span>
+                <span>快速选择</span>
+              </div>
+              <div class="hdm-counts">
+                <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+              </div>
+            </div>
+          </div>
+          <div class="component-preview-label">默认状态 · 暮紫主题</div>
+        </div>
+        <div class="component-info">
+          <h4>四层结构设计</h4>
+          <ul>
+            <li><strong>渐变头部</strong>：Mac 风格窗口控制，135° 渐变背景，<strong>可拖拽移动整个工具栏</strong>（按住头部拖动）</li>
+            <li><strong>操作按钮行</strong>：选择 / 复制 / 新增 / 删除，四按钮等宽，选中态主色填充</li>
+            <li><strong>导出行</strong>：左侧重置（方按钮）+ 中间导出 + 右侧设置（方按钮）</li>
+            <li><strong>底部信息栏</strong>：左快捷键提示 + 右计数（标记数 · 修改数）</li>
+          </ul>
+          <h4 style="margin-top: 16px;">交互逻辑</h4>
+          <ul>
+            <li>选择按钮为三态切换：选择模式 ↔ 编辑模式 ↔ 最小化</li>
+            <li>删除按钮使用危险态样式（红色系），点击前需确认</li>
+            <li>⌥ 快捷键全局触发选择模式</li>
+            <li>计数实时同步标记/修改状态，数字使用等宽字体</li>
+          </ul>
+          <h4 style="margin-top: 16px;">拖拽与收起</h4>
+          <ul>
+            <li><strong>拖拽移动</strong>：按住渐变头部可自由拖动工具栏到页面任意位置</li>
+            <li><strong>最小化/收起</strong>：点击头部左侧「−」按钮，工具栏收起为仅显示标题栏的状态；再次点击「+」展开</li>
+            <li><strong>边界约束</strong>：拖拽时有视口边界检测，不会拖出屏幕</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">按钮五态</span>
+          <span class="component-card-tag">States</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 12px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="hdm-action-btn" style="flex: 0 0 80px;">默认</button>
+            <span style="font-size: 11px; color: var(--text-tertiary);">白底 + 浅灰边</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="hdm-action-btn" style="flex: 0 0 80px; background: var(--bg-hover); border-color: #d1d5db;">Hover</button>
+            <span style="font-size: 11px; color: var(--text-tertiary);">背景变深 + 边框变深</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="hdm-action-btn active" style="flex: 0 0 80px;">选中</button>
+            <span style="font-size: 11px; color: var(--text-tertiary);">主色填充 + 白字</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="hdm-action-btn danger" style="flex: 0 0 80px;">危险</button>
+            <span style="font-size: 11px; color: var(--text-tertiary);">红字 + 红边 + 浅红底 hover</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="hdm-action-btn" style="flex: 0 0 80px; background: #F3F4F6; color: var(--text-disabled); cursor: not-allowed;" disabled>禁用</button>
+            <span style="font-size: 11px; color: var(--text-tertiary);">灰底 + 灰字 + 不可点</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">导出按钮行详解</span>
+          <span class="component-card-tag">Layout</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <p style="font-size: 12px; color: var(--text-secondary);">两侧 36×40px 方按钮 + 中间弹性导出按钮，统一 6px 圆角，1.5px 边框。</p>
+          <div style="display: flex; gap: 8px;">
+            <button class="hdm-side-btn" title="重置全部">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; color: var(--text-tertiary); line-height: 1.4;">
+              重置按钮：点击清空所有标记
+            </div>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; color: var(--text-tertiary); line-height: 1.4;">
+              设置按钮：弹出设置面板
+            </div>
+          </div>
+          <p style="font-size: 11px; color: var(--text-tertiary);">Hover 效果：边框变主色浅色、文字变主色、背景变柔和主题色</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       3. 编辑面板 V5
+       ================================================================ -->
+  <section id="inspector" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">3</span>编辑面板 Inspector V5</h2>
+      <p class="section-desc">全滑块化交互 + 7 大编辑分组 + 11 个样式属性精确控制</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">编辑面板完整展示 — 上半部分</span>
+        <span class="component-card-tag">Core Component</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-inspector" style="position: relative;">
+            <div class="hdm-inspector-topline"></div>
+            <div class="hdm-inspector-header">
+              <div class="hdm-inspector-title">元素编辑</div>
+              <span class="hdm-inspector-selector">#btn-primary</span>
+            </div>
+
+            <!-- 组件标签 -->
+            <div class="hdm-group">
+              <div class="hdm-input-row">
+                <label class="hdm-input-label">组件标签</label>
+                <input type="text" class="hdm-text-input" value="主按钮" placeholder="输入自定义标签名...">
+              </div>
+            </div>
+
+            <!-- 位置调整 -->
+            <div class="hdm-group">
+              <div class="hdm-group-header">
+                <div class="hdm-group-title">位置调整</div>
+                <button class="hdm-reset-btn">重置</button>
+              </div>
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">X（左偏移）</span>
+                  <span class="hdm-slider-value">0px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 50%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 50%;"></div>
+                </div>
+              </div>
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">Y（上偏移）</span>
+                  <span class="hdm-slider-value">0px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 50%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 50%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 大小调整 -->
+            <div class="hdm-group">
+              <div class="hdm-group-header">
+                <div class="hdm-group-title">大小调整</div>
+                <div class="hdm-unit-toggle">
+                  <button class="hdm-unit-btn active">px</button>
+                  <button class="hdm-unit-btn">%</button>
+                  <button class="hdm-reset-btn">重置</button>
+                </div>
+              </div>
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">宽度</span>
+                  <span class="hdm-slider-value">86px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 35%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 35%;"></div>
+                </div>
+              </div>
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">高度</span>
+                  <span class="hdm-slider-value">36px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 20%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 20%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hdm-inspector-footer">
+              <button class="hdm-footer-btn delete">删除标记</button>
+              <button class="hdm-footer-btn save">保存修改</button>
+            </div>
+            <div class="hdm-resize-handle"></div>
+          </div>
+          <div class="component-preview-label">位置 + 大小分组</div>
+        </div>
+        <div class="component-info">
+          <h4>面板结构总览</h4>
+          <p>编辑面板是最核心的交互组件，包含 7 大编辑分组，覆盖从定位到样式的完整编辑能力。</p>
+          <ul>
+            <li><strong>顶部色条</strong>：3px 主色条，视觉锚点</li>
+            <li><strong>面板头部</strong>：「元素编辑」标题 + 折叠指示箭头，<strong>可拖拽移动整个面板</strong></li>
+            <li><strong>分组结构</strong>：每组独立标题 + 右上角重置按钮</li>
+            <li><strong>滑块交互</strong>：拖动实时更新，<strong>双击数值可精确输入</strong>（Enter 确认，Esc 取消）</li>
+            <li><strong>底部操作栏</strong>：删除标记 + 保存修改双按钮</li>
+            <li><strong>拖拽调整</strong>：右下角三角把手可调整面板大小</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">滑块交互三方式</h4>
+          <ul>
+            <li><strong>拖动滑块</strong>：实时预览，最直觉的调节方式</li>
+            <li><strong>双击数值</strong>：切换为输入框，Enter 确认，Esc 取消，失焦自动确认</li>
+            <li><strong>滚轮微调</strong>：Hover 在滑块上时滚轮 ±1px 微调</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">单位切换</h4>
+          <p>大小调整支持 px / % 双单位切换，切换时数值自动换算，滑块范围自适应。</p>
+
+          <h4 style="margin-top: 16px;">拖拽与折叠</h4>
+          <ul>
+            <li><strong>拖拽移动</strong>：按住面板头部可自由拖动编辑面板到页面任意位置</li>
+            <li><strong>折叠/展开</strong>：点击面板头部可折叠内容区，仅保留头部；再次点击展开</li>
+            <li><strong>重置按钮</strong>：所有重置按钮（↺ 图标）使用主题色，与整体视觉统一</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 样式编辑分组 -->
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">样式编辑 — 11 个属性精确控制</span>
+        <span class="component-card-tag">Advanced</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-inspector" style="width: 340px;">
+            <div class="hdm-inspector-topline"></div>
+            <div class="hdm-inspector-header">
+              <div class="hdm-inspector-title">元素编辑</div>
+              <span class="hdm-inspector-selector">#btn-primary</span>
+            </div>
+
+            <!-- 文字样式 -->
+            <div class="hdm-group">
+              <div class="hdm-group-header">
+                <div class="hdm-group-title">文字样式</div>
+                <button class="hdm-reset-btn">重置</button>
+              </div>
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">字号</span>
+                  <span class="hdm-slider-value">14px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 45%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 45%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 样式编辑 -->
+            <div class="hdm-group">
+              <div class="hdm-group-header">
+                <div class="hdm-group-title">样式编辑</div>
+                <button class="hdm-reset-btn">重置全部</button>
+              </div>
+
+              <!-- 背景颜色 -->
+              <div class="hdm-prop-row">
+                <label class="hdm-prop-label">背景颜色</label>
+                <div class="hdm-prop-control">
+                  <div class="hdm-color-picker"></div>
+                  <input type="text" class="hdm-text-input mono" value="#FFFFFF">
+                  <button class="hdm-prop-reset" title="重置此属性">↺</button>
+                </div>
+              </div>
+
+              <!-- 文本颜色 -->
+              <div class="hdm-prop-row">
+                <label class="hdm-prop-label">文本颜色</label>
+                <div class="hdm-prop-control">
+                  <div class="hdm-color-picker" style="--theme-primary: #1F2937;"></div>
+                  <input type="text" class="hdm-text-input mono" value="#1F2937">
+                  <button class="hdm-prop-reset" title="重置此属性">↺</button>
+                </div>
+              </div>
+
+              <!-- 字体 -->
+              <div class="hdm-prop-row">
+                <label class="hdm-prop-label">字体</label>
+                <div class="hdm-prop-control">
+                  <div class="hdm-select-wrap">
+                    <select class="hdm-select">
+                      <option>继承</option>
+                      <option>系统默认</option>
+                    </select>
+                  </div>
+                  <button class="hdm-add-font-btn" title="添加自定义字体">+</button>
+                  <button class="hdm-prop-reset" title="重置此属性">↺</button>
+                </div>
+              </div>
+
+              <!-- 字体粗细 -->
+              <div class="hdm-prop-row">
+                <label class="hdm-prop-label">字体粗细</label>
+                <div class="hdm-prop-control">
+                  <div class="hdm-select-wrap">
+                    <select class="hdm-select">
+                      <option>继承</option>
+                      <option>400 正常</option>
+                      <option>600 半粗</option>
+                      <option>700 粗体</option>
+                    </select>
+                  </div>
+                  <button class="hdm-prop-reset" title="重置此属性">↺</button>
+                </div>
+              </div>
+
+              <!-- 字号 -->
+              <div class="hdm-prop-row">
+                <label class="hdm-prop-label">字号</label>
+                <div class="hdm-prop-control">
+                  <input type="text" class="hdm-text-input mono" value="14px">
+                  <button class="hdm-prop-reset" title="重置此属性">↺</button>
+                </div>
+              </div>
+
+              <div class="hdm-style-stats">已修改 3 个样式属性</div>
+            </div>
+          </div>
+          <div class="component-preview-label">样式编辑分组（部分）</div>
+        </div>
+        <div class="component-info">
+          <h4>11 个样式属性清单</h4>
+          <p>覆盖颜色、文字、盒模型、布局、视觉五大类，每个属性都有独立的重置按钮。</p>
+          <ul>
+            <li><strong>颜色类</strong>：背景颜色、文本颜色</li>
+            <li><strong>文字类</strong>：字体、字体粗细、字号</li>
+            <li><strong>盒模型类</strong>：内边距、外边距、圆角、边框</li>
+            <li><strong>布局类</strong>：显示方式</li>
+            <li><strong>视觉类</strong>：不透明度</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">控件类型</h4>
+          <ul>
+            <li><strong>颜色选择器</strong>：色块 + 文本输入联动，支持原生 picker</li>
+            <li><strong>下拉选择</strong>：自定义美化，右侧 Chevron 箭头</li>
+            <li><strong>文本输入</strong>：等宽字体，支持精确值 + 单位</li>
+            <li><strong>重置按钮</strong>：↺ 符号，<strong>主题色浅底</strong>，与整体视觉统一，tooltip 提示</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">字号双重控制</h4>
+          <p>「文字样式」分组的字号滑块与「样式编辑」的字号输入框实时联动：滑块拖动时输入框同步更新，输入框修改时滑块位置同步（若在范围内）。</p>
+
+          <h4 style="margin-top: 16px;">样式统计条</h4>
+          <p>分组底部显示已修改的属性数量，使用柔和主题色背景，帮助用户了解修改程度。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 背景图 + 修改说明 + HTML编辑 -->
+    <div class="grid-2">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">背景图分组（垂直布局）</span>
+          <span class="component-card-tag">Feature</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column;">
+          <div class="hdm-group" style="padding: 0;">
+            <div class="hdm-group-header">
+              <div class="hdm-group-title">背景图片</div>
+            </div>
+            <div class="hdm-bg-image-wrap">
+              <div class="hdm-bg-image-main">
+                <div class="hdm-bg-preview" style="background-image: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);">
+                </div>
+                <div class="hdm-bg-info">
+                  <b>已上传图片</b><br>
+                  大小: 45.2 KB
+                </div>
+                <div class="hdm-bg-buttons">
+                  <button class="hdm-bg-btn primary">选择本地图片</button>
+                  <button class="hdm-bg-btn danger">移除背景图</button>
+                </div>
+              </div>
+              <div class="hdm-bg-reset-wrap">
+                <button class="hdm-prop-reset" title="重置">↺</button>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 11px; color: var(--warning-text); background: var(--warning-bg); padding: 6px 10px; border-radius: 4px; margin-top: 8px;">
+            ⚠ 未保存（刷新后丢失）
+          </p>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">修改说明 & HTML 编辑</span>
+          <span class="component-card-tag">Feature</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <div>
+            <label class="hdm-prop-label" style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">修改说明（给 AI Agent 看）</label>
+            <textarea class="hdm-textarea" placeholder="描述你的修改意图，支持 Markdown 链接格式...">将按钮背景色改为暮紫色，添加 8px 内边距</textarea>
+          </div>
+          <div>
+            <label class="hdm-prop-label" style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">原始 HTML（参考）</label>
+            <textarea class="hdm-textarea mono readonly" readonly>&lt;button id="btn-primary" class="btn"&gt;确认&lt;/button&gt;</textarea>
+          </div>
+          <div>
+            <label class="hdm-prop-label" style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">修改后的 HTML</label>
+            <textarea class="hdm-textarea mono" placeholder="在此输入修改后的 HTML 代码...">&lt;button id="btn-primary" class="btn" style="background:#70649A;color:#fff;padding:8px;"&gt;确认&lt;/button&gt;</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       4. 元素标记视觉
+       ================================================================ -->
+  <section id="mark-element" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">4</span>元素标记视觉 Element Mark</h2>
+      <p class="section-desc">徽章 + 把手 + 删除角标的三层级浮层系统</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">元素标记完整视觉</span>
+        <span class="component-card-tag">Visual</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-mark-demo">
+            标记元素示意
+            <div class="hdm-mark-element">
+              <div class="hdm-mark-remove">×</div>
+              <div class="hdm-mark-badge">1</div>
+              <div class="hdm-mark-handle tl"></div>
+              <div class="hdm-mark-handle t"></div>
+              <div class="hdm-mark-handle tr"></div>
+              <div class="hdm-mark-handle r"></div>
+              <div class="hdm-mark-handle br"></div>
+              <div class="hdm-mark-handle b"></div>
+              <div class="hdm-mark-handle bl"></div>
+              <div class="hdm-mark-handle l"></div>
+            </div>
+          </div>
+          <div class="component-preview-label">8 方向把手 + 徽章 + 删除角标</div>
+        </div>
+        <div class="component-info">
+          <h4>三层 z-index 结构</h4>
+          <div class="z-index-diagram" style="margin-top: 8px;">
+            <div class="z-index-item">
+              <div class="icon-circle" style="background: #6B7280;">⬜</div>
+              <div class="info">
+                <div class="name">拖拽把手（8 方向）</div>
+                <div class="desc">最底层，元素边框上的方形控制点</div>
+              </div>
+              <div class="level">z +0</div>
+            </div>
+            <div class="z-index-item">
+              <div class="icon-circle" style="background: var(--error);">×</div>
+              <div class="info">
+                <div class="name">删除角标</div>
+                <div class="desc">左上角红色圆形，点击删除标记</div>
+              </div>
+              <div class="level">z +20</div>
+            </div>
+            <div class="z-index-item">
+              <div class="icon-circle" style="background: var(--theme-primary);">1</div>
+              <div class="info">
+                <div class="name">编号徽章</div>
+                <div class="desc">右上角主色圆形，显示标记编号</div>
+              </div>
+              <div class="level">z +10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">编号徽章</span>
+          <span class="component-card-tag">24px</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; align-items: center; gap: 12px;">
+          <div style="position: relative; width: 100px; height: 60px; border: 2px solid var(--theme-primary); border-radius: 4px;">
+            <div class="hdm-mark-badge" style="position: absolute; top: -11px; right: -11px;">1</div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6;">
+            <p><strong>尺寸</strong>：24×24px 圆形</p>
+            <p><strong>位置</strong>：右上角 -11px 偏移</p>
+            <p><strong>颜色</strong>：主色填充 / 修改态橙色</p>
+            <p><strong>字号</strong>：11px bold 白色</p>
+            <p><strong>交互</strong>：点击选中元素，hover 放大</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">删除角标</span>
+          <span class="component-card-tag">18px</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; align-items: center; gap: 12px;">
+          <div style="position: relative; width: 100px; height: 60px; border: 2px solid var(--theme-primary); border-radius: 4px;">
+            <div class="hdm-mark-remove" style="position: absolute; top: -9px; left: -9px;">×</div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6;">
+            <p><strong>尺寸</strong>：18×18px 圆形</p>
+            <p><strong>位置</strong>：左上角 -9px 偏移</p>
+            <p><strong>颜色</strong>：#EF4444 红色填充</p>
+            <p><strong>字号</strong>：10px bold 白色 ×</p>
+            <p><strong>交互</strong>：hover 变深红 + 放大</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">拖拽把手</span>
+          <span class="component-card-tag">8px</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; align-items: center; gap: 12px;">
+          <div style="position: relative; width: 100px; height: 60px; border: 2px solid var(--theme-primary); border-radius: 4px;">
+            <div class="hdm-mark-handle tl"></div>
+            <div class="hdm-mark-handle tr"></div>
+            <div class="hdm-mark-handle bl"></div>
+            <div class="hdm-mark-handle br"></div>
+            <div class="hdm-mark-handle t"></div>
+            <div class="hdm-mark-handle b"></div>
+            <div class="hdm-mark-handle l"></div>
+            <div class="hdm-mark-handle r"></div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.6;">
+            <p><strong>尺寸</strong>：8×8px 方形，2px 圆角</p>
+            <p><strong>数量</strong>：8 方向（4角 + 4边）</p>
+            <p><strong>样式</strong>：白底 + 1.5px 主色边框</p>
+            <p><strong>光标</strong>：对应方向的 resize 光标</p>
+            <p><strong>层级</strong>：z-index 最底层</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       5. 设置面板
+       ================================================================ -->
+  <section id="settings" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">5</span>设置面板 Settings Panel</h2>
+      <p class="section-desc">iOS 风格开关 + 2×2 主题卡片 + 自定义颜色</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">设置面板完整结构</span>
+        <span class="component-card-tag">Core Component</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-settings-panel">
+            <div class="hdm-settings-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              设置
+            </div>
+
+            <!-- 开关行 -->
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">显示编号徽章</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">显示拖拽把手</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">启用快捷键提示</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+
+            <!-- 主题选择 -->
+            <div class="hdm-theme-section">
+              <div class="hdm-theme-section-title">主题选择</div>
+              <div class="hdm-theme-grid">
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);"></div>
+                  <div class="hdm-theme-name">深藏青</div>
+                  <div class="hdm-theme-hex">#211E55</div>
+                </div>
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);"></div>
+                  <div class="hdm-theme-name">灰绿</div>
+                  <div class="hdm-theme-hex">#6A8372</div>
+                </div>
+                <div class="hdm-theme-card active">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);"></div>
+                  <div class="hdm-theme-name">暮紫</div>
+                  <div class="hdm-theme-hex">#70649A</div>
+                </div>
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);"></div>
+                  <div class="hdm-theme-name">暖棕</div>
+                  <div class="hdm-theme-hex">#9E7A7A</div>
+                </div>
+              </div>
+              <div class="hdm-theme-section-title" style="margin-top: 4px;">自定义颜色</div>
+              <div class="hdm-custom-color-row">
+                <div class="hdm-custom-color-preview" style="background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);"></div>
+                <input type="text" class="hdm-custom-color-input" placeholder="#70649A" value="#70649A">
+                <button class="hdm-custom-color-apply">→</button>
+              </div>
+            </div>
+          </div>
+          <div class="component-preview-label">设置面板 · 暮紫主题</div>
+        </div>
+        <div class="component-info">
+          <h4>面板结构</h4>
+          <ul>
+            <li><strong>头部</strong>：齿轮图标 + "设置" 标题</li>
+            <li><strong>开关区域</strong>：3 个 iOS 风格开关，44px 行高</li>
+            <li><strong>主题区域</strong>：浅灰底分区，2×2 主题卡片网格</li>
+            <li><strong>自定义颜色</strong>：颜色预览 + 输入框 + 应用按钮</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">自定义颜色</h4>
+          <ul>
+            <li>输入 HEX 颜色值，实时预览渐变效果</li>
+            <li>点击「→」或按 Enter 应用自定义主题</li>
+            <li>使用 HSL 色彩空间自动计算衍生色（浅色/深色/柔和背景等）</li>
+            <li>支持纯黑/纯白兜底保护，确保视觉可用性</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">iOS 风格开关</h4>
+          <ul>
+            <li>尺寸：44×24px，12px 全圆角</li>
+            <li>关闭态：#E5E7EB 灰色轨道</li>
+            <li>开启态：主题色填充轨道</li>
+            <li>滑块：20px 白色圆形，带阴影</li>
+            <li>动画：背景色 + translate，200ms 缓动</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">主题卡片</h4>
+          <ul>
+            <li>顶部渐变预览条（32px 高）</li>
+            <li>中间主题名称（11px medium）</li>
+            <li>底部 HEX 值（10px 等宽字体）</li>
+            <li>选中态：主色边框 + 柔和背景</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">触发与关闭</h4>
+          <ul>
+            <li>触发：工具栏设置按钮点击</li>
+            <li>关闭：点击外部 / 再次点击按钮 / Esc 键</li>
+            <li>动画：fade in + slide down，180ms</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       6. Toast 通知
+       ================================================================ -->
+  <section id="toast" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">6</span>Toast 通知系统</h2>
+      <p class="section-desc">4 种类型：成功 / 警告 / 错误 / 信息，浅色风格左侧色条</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">四种 Toast 类型</span>
+        <span class="component-card-tag">Feedback</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-toast-group">
+            <div class="hdm-toast hdm-toast--success">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span class="hdm-toast-text">操作成功，样式已保存</span>
+            </div>
+            <div class="hdm-toast hdm-toast--warning">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <span class="hdm-toast-text">字体不可用，请检查字体是否已安装</span>
+            </div>
+            <div class="hdm-toast hdm-toast--error">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              <span class="hdm-toast-text">导出失败，请重试</span>
+            </div>
+            <div class="hdm-toast hdm-toast--info">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span class="hdm-toast-text">点击「+ 添加自定义字体」开始添加</span>
+            </div>
+          </div>
+          <div class="component-preview-label">Success · Warning · Error · Info</div>
+        </div>
+        <div class="component-info">
+          <h4>通用样式规范</h4>
+          <ul>
+            <li><strong>布局</strong>：左侧色条 + 图标 + 文字，flex 布局</li>
+            <li><strong>左侧色条</strong>：3px 宽，对应类型颜色</li>
+            <li><strong>图标</strong>：16px SVG，线性风格，stroke 2.5px</li>
+            <li><strong>圆角</strong>：6px</li>
+            <li><strong>内边距</strong>：10px 14px</li>
+            <li><strong>字号</strong>：12px</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">配色速查</h4>
+          <table class="token-spec-table" style="margin-top: 8px;">
+            <thead>
+              <tr><th>类型</th><th>背景</th><th>文字</th><th>色条/图标</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Success</td><td class="token-value">#ECFDF5</td><td class="token-value">#065F46</td><td class="token-value">#10B981</td></tr>
+              <tr><td>Warning</td><td class="token-value">#FFFBEB</td><td class="token-value">#92400E</td><td class="token-value">#F59E0B</td></tr>
+              <tr><td>Error</td><td class="token-value">#FEF2F2</td><td class="token-value">#991B1B</td><td class="token-value">#EF4444</td></tr>
+              <tr><td>Info</td><td class="token-value">#EFF6FF</td><td class="token-value">#1E40AF</td><td class="token-value">#3B82F6</td></tr>
+            </tbody>
+          </table>
+
+          <h4 style="margin-top: 16px;">行为特性</h4>
+          <ul>
+            <li>自动消失：3 秒后淡出</li>
+            <li>堆叠：多个 Toast 上下排列</li>
+            <li>位置：顶部居中，top: 20px</li>
+            <li>z-index：全局最高层级之一</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       7. 模态弹窗
+       ================================================================ -->
+  <section id="modal" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">7</span>模态弹窗 Modal Dialog</h2>
+      <p class="section-desc">毛玻璃遮罩 + 渐变头部 + 底部操作区</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">模态弹窗完整效果</span>
+        <span class="component-card-tag">Feedback</span>
+      </div>
+      <div class="component-card-body">
+        <div class="component-preview">
+          <div class="hdm-modal-demo">
+            <div class="hdm-modal-backdrop">
+              <div class="hdm-modal">
+                <div class="hdm-modal-header">确认删除</div>
+                <div class="hdm-modal-body">
+                  确定要删除这个标记吗？删除后将无法恢复，对应的所有修改也将一并清除。
+                </div>
+                <div class="hdm-modal-footer">
+                  <button class="hdm-modal-btn cancel">取消</button>
+                  <button class="hdm-modal-btn confirm">确认删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="component-preview-label">确认弹窗示例</div>
+        </div>
+        <div class="component-info">
+          <h4>三层结构</h4>
+          <ul>
+            <li><strong>遮罩层</strong>：半透明深色 + backdrop-filter 毛玻璃（渐进增强）</li>
+            <li><strong>弹窗容器</strong>：白色底，12px 圆角，modal 级阴影</li>
+            <li><strong>内部结构</strong>：渐变头部 + 内容区 + 底部按钮组</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">头部设计</h4>
+          <p>使用主题渐变背景，白色文字，14px semibold。替代原生 alert/confirm 的标题栏。</p>
+
+          <h4 style="margin-top: 16px;">按钮规范</h4>
+          <ul>
+            <li>右对齐布局，取消按钮在左，确认按钮在右</li>
+            <li>取消按钮：白底 + 灰边 + 灰字（次要样式）</li>
+            <li>确认按钮：渐变主色 + 白字（主按钮样式）</li>
+            <li>高度 32px，6px 圆角，12px 字重 500</li>
+          </ul>
+
+          <h4 style="margin-top: 16px;">动画效果</h4>
+          <ul>
+            <li>遮罩：fade in 200ms</li>
+            <li>弹窗：scale up + fade in 200ms</li>
+            <li>关闭时反向动画</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       8. 其他组件
+       ================================================================ -->
+  <section id="other-components" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">8</span>其他组件 Other Components</h2>
+      <p class="section-desc">多选工具栏、唤醒按钮、输入框状态等辅助组件</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">多选工具栏</span>
+          <span class="component-card-tag">Selection</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: center;">
+            <div class="hdm-multi-toolbar">
+              <button class="hdm-multi-btn primary">组合标记</button>
+              <button class="hdm-multi-btn secondary">复制选中</button>
+              <button class="hdm-multi-btn danger">删除选中</button>
+              <button class="hdm-multi-btn ghost">取消选择</button>
+              <span class="hdm-multi-count">已选 <b>3</b></span>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+            <p><strong>位置</strong>：多选区域上方居中，距离选区顶部 12px</p>
+            <p><strong>按钮</strong>：组合标记（主色）/ 复制 / 删除 / 取消</p>
+            <p><strong>计数</strong>：右部分隔线 + 选中数量</p>
+            <p><strong>高度</strong>：28px 小按钮，紧凑布局</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">唤醒按钮</span>
+          <span class="component-card-tag">Wake</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: center;">
+            <div class="hdm-wake-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+            <p><strong>尺寸</strong>：44×44px 圆形</p>
+            <p><strong>样式</strong>：主题渐变 + 主题色阴影</p>
+            <p><strong>动画</strong>：首次出现呼吸脉冲效果</p>
+            <p><strong>交互</strong>：hover 放大，active 缩小</p>
+            <p><strong>用途</strong>：工具栏最小化时的唤醒入口</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">输入框五态</span>
+        <span class="component-card-tag">Base</span>
+      </div>
+      <div class="component-card-body">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">默认</div>
+            <input type="text" class="hdm-text-input" value="默认状态" style="width: 240px;">
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Focus</div>
+            <input type="text" class="hdm-text-input" value="聚焦状态" style="width: 240px; border-color: var(--theme-primary); box-shadow: var(--shadow-focus);">
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Disabled</div>
+            <input type="text" class="hdm-text-input" value="禁用状态" style="width: 240px; background: #F3F4F6; color: var(--text-disabled); cursor: not-allowed;" disabled>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Error</div>
+            <input type="text" class="hdm-text-input" value="错误状态" style="width: 240px; border-color: var(--error); box-shadow: 0 0 0 3px rgba(239,68,68,0.12);">
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">等宽字体输入</div>
+            <input type="text" class="hdm-text-input mono" value="#70649A" style="width: 240px;">
+          </div>
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">带标签输入</div>
+            <div style="width: 240px;">
+              <label class="hdm-input-label">链接地址</label>
+              <input type="text" class="hdm-text-input" placeholder="https://example.com">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自定义复选框 -->
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">自定义复选框</span>
+        <span class="component-card-tag">Base</span>
+      </div>
+      <div class="component-card-body">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div class="hdm-checkbox-row">
+            <label class="hdm-checkbox">
+              <input type="checkbox" checked>
+              <span class="hdm-checkbox-box"></span>
+            </label>
+            <span class="hdm-checkbox-label">已选中状态</span>
+          </div>
+          <div class="hdm-checkbox-row">
+            <label class="hdm-checkbox">
+              <input type="checkbox">
+              <span class="hdm-checkbox-box"></span>
+            </label>
+            <span class="hdm-checkbox-label">未选中状态</span>
+          </div>
+          <div class="hdm-checkbox-row">
+            <label class="hdm-checkbox">
+              <input type="checkbox" disabled>
+              <span class="hdm-checkbox-box"></span>
+            </label>
+            <span class="hdm-checkbox-label" style="opacity: 0.5;">禁用状态</span>
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">规格说明</h4>
+          <ul style="list-style: none; padding: 0;">
+            <li style="font-size: 11px; color: var(--text-secondary); padding: 3px 0; padding-left: 16px; position: relative;">
+              <span style="position: absolute; left: 0; top: 10px; width: 6px; height: 6px; background: var(--theme-primary); border-radius: 50%; opacity: 0.6;"></span>
+              <strong>尺寸</strong>：16×16px，3px 圆角
+            </li>
+            <li style="font-size: 11px; color: var(--text-secondary); padding: 3px 0; padding-left: 16px; position: relative;">
+              <span style="position: absolute; left: 0; top: 10px; width: 6px; height: 6px; background: var(--theme-primary); border-radius: 50%; opacity: 0.6;"></span>
+              <strong>边框</strong>：默认 1.5px #D1D5DB
+            </li>
+            <li style="font-size: 11px; color: var(--text-secondary); padding: 3px 0; padding-left: 16px; position: relative;">
+              <span style="position: absolute; left: 0; top: 10px; width: 6px; height: 6px; background: var(--theme-primary); border-radius: 50%; opacity: 0.6;"></span>
+              <strong>选中态</strong>：主题色填充 + 白色 ✓ 勾
+            </li>
+            <li style="font-size: 11px; color: var(--text-secondary); padding: 3px 0; padding-left: 16px; position: relative;">
+              <span style="position: absolute; left: 0; top: 10px; width: 6px; height: 6px; background: var(--theme-primary); border-radius: 50%; opacity: 0.6;"></span>
+              <strong>Hover</strong>：边框变主题色
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 尺寸信息浮窗 + 对齐辅助线 -->
+    <div class="grid-2">
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">尺寸信息浮窗</span>
+          <span class="component-card-tag">Feedback</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: center; padding: 20px 0;">
+            <div class="hdm-size-tooltip">86 <span>×</span> 36 px</div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+            <p><strong>背景</strong>：深紫半透明 rgba(30,27,75,0.92)</p>
+            <p><strong>文字</strong>：白色，11px semibold，等宽数字</p>
+            <p><strong>内边距</strong>：6px 12px，8px 圆角</p>
+            <p><strong>用途</strong>：拖拽/调整大小时实时显示尺寸</p>
+            <p><strong>特性</strong>：pointer-events: none，不干扰操作</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <div class="component-card-header">
+          <span class="component-card-title">对齐辅助线</span>
+          <span class="component-card-tag">Feedback</span>
+        </div>
+        <div class="component-card-body" style="flex-direction: column; gap: 16px;">
+          <div class="hdm-align-guides-demo">
+            <div class="hdm-guide-line-v" style="left: 30%;"></div>
+            <div class="hdm-guide-line-h" style="top: 40%;"></div>
+            <div class="hdm-guide-demo-box" style="left: calc(30% - 30px); top: calc(40% - 20px);"></div>
+            <div class="hdm-guide-demo-box" style="right: 40px; bottom: 30px; border-style: dashed; opacity: 0.5;"></div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+            <p><strong>颜色</strong>：红色 #EF4444（保持红色语义）</p>
+            <p><strong>线宽</strong>：1px，带 4px 红色发光阴影</p>
+            <p><strong>垂直线</strong>：100vh 高度，左/中心/右对齐时触发</p>
+            <p><strong>水平线</strong>：100vw 宽度，上/中/下对齐时触发</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 字体三态提示条 -->
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">字体三态提示条 + 删除字体按钮</span>
+        <span class="component-card-tag">Typography</span>
+      </div>
+      <div class="component-card-body">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+          <!-- 失败黄 -->
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px; font-weight: 500;">失败态（黄色）</div>
+            <div class="hdm-font-hint hdm-font-hint--warning">
+              <span class="hdm-font-hint-icon">⚠</span>
+              <span class="hdm-font-hint-text">字体预览失败，请检查字体是否已正确安装</span>
+            </div>
+          </div>
+          <!-- 引导蓝 -->
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px; font-weight: 500;">引导态（蓝色）</div>
+            <div class="hdm-font-hint hdm-font-hint--info">
+              <span class="hdm-font-hint-icon">ℹ</span>
+              <span class="hdm-font-hint-text">点击「+ 添加自定义字体」开始添加本地字体</span>
+            </div>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+          <!-- 成功绿 + 删除按钮 -->
+          <div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 6px; font-weight: 500;">成功态（绿色）+ 删除按钮</div>
+            <div class="hdm-font-hint hdm-font-hint--success">
+              <span class="hdm-font-hint-icon">✓</span>
+              <span class="hdm-font-hint-text">字体 "PingFang SC" 预览正常，已添加到列表</span>
+            </div>
+            <button class="hdm-font-del-btn">删除此字体</button>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+            <p><strong>三种状态</strong>：失败黄 / 引导蓝 / 成功绿</p>
+            <p><strong>位置</strong>：字体下拉框下方，上边距 6px</p>
+            <p><strong>删除按钮</strong>：始终在提示条紧下方，全宽 28px 高</p>
+            <p><strong>仅自定义字体显示</strong>：系统字体不显示删除按钮</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       9. 交互逻辑说明
+       ================================================================ -->
+  <section id="theme-logic" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">9</span>主题切换机制</h2>
+      <p class="section-desc">四套预设 + 自定义颜色的完整主题系统架构</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">主题切换流程图</span>
+        <span class="component-card-tag">Architecture</span>
+      </div>
+      <div class="component-card-body" style="flex-direction: column;">
+        <div style="display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;">
+          <!-- 预设主题流程 -->
+          <div style="flex: 1; min-width: 280px;">
+            <h4 style="font-size: 14px; margin-bottom: 16px; color: var(--text-primary);">预设主题切换</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+              <div style="padding: 10px 14px; background: var(--theme-soft-bg); color: var(--theme-primary); border-radius: 6px; text-align: center; font-weight: 500;">
+                用户选择预设主题
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                清除内联自定义变量（如存在）
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                设置 <code style="font-size: 10px; background: #fff; padding: 2px 6px; border-radius: 4px;">data-theme</code> 属性
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                CSS 变量自动响应（类选择器）
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: var(--success-bg); color: var(--success-text); border-radius: 6px; text-align: center; font-weight: 500;">
+                保存到 chrome.storage.local
+              </div>
+            </div>
+          </div>
+
+          <!-- 自定义主题流程 -->
+          <div style="flex: 1; min-width: 280px;">
+            <h4 style="font-size: 14px; margin-bottom: 16px; color: var(--text-primary);">自定义颜色切换</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+              <div style="padding: 10px 14px; background: var(--theme-soft-bg); color: var(--theme-primary); border-radius: 6px; text-align: center; font-weight: 500;">
+                用户输入自定义颜色
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                generateThemeColors 计算衍生色
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                清除 data-theme 属性
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 6px; text-align: center;">
+                JS 设置 CSS 变量（内联样式）
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary);">↓</div>
+              <div style="padding: 10px 14px; background: var(--success-bg); color: var(--success-text); border-radius: 6px; text-align: center; font-weight: 500;">
+                保存 themeType + themeColor
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+          <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);">优先级规则（从低到高）</h4>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 2;">
+            <code style="background: #fff; padding: 2px 8px; border-radius: 4px; margin: 0 4px;">:root 默认</code>
+            →
+            <code style="background: #fff; padding: 2px 8px; border-radius: 4px; margin: 0 4px;">data-theme 预设</code>
+            →
+            <code style="background: var(--theme-soft-bg); color: var(--theme-primary); padding: 2px 8px; border-radius: 4px; margin: 0 4px; font-weight: 500;">内联自定义（最高）</code>
+          </div>
+          <p style="font-size: 11px; color: var(--text-tertiary); margin-top: 8px;">
+            自定义主题优先级最高，因为 style.setProperty 设置的内联样式优先级高于 CSS 类选择器。切换回预设主题时必须清除内联变量。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="slider-logic" class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-number">10</span>滑块交互逻辑</h2>
+      <p class="section-desc">拖动 / 双击编辑 / 滚轮微调三种交互方式</p>
+    </div>
+
+    <div class="component-card">
+      <div class="component-card-header">
+        <span class="component-card-title">滑块三模式交互</span>
+        <span class="component-card-tag">Interaction</span>
+      </div>
+      <div class="component-card-body" style="flex-direction: column;">
+        <div class="grid-3">
+          <div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+            <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);">1. 拖动滑块</h4>
+            <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+              最直觉的调节方式，拖动滑块轨道上的圆形把手，实时更新数值和元素样式。<br><br>
+              <strong>范围</strong>：位置 ±500px，大小 10-2000px，字号 8-72px
+            </p>
+            <div style="margin-top: 12px;">
+              <div class="hdm-slider-row">
+                <div class="hdm-slider-label-row">
+                  <span class="hdm-slider-label">示例</span>
+                  <span class="hdm-slider-value">60px</span>
+                </div>
+                <div class="hdm-slider-track">
+                  <div class="hdm-slider-fill" style="width: 60%;"></div>
+                  <div class="hdm-slider-thumb" style="left: 60%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+            <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);">2. 双击数值</h4>
+            <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+              双击数值区域切换为输入框，支持键盘精确输入。<br><br>
+              <strong>确认</strong>：Enter 键 / 失焦自动确认<br>
+              <strong>取消</strong>：Esc 键恢复原值
+            </p>
+            <div style="margin-top: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 12px; color: var(--text-tertiary);">宽度</span>
+              <input type="text" value="86" style="width: 60px; height: 24px; padding: 0 6px; border: 1px solid var(--theme-primary); border-radius: 3px; font-size: 11px; font-family: monospace; text-align: right; outline: none;">
+            </div>
+          </div>
+
+          <div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+            <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);">3. 滚轮微调</h4>
+            <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.7;">
+              Hover 在滑块上时，使用鼠标滚轮进行 ±1px 的精细调节。<br><br>
+              <strong>步长</strong>：每次滚动 ±1px<br>
+              <strong>适用</strong>：需要像素级精确调整时
+            </p>
+            <div style="margin-top: 12px; text-align: center; font-size: 24px;">
+              <span style="color: var(--text-tertiary);">↑ ↓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页面底部 -->
+  <footer class="page-footer">
+    <p><strong>HTML Diff Marker V5.2</strong> · UI 设计系统路演手册</p>
+    <p style="margin-top: 4px;">四套主题 · 10+ 组件 · 完整交互规范 · 纯 CSS 变量驱动</p>
+  </footer>
+
+</main>
+
+<script>
+/* ================================================================
+   主题切换演示功能
+   ================================================================ */
+(function() {
+  const themeDots = document.querySelectorAll('.theme-dot');
+  const htmlEl = document.documentElement;
+  const bodyEl = document.body;
+
+  // 页面顶部主题切换
+  themeDots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      const theme = this.getAttribute('data-theme-target');
+
+      // 更新 dot 状态
+      themeDots.forEach(d => d.classList.remove('active'));
+      this.classList.add('active');
+
+      // 切换主题
+      bodyEl.setAttribute('data-theme', theme);
+    });
+  });
+
+  // 设置面板主题卡片切换
+  const themeCards = document.querySelectorAll('.hdm-theme-card');
+  themeCards.forEach((card, index) => {
+    const themes = ['deep-cyan', 'gray-green', 'dusk-purple', 'warm-brown'];
+    card.addEventListener('click', function() {
+      themeCards.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+
+      const theme = themes[index];
+      bodyEl.setAttribute('data-theme', theme);
+
+      // 同步顶部切换器
+      themeDots.forEach(d => d.classList.remove('active'));
+      const matchingDot = document.querySelector(`.theme-dot[data-theme-target="${theme}"]`);
+      if (matchingDot) matchingDot.classList.add('active');
+    });
+  });
+
+  // iOS 开关切换
+  const switches = document.querySelectorAll('.hdm-switch');
+  switches.forEach(sw => {
+    sw.addEventListener('click', function() {
+      this.classList.toggle('on');
+    });
+  });
+
+  // 导航高亮
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('section[id]');
+
+  function updateActiveNav() {
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 100;
+      if (window.scrollY >= sectionTop) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('href') === '#' + current) {
+        item.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveNav);
+  updateActiveNav();
+
+  // 单位切换演示
+  const unitBtns = document.querySelectorAll('.hdm-unit-btn');
+  unitBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const parent = this.closest('.hdm-unit-toggle');
+      if (!parent) return;
+      parent.querySelectorAll('.hdm-unit-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // ================================================================
+  // 滑块拖动交互
+  // ================================================================
+  function initSliders() {
+    const sliderTracks = document.querySelectorAll('.hdm-slider-track');
+
+    sliderTracks.forEach(track => {
+      const thumb = track.querySelector('.hdm-slider-thumb');
+      const fill = track.querySelector('.hdm-slider-fill');
+      const sliderRow = track.closest('.hdm-slider-row');
+      const valueEl = sliderRow ? sliderRow.querySelector('.hdm-slider-value') : null;
+
+      if (!thumb || !fill) return;
+
+      let isDragging = false;
+
+      // 获取滑块配置
+      const getSliderConfig = function() {
+        let min = 0, max = 100, unit = 'px';
+        const label = sliderRow ? sliderRow.querySelector('.hdm-slider-label') : null;
+        const labelText = label ? label.textContent : '';
+
+        if (labelText.includes('X') || labelText.includes('Y')) {
+          min = -500; max = 500;
+        } else if (labelText.includes('宽度') || labelText.includes('高度')) {
+          min = 10; max = 2000;
+        } else if (labelText.includes('字号')) {
+          min = 8; max = 72;
+        }
+
+        // 检查单位切换
+        const unitToggle = sliderRow ? sliderRow.closest('.hdm-group') : null;
+        if (unitToggle) {
+          const activeUnit = unitToggle.querySelector('.hdm-unit-btn.active');
+          if (activeUnit) unit = activeUnit.textContent;
+        }
+
+        return { min, max, unit };
+      };
+
+      // 计算百分比对应的数值
+      const percentToValue = function(percent) {
+        const { min, max } = getSliderConfig();
+        return Math.round(min + (max - min) * (percent / 100));
+      };
+
+      // 计算数值对应的百分比
+      const valueToPercent = function(value) {
+        const { min, max } = getSliderConfig();
+        return ((value - min) / (max - min)) * 100;
+      };
+
+      // 更新滑块UI
+      const updateSlider = function(percent) {
+        percent = Math.max(0, Math.min(100, percent));
+        thumb.style.left = percent + '%';
+        fill.style.width = percent + '%';
+        if (valueEl) {
+          const { unit } = getSliderConfig();
+          valueEl.textContent = percentToValue(percent) + unit;
+        }
+      };
+
+      // 拖动开始
+      const startDrag = function(e) {
+        isDragging = true;
+        e.preventDefault();
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ew-resize';
+        onDrag(e);
+      };
+
+      // 拖动中
+      const onDrag = function(e) {
+        if (!isDragging) return;
+        const rect = track.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const percent = ((clientX - rect.left) / rect.width) * 100;
+        updateSlider(percent);
+      };
+
+      // 拖动结束
+      const endDrag = function() {
+        if (!isDragging) return;
+        isDragging = false;
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      };
+
+      // 绑定事件
+      thumb.addEventListener('mousedown', startDrag);
+      track.addEventListener('mousedown', function(e) {
+        if (e.target === thumb) return;
+        startDrag(e);
+      });
+
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('mouseup', endDrag);
+
+      // 触摸支持
+      thumb.addEventListener('touchstart', startDrag, { passive: false });
+      track.addEventListener('touchstart', function(e) {
+        if (e.target === thumb) return;
+        startDrag(e);
+      }, { passive: false });
+      document.addEventListener('touchmove', onDrag, { passive: false });
+      document.addEventListener('touchend', endDrag);
+    });
+  }
+
+  initSliders();
+
+  // ================================================================
+  // 双击编辑滑块数值
+  // ================================================================
+  function initDoubleClickEdit() {
+    const valueEls = document.querySelectorAll('.hdm-slider-value');
+
+    valueEls.forEach(valueEl => {
+      valueEl.addEventListener('dblclick', function() {
+        const sliderRow = valueEl.closest('.hdm-slider-row');
+        if (!sliderRow) return;
+
+        const track = sliderRow.querySelector('.hdm-slider-track');
+        const thumb = track ? track.querySelector('.hdm-slider-thumb') : null;
+        const fill = track ? track.querySelector('.hdm-slider-fill') : null;
+        if (!thumb || !fill) return;
+
+        // 获取当前值和单位
+        const currentText = valueEl.textContent.trim();
+        const unitMatch = currentText.match(/(px|%|em|rem|pt)$/);
+        const unit = unitMatch ? unitMatch[1] : 'px';
+        const currentValue = parseFloat(currentText) || 0;
+
+        // 获取滑块范围
+        const label = sliderRow.querySelector('.hdm-slider-label');
+        const labelText = label ? label.textContent : '';
+        let min = 0, max = 100;
+        if (labelText.includes('X') || labelText.includes('Y')) {
+          min = -500; max = 500;
+        } else if (labelText.includes('宽度') || labelText.includes('高度')) {
+          min = 10; max = 2000;
+        } else if (labelText.includes('字号')) {
+          min = 8; max = 72;
+        }
+
+        // 创建输入框
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'hdm-slider-value-input';
+        input.value = currentValue;
+
+        // 替换数值显示
+        valueEl.style.display = 'none';
+        valueEl.parentNode.insertBefore(input, valueEl.nextSibling);
+        input.focus();
+        input.select();
+
+        // 确认函数
+        function confirmEdit() {
+          let val = parseFloat(input.value);
+          if (isNaN(val)) val = currentValue;
+          val = Math.max(min, Math.min(max, val));
+
+          // 更新滑块位置
+          const percent = ((val - min) / (max - min)) * 100;
+          thumb.style.left = percent + '%';
+          fill.style.width = percent + '%';
+          valueEl.textContent = val + unit;
+
+          // 恢复显示
+          input.remove();
+          valueEl.style.display = '';
+        }
+
+        // 取消函数
+        function cancelEdit() {
+          input.remove();
+          valueEl.style.display = '';
+        }
+
+        // 事件绑定
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            confirmEdit();
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            cancelEdit();
+          }
+        });
+
+        input.addEventListener('blur', function() {
+          confirmEdit();
+        });
+      });
+    });
+  }
+
+  initDoubleClickEdit();
+
+  // ================================================================
+  // 自定义颜色 - generateThemeColors 算法
+  // ================================================================
+  function hexToHsl(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function hslToHex(h, s, l) {
+    h = h / 360;
+    s = s / 100;
+    l = l / 100;
+
+    let r, g, b;
+
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = function(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+
+    const toHex = function(x) {
+      const hex = Math.round(x * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    return '#' + toHex(r) + toHex(g) + toHex(b);
+  }
+
+  function hexToRgba(hex, alpha) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+  }
+
+  function generateThemeColors(baseHex) {
+    // 边界保护：纯黑/纯白兜底
+    if (baseHex.toLowerCase() === '#000000') {
+      return {
+        primary: '#2D2D2D',
+        primaryLight: '#4A4A4A',
+        primaryDark: '#1A1A1A',
+        softBg: '#F5F5F5',
+        gradient: 'linear-gradient(135deg, #4A4A4A 0%, #2D2D2D 100%)',
+        softText: '#1A1A1A',
+        countText: '#2D2D2D',
+        shadow: '0 2px 8px rgba(45,45,45,0.3)'
+      };
+    }
+    if (baseHex.toLowerCase() === '#ffffff' || baseHex.toLowerCase() === '#fff') {
+      return {
+        primary: '#9E9E9E',
+        primaryLight: '#BDBDBD',
+        primaryDark: '#757575',
+        softBg: '#FAFAFA',
+        gradient: 'linear-gradient(135deg, #BDBDBD 0%, #9E9E9E 100%)',
+        softText: '#757575',
+        countText: '#9E9E9E',
+        shadow: '0 2px 8px rgba(158,158,158,0.3)'
+      };
+    }
+
+    const hsl = hexToHsl(baseHex);
+    const safeHsl = {
+      ...hsl,
+      s: Math.max(20, hsl.s),
+      l: Math.max(15, Math.min(75, hsl.l))
+    };
+
+    const lightHsl = { ...safeHsl, l: Math.min(90, safeHsl.l + 25) };
+    const darkHsl = { ...safeHsl, l: Math.max(5, safeHsl.l - 20) };
+    const softBgHsl = { ...safeHsl, l: Math.min(98, safeHsl.l + 88), s: Math.max(5, safeHsl.s - 60) };
+
+    const primaryLight = hslToHex(lightHsl.h, lightHsl.s, lightHsl.l);
+    const primaryDark = hslToHex(darkHsl.h, darkHsl.s, darkHsl.l);
+    const softBg = hslToHex(softBgHsl.h, softBgHsl.s, softBgHsl.l);
+
+    return {
+      primary: baseHex,
+      primaryLight: primaryLight,
+      primaryDark: primaryDark,
+      softBg: softBg,
+      gradient: 'linear-gradient(135deg, ' + primaryLight + ' 0%, ' + baseHex + ' 100%)',
+      softText: primaryDark,
+      countText: baseHex,
+      shadow: '0 2px 8px ' + hexToRgba(baseHex, 0.3)
+    };
+  }
+
+  function applyCustomTheme(baseHex) {
+    const colors = generateThemeColors(baseHex);
+    const root = document.documentElement;
+
+    root.style.setProperty('--theme-primary', colors.primary);
+    root.style.setProperty('--theme-primary-light', colors.primaryLight);
+    root.style.setProperty('--theme-primary-dark', colors.primaryDark);
+    root.style.setProperty('--theme-gradient', colors.gradient);
+    root.style.setProperty('--theme-soft-bg', colors.softBg);
+    root.style.setProperty('--theme-soft-text', colors.softText);
+    root.style.setProperty('--theme-count-text', colors.countText);
+    root.style.setProperty('--theme-shadow', colors.shadow);
+
+    // 清除 data-theme，让内联样式优先级生效
+    document.body.removeAttribute('data-theme');
+
+    // 更新主题切换器的 active 状态
+    document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.hdm-theme-card').forEach(c => c.classList.remove('active'));
+  }
+
+  // 初始化自定义颜色交互
+  function initCustomColor() {
+    const customInput = document.querySelector('.hdm-custom-color-input');
+    const customApplyBtn = document.querySelector('.hdm-custom-color-apply');
+    const customPreview = document.querySelector('.hdm-custom-color-preview');
+
+    if (!customInput || !customApplyBtn) return;
+
+    // 输入框实时更新预览
+    customInput.addEventListener('input', function() {
+      let val = this.value.trim();
+      if (!val.startsWith('#')) val = '#' + val;
+      if (/^#[0-9A-Fa-f]{6}$/.test(val) || /^#[0-9A-Fa-f]{3}$/.test(val)) {
+        const colors = generateThemeColors(val);
+        if (customPreview) {
+          customPreview.style.background = colors.gradient;
+        }
+      }
+    });
+
+    // 应用按钮
+    customApplyBtn.addEventListener('click', function() {
+      let val = customInput.value.trim();
+      if (!val.startsWith('#')) val = '#' + val;
+      if (/^#[0-9A-Fa-f]{6}$/.test(val) || /^#[0-9A-Fa-f]{3}$/.test(val)) {
+        applyCustomTheme(val);
+      }
+    });
+
+    // 回车应用
+    customInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        customApplyBtn.click();
+      }
+    });
+  }
+
+  initCustomColor();
+
+  // ================================================================
+  // 工具栏与编辑面板拖拽 + 收起展开
+  // ================================================================
+  function makeDraggable(element, handle) {
+    // 预览页面：仅示意"可拖拽"，不实际移动位置
+    // 避免组件脱离卡片、干扰页面浏览
+    handle.style.cursor = 'grab';
+
+    handle.addEventListener('mousedown', function(e) {
+      if (e.target.closest('button')) return;
+      handle.style.cursor = 'grabbing';
+      element.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', function() {
+      handle.style.cursor = 'grab';
+      element.style.cursor = '';
+    });
+  }
+
+  function initDragAndCollapse() {
+    // 工具栏拖拽 + 最小化
+    const toolbars = document.querySelectorAll('.hdm-toolbar');
+    toolbars.forEach(toolbar => {
+      const header = toolbar.querySelector('.hdm-toolbar-header');
+      if (header) {
+        makeDraggable(toolbar, header);
+      }
+
+      // 最小化按钮
+      const minimizeBtn = toolbar.querySelector('.hdm-ctrl-btn:first-child');
+      const body = toolbar.querySelector('.hdm-toolbar-body');
+      const footer = toolbar.querySelector('.hdm-toolbar-footer');
+
+      if (minimizeBtn && body) {
+        let isMinimized = false;
+        minimizeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          isMinimized = !isMinimized;
+          if (isMinimized) {
+            if (body) body.style.display = 'none';
+            if (footer) footer.style.display = 'none';
+            minimizeBtn.textContent = '+';
+            minimizeBtn.title = '展开';
+          } else {
+            if (body) body.style.display = '';
+            if (footer) footer.style.display = '';
+            minimizeBtn.textContent = '−';
+            minimizeBtn.title = '最小化';
+          }
+        });
+      }
+    });
+
+    // 编辑面板拖拽 + 折叠
+    const inspectors = document.querySelectorAll('.hdm-inspector');
+    inspectors.forEach(inspector => {
+      const header = inspector.querySelector('.hdm-inspector-header');
+      if (header) {
+        makeDraggable(inspector, header);
+      }
+
+      // 点击头部折叠/展开
+      const topline = inspector.querySelector('.hdm-inspector-topline');
+      const groups = inspector.querySelectorAll('.hdm-group, .hdm-inspector-footer, .hdm-resize-handle');
+
+      if (header && groups.length > 0) {
+        let isCollapsed = false;
+        header.style.cursor = 'pointer';
+
+        // 给头部加一个折叠指示器
+        const collapseIndicator = document.createElement('span');
+        collapseIndicator.textContent = '▼';
+        collapseIndicator.style.cssText = 'font-size:10px; color:var(--text-tertiary); margin-left:8px; transition:transform 0.2s;';
+        const titleEl = header.querySelector('.hdm-inspector-title');
+        if (titleEl) {
+          titleEl.style.display = 'flex';
+          titleEl.style.alignItems = 'center';
+          titleEl.appendChild(collapseIndicator);
+        }
+
+        header.addEventListener('click', function(e) {
+          // 排除选择器徽章等交互元素的点击
+          if (e.target.closest('button, input, .hdm-inspector-selector')) return;
+
+          isCollapsed = !isCollapsed;
+          groups.forEach(g => {
+            g.style.display = isCollapsed ? 'none' : '';
+          });
+          if (topline) topline.style.display = isCollapsed ? 'none' : '';
+          if (collapseIndicator) {
+            collapseIndicator.style.transform = isCollapsed ? 'rotate(-90deg)' : '';
+          }
+        });
+      }
+    });
+  }
+
+  initDragAndCollapse();
+})();
+</script>
+
+</body>
+</html>

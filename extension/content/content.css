@@ -1,0 +1,4174 @@
+/* ============================================================
+   HTML Diff Marker - Styles
+   ============================================================ */
+
+/* ============================================================
+   设计令牌 (Design Tokens) — 主题化变量体系
+   ============================================================ */
+:root {
+  /* ---------- 主题变量（默认：暮紫） ---------- */
+  --hdm-theme-primary: #70649A;
+  --hdm-theme-primary-light: #8B7FB3;
+  --hdm-theme-primary-dark: #5A4F7D;
+  --hdm-theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --hdm-theme-soft-bg: #F0EEF7;
+  --hdm-theme-soft-bg-hover: #E9E4F3;
+  --hdm-theme-soft-text: #5A4F7D;
+  --hdm-theme-count-text: #70649A;
+  --hdm-theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+  --hdm-theme-alpha-20: rgba(112, 100, 154, 0.2);
+
+  /* ---------- 品牌色（兼容旧代码） ---------- */
+  --hdm-primary: var(--hdm-theme-primary);
+  --hdm-primary-hover: var(--hdm-theme-primary-dark);
+  --hdm-primary-dark: var(--hdm-theme-primary-dark);
+  --hdm-primary-light: var(--hdm-theme-primary-light);
+  --hdm-primary-bg: var(--hdm-theme-soft-bg);
+  --hdm-primary-bg-hover: var(--hdm-theme-soft-bg-hover);
+  --hdm-primary-50: var(--hdm-theme-soft-bg);
+  --hdm-primary-bg-soft: var(--hdm-theme-soft-bg);
+
+  /* ---------- 渐变色 ---------- */
+  --hdm-gradient-primary: var(--hdm-theme-gradient);
+  --hdm-gradient-btn-primary: var(--hdm-theme-gradient);
+  --hdm-gradient-btn-primary-hover: linear-gradient(135deg, var(--hdm-theme-primary-light), var(--hdm-theme-primary));
+  --hdm-gradient-btn-primary-active: linear-gradient(135deg, var(--hdm-theme-primary), var(--hdm-theme-primary-dark));
+  --hdm-gradient-header: var(--hdm-theme-gradient);
+
+  /* ---------- Toast 渐变色 ---------- */
+  --hdm-gradient-toast-info: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+  --hdm-gradient-toast-success: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  --hdm-gradient-toast-warning: linear-gradient(135deg, #92400E 0%, #D97706 100%);
+  --hdm-gradient-toast-error: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);
+
+  /* ---------- 中性色 ---------- */
+  /* 文字 3 级 */
+  --hdm-text-primary: #1F2937;
+  --hdm-text-secondary: #4B5563;
+  --hdm-text-tertiary: #6B7280;
+  --hdm-text-disabled: #9CA3AF;
+  --hdm-text-white: #FFFFFF;
+  --hdm-text-white-sub: rgba(255, 255, 255, 0.75);
+  --hdm-text-white-dim: rgba(255, 255, 255, 0.55);
+
+  /* 背景 3 级 */
+  --hdm-bg-white: #FFFFFF;
+  --hdm-bg-secondary: #F9FAFB;
+  --hdm-bg-surface: #F3F4F6;
+  --hdm-bg-hover: #F3F4F6;
+  --hdm-bg-disabled: #F3F4F6;
+
+  /* 边框 2 级 */
+  --hdm-border: #E5E7EB;
+  --hdm-border-hover: #D1D5DB;
+  --hdm-divider: #F3F4F6;
+
+  /* ---------- 功能语义色 ---------- */
+  /* 成功 Success */
+  --hdm-success: #10B981;
+  --hdm-success-hover: #059669;
+  --hdm-success-active: #047857;
+  --hdm-success-bg: #ECFDF5;
+  --hdm-success-bg-hover: #D1FAE5;
+  --hdm-success-border: #A7F3D0;
+  --hdm-success-text: #065F46;
+  --hdm-success-disabled: #6EE7B7;
+
+  /* 警告 Warning */
+  --hdm-warning: #F59E0B;
+  --hdm-warning-bg: #FFFBEB;
+  --hdm-warning-border: #FDE68A;
+  --hdm-warning-text: #92400E;
+
+  /* 错误 Error */
+  --hdm-error: #EF4444;
+  --hdm-error-hover: #DC2626;
+  --hdm-error-active: #B91C1B;
+  --hdm-error-bg: #FEF2F2;
+  --hdm-error-bg-hover: #FEE2E2;
+  --hdm-error-border: #FECACA;
+  --hdm-error-border-hover: #FCA5A5;
+  --hdm-error-text: #991B1B;
+  --hdm-error-disabled: #FCA5A5;
+
+  /* 信息 Info */
+  --hdm-info: #3B82F6;
+  --hdm-info-bg: #EFF6FF;
+  --hdm-info-border: #BFDBFE;
+  --hdm-info-text: #1E40AF;
+
+  /* ---------- 标记状态色 ---------- */
+  --hdm-mark-selected: #10B981;
+  --hdm-mark-modified: #F59E0B;
+  --hdm-mark-removed: #EF4444;
+
+  /* 标记高亮背景（透明叠加色） */
+  --hdm-mark-hover-bg: color-mix(in srgb, var(--hdm-theme-primary-light) 8%, transparent);
+  --hdm-mark-selected-bg: rgba(16, 185, 129, 0.06);
+  --hdm-mark-modified-bg: rgba(245, 158, 11, 0.06);
+  --hdm-mark-multi-bg: color-mix(in srgb, var(--hdm-theme-primary) 10%, transparent);
+  --hdm-mark-group-bg: color-mix(in srgb, var(--hdm-theme-primary) 4%, transparent);
+
+  /* 标记组件专用色 */
+  --hdm-mark-size-display-bg: rgba(49, 18, 92, 0.95);
+  --hdm-mark-guide-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+
+  /* ---------- 圆角 ---------- */
+  --hdm-radius-xs: 4px;
+  --hdm-radius-sm: 6px;
+  --hdm-radius-md: 8px;
+  --hdm-radius-lg: 10px;
+  --hdm-radius-xl: 12px;
+  --hdm-radius-2xl: 16px;
+  --hdm-radius-full: 9999px;
+
+  /* ---------- 阴影 ---------- */
+  --hdm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --hdm-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --hdm-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --hdm-shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --hdm-shadow-lg: 0 8px 28px color-mix(in srgb, var(--hdm-theme-primary) 15%, transparent);
+  --hdm-shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.18);
+  --hdm-shadow-focus-ring: 0 0 0 3px color-mix(in srgb, var(--hdm-theme-primary) 15%, transparent);
+  --hdm-shadow-focus-ring-error: 0 0 0 3px rgba(239, 68, 68, 0.12);
+
+  /* 主色阴影（按钮/组件用） */
+  --hdm-shadow-primary: 0 4px 12px color-mix(in srgb, var(--hdm-theme-primary) 30%, transparent);
+  --hdm-shadow-primary-hover: 0 4px 16px color-mix(in srgb, var(--hdm-theme-primary) 40%, transparent);
+  --hdm-shadow-primary-active: 0 2px 8px color-mix(in srgb, var(--hdm-theme-primary) 30%, transparent);
+  --hdm-shadow-error-hover: 0 4px 12px rgba(239, 68, 68, 0.15);
+
+  /* Toast 阴影（4 种类型） */
+  --hdm-shadow-toast-info: 0 6px 20px rgba(109, 40, 217, 0.35);
+  --hdm-shadow-toast-success: 0 6px 20px rgba(16, 185, 129, 0.35);
+  --hdm-shadow-toast-warning: 0 6px 20px rgba(245, 158, 11, 0.35);
+  --hdm-shadow-toast-error: 0 6px 20px rgba(239, 68, 68, 0.35);
+
+  /* ---------- 半透明颜色（Alpha Colors） ---------- */
+  /* 白色半透明 */
+  --hdm-white-alpha-10: rgba(255, 255, 255, 0.1);
+  --hdm-white-alpha-15: rgba(255, 255, 255, 0.15);
+  --hdm-white-alpha-20: rgba(255, 255, 255, 0.2);
+  --hdm-white-alpha-25: rgba(255, 255, 255, 0.25);
+  --hdm-white-alpha-28: rgba(255, 255, 255, 0.28);
+  --hdm-white-alpha-38: rgba(255, 255, 255, 0.38);
+  --hdm-white-alpha-70: rgba(255, 255, 255, 0.7);
+
+  /* 黑色半透明 */
+  --hdm-black-alpha-20: rgba(0, 0, 0, 0.2);
+  --hdm-black-alpha-25: rgba(0, 0, 0, 0.25);
+  --hdm-black-alpha-30: rgba(0, 0, 0, 0.3);
+
+  /* 主色半透明（从主题主色派生） */
+  --hdm-primary-alpha-10: color-mix(in srgb, var(--hdm-theme-primary) 10%, transparent);
+  --hdm-primary-alpha-15: color-mix(in srgb, var(--hdm-theme-primary) 15%, transparent);
+  --hdm-primary-alpha-30: color-mix(in srgb, var(--hdm-theme-primary) 30%, transparent);
+  --hdm-primary-alpha-40: color-mix(in srgb, var(--hdm-theme-primary) 40%, transparent);
+  --hdm-primary-alpha-50: color-mix(in srgb, var(--hdm-theme-primary) 50%, transparent);
+
+  /* 错误色半透明（红） */
+  --hdm-error-alpha-15: rgba(239, 68, 68, 0.15);
+
+  /* 模态遮罩 */
+  --hdm-modal-overlay: rgba(15, 23, 42, 0.6);
+
+  /* ---------- 间距（4px 基准） ---------- */
+  --hdm-space-1: 4px;
+  --hdm-space-2: 8px;
+  --hdm-space-3: 12px;
+  --hdm-space-4: 16px;
+  --hdm-space-5: 20px;
+  --hdm-space-6: 24px;
+  --hdm-space-8: 32px;
+
+  /* ---------- 字体 ---------- */
+  --hdm-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  --hdm-font-mono: "SF Mono", Menlo, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+
+  /* 字号 6 级 */
+  --hdm-font-xs: 10px;
+  --hdm-font-sm: 11px;
+  --hdm-font-base: 12px;
+  --hdm-font-md: 13px;
+  --hdm-font-lg: 14px;
+  --hdm-font-xl: 16px;
+
+  /* 字重 4 级 */
+  --hdm-font-regular: 400;
+  --hdm-font-medium: 500;
+  --hdm-font-semibold: 600;
+  --hdm-font-bold: 700;
+
+  /* ---------- 过渡动画 ---------- */
+  --hdm-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hdm-transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hdm-transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------- 尺寸 ---------- */
+  --hdm-btn-height-sm: 28px;
+  --hdm-btn-height-md: 36px;
+  --hdm-input-height-sm: 30px;
+  --hdm-input-height-md: 36px;
+
+  /* ---------- z-index 层级 ---------- */
+  --hdm-z-base: 2147483000;
+  --hdm-z-floating: var(--hdm-z-base);
+  --hdm-z-handles: calc(var(--hdm-z-floating) + 0);
+  --hdm-z-badge: calc(var(--hdm-z-floating) + 10);
+  --hdm-z-remove: calc(var(--hdm-z-floating) + 20);
+  --hdm-z-panel: calc(var(--hdm-z-base) + 500);
+  --hdm-z-toolbar: calc(var(--hdm-z-base) + 600);
+  --hdm-z-settings: calc(var(--hdm-z-base) + 650);
+  --hdm-z-toast: calc(var(--hdm-z-base) + 680);
+  --hdm-z-modal: calc(var(--hdm-z-base) + 700);
+}
+
+/* ============================================================
+   四套预设主题
+   ============================================================ */
+/* 主题1：深海蓝 #211E55 */
+[data-theme="deep-cyan"] {
+  --hdm-theme-primary: #211E55;
+  --hdm-theme-primary-light: #3D3A75;
+  --hdm-theme-primary-dark: #15133D;
+  --hdm-theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+  --hdm-theme-soft-bg: #EDECF5;
+  --hdm-theme-soft-bg-hover: #ddd9ee;
+  --hdm-theme-soft-text: #15133D;
+  --hdm-theme-count-text: #211E55;
+  --hdm-theme-shadow: 0 2px 8px rgba(33,30,85,0.3);
+  --hdm-theme-alpha-20: rgba(33, 30, 85, 0.2);
+}
+
+/* 主题2：墨绿 #6A8372 */
+[data-theme="gray-green"] {
+  --hdm-theme-primary: #6A8372;
+  --hdm-theme-primary-light: #8A9E8F;
+  --hdm-theme-primary-dark: #526958;
+  --hdm-theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);
+  --hdm-theme-soft-bg: #EEF2EF;
+  --hdm-theme-soft-bg-hover: #dfe6e1;
+  --hdm-theme-soft-text: #526958;
+  --hdm-theme-count-text: #6A8372;
+  --hdm-theme-shadow: 0 2px 8px rgba(106,131,114,0.3);
+  --hdm-theme-alpha-20: rgba(106, 131, 114, 0.2);
+}
+
+/* 主题3：柔雾紫 #70649A（默认） */
+[data-theme="dusk-purple"] {
+  --hdm-theme-primary: #70649A;
+  --hdm-theme-primary-light: #8B7FB3;
+  --hdm-theme-primary-dark: #5A4F7D;
+  --hdm-theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --hdm-theme-soft-bg: #F0EEF7;
+  --hdm-theme-soft-bg-hover: #e9e4f3;
+  --hdm-theme-soft-text: #5A4F7D;
+  --hdm-theme-count-text: #70649A;
+  --hdm-theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+  --hdm-theme-alpha-20: rgba(112, 100, 154, 0.2);
+}
+
+/* 主题4：暖棕 #9E7A7A */
+[data-theme="warm-brown"] {
+  --hdm-theme-primary: #9E7A7A;
+  --hdm-theme-primary-light: #B89595;
+  --hdm-theme-primary-dark: #7E5E5E;
+  --hdm-theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);
+  --hdm-theme-soft-bg: #F5EFEF;
+  --hdm-theme-soft-bg-hover: #eee5e5;
+  --hdm-theme-soft-text: #7E5E5E;
+  --hdm-theme-count-text: #9E7A7A;
+  --hdm-theme-shadow: 0 2px 8px rgba(158,122,122,0.3);
+  --hdm-theme-alpha-20: rgba(158, 122, 122, 0.2);
+}
+
+/* ============================================================
+   样式隔离重置（防止宿主页面 CSS 覆盖插件样式）
+   ============================================================ */
+
+/* 根容器重置：清除所有继承样式，恢复基础排版 */
+.html-diff-marker-toolbar,
+.html-diff-marker-inspector,
+.html-diff-marker-settings-panel,
+.html-diff-marker-modal-overlay,
+.html-diff-marker-toast,
+.html-diff-marker-multi-toolbar,
+.html-diff-marker-wake-btn,
+.html-diff-marker-size-display,
+.html-diff-marker-guide-line,
+.html-diff-marker-badge,
+.html-diff-marker-badge-floating,
+.html-diff-marker-remove-badge,
+.html-diff-marker-remove-badge-floating,
+.html-diff-marker-resize-handle,
+.html-diff-marker-resize-handle-floating,
+.html-diff-marker-group-outline,
+.html-diff-marker-group-outline-floating,
+.html-diff-marker-group-handle,
+.html-diff-marker-group-handle-floating,
+.html-diff-marker-group-wrap {
+  all: initial !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--hdm-text-primary) !important;
+}
+
+/* 所有子元素重置：清除继承，恢复 box-sizing */
+.html-diff-marker-toolbar *,
+.html-diff-marker-inspector *,
+.html-diff-marker-settings-panel *,
+.html-diff-marker-modal-overlay *,
+.html-diff-marker-toast *,
+.html-diff-marker-multi-toolbar *,
+.html-diff-marker-wake-btn *,
+.html-diff-marker-size-display *,
+.html-diff-marker-badge *,
+.html-diff-marker-badge-floating *,
+.html-diff-marker-remove-badge *,
+.html-diff-marker-remove-badge-floating *,
+.html-diff-marker-resize-handle *,
+.html-diff-marker-resize-handle-floating *,
+.html-diff-marker-group-outline *,
+.html-diff-marker-group-outline-floating *,
+.html-diff-marker-group-handle *,
+.html-diff-marker-group-handle-floating *,
+.html-diff-marker-group-wrap *,
+.html-diff-marker-guide-line * {
+  all: unset !important;
+  box-sizing: border-box !important;
+}
+
+/* ---------- 恢复表单元素基础样式 ---------- */
+.html-diff-marker-toolbar button,
+.html-diff-marker-inspector button,
+.html-diff-marker-settings-panel button,
+.html-diff-marker-modal-overlay button,
+.html-diff-marker-toast button,
+.html-diff-marker-multi-toolbar button,
+.html-diff-marker-wake-btn button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  font: inherit !important;
+  color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.html-diff-marker-toolbar input,
+.html-diff-marker-inspector input,
+.html-diff-marker-settings-panel input,
+.html-diff-marker-modal-overlay input {
+  display: inline-block !important;
+  border: 1px solid var(--hdm-border) !important;
+  padding: 0 var(--hdm-space-3) !important;
+  font: inherit !important;
+  color: inherit !important;
+  background: var(--hdm-bg-white) !important;
+  height: var(--hdm-input-height-md) !important;
+  line-height: 1.5 !important;
+  outline: none !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.html-diff-marker-toolbar select,
+.html-diff-marker-inspector select,
+.html-diff-marker-settings-panel select,
+.html-diff-marker-modal-overlay select {
+  display: inline-block !important;
+  border: 1px solid var(--hdm-border) !important;
+  padding: 0 var(--hdm-space-3) !important;
+  font: inherit !important;
+  color: inherit !important;
+  background: var(--hdm-bg-white) !important;
+  height: var(--hdm-input-height-md) !important;
+  line-height: 1.5 !important;
+  outline: none !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.html-diff-marker-toolbar textarea,
+.html-diff-marker-inspector textarea,
+.html-diff-marker-settings-panel textarea,
+.html-diff-marker-modal-overlay textarea {
+  display: block !important;
+  border: 1px solid var(--hdm-border) !important;
+  padding: var(--hdm-space-2) var(--hdm-space-3) !important;
+  font: inherit !important;
+  color: inherit !important;
+  background: var(--hdm-bg-white) !important;
+  line-height: 1.6 !important;
+  outline: none !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  resize: vertical !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* ---------- 恢复排版元素基础样式 ---------- */
+.html-diff-marker-toolbar div:not(.html-diff-marker-toolbar-header):not(.html-diff-marker-toolbar-body):not(.html-diff-marker-toolbar-btn-row):not(.html-diff-marker-toolbar-footer):not(.html-diff-marker-export-row):not(.html-diff-marker-toolbar-window-ctrl):not(.html-diff-marker-shortcut):not(.html-diff-marker-counts),
+.html-diff-marker-inspector div:not(.html-diff-marker-inspector-header):not(.html-diff-marker-inspector-title-row):not(.html-diff-marker-inspector-header-btns):not(.html-diff-marker-group-header):not(.html-diff-marker-group-actions):not(.html-diff-marker-unit-toggle):not(.html-diff-marker-style-prop-row):not(.html-diff-marker-style-prop-control):not(.html-diff-marker-style-header):not(.html-diff-marker-style-header-actions):not(.html-diff-marker-style-input-wrap):not(.html-diff-marker-inspector-actions):not(.html-diff-marker-inspector-body):not(.html-diff-marker-resize-handle-se):not(.html-diff-marker-group-child-item):not(.html-diff-marker-reset-all-wrap):not(.html-diff-marker-link-input-wrap):not(.html-diff-marker-element-info):not(.html-diff-marker-field-row):not(.html-diff-marker-style-section):not(.html-diff-marker-style-row):not(.html-diff-marker-child-row),
+.html-diff-marker-settings-panel div:not(.html-diff-marker-settings-header):not(.html-diff-marker-settings-title):not(.html-diff-marker-settings-body):not(.html-diff-marker-settings-section):not(.html-diff-marker-settings-theme-grid):not(.html-diff-marker-settings-theme-card):not(.html-diff-marker-settings-custom-row):not(.html-diff-marker-settings-row),
+.html-diff-marker-modal-overlay div:not(.html-diff-marker-modal):not(.html-diff-marker-modal-header):not(.html-diff-marker-modal-header-title):not(.html-diff-marker-modal-body):not(.html-diff-marker-modal-footer):not(.html-diff-marker-modal-field):not(.html-diff-marker-modal-hint),
+.html-diff-marker-toast div,
+.html-diff-marker-multi-toolbar div {
+  display: block !important;
+}
+
+.html-diff-marker-toolbar span,
+.html-diff-marker-inspector span,
+.html-diff-marker-settings-panel span,
+.html-diff-marker-modal-overlay span,
+.html-diff-marker-toast span,
+.html-diff-marker-multi-toolbar span {
+  display: inline !important;
+}
+
+.html-diff-marker-toolbar label,
+.html-diff-marker-inspector label,
+.html-diff-marker-settings-panel label,
+.html-diff-marker-modal-overlay label {
+  display: inline-block !important;
+  cursor: default !important;
+}
+
+.html-diff-marker-toolbar p,
+.html-diff-marker-inspector p,
+.html-diff-marker-settings-panel p,
+.html-diff-marker-modal-overlay p {
+  display: block !important;
+  margin: 0 !important;
+}
+
+.html-diff-marker-toolbar h1,
+.html-diff-marker-toolbar h2,
+.html-diff-marker-toolbar h3,
+.html-diff-marker-toolbar h4,
+.html-diff-marker-toolbar h5,
+.html-diff-marker-toolbar h6,
+.html-diff-marker-inspector h1,
+.html-diff-marker-inspector h2,
+.html-diff-marker-inspector h3,
+.html-diff-marker-inspector h4,
+.html-diff-marker-inspector h5,
+.html-diff-marker-inspector h6 {
+  display: block !important;
+  margin: 0 !important;
+  font-weight: var(--hdm-font-semibold) !important;
+}
+
+.html-diff-marker-toolbar ul,
+.html-diff-marker-toolbar li,
+.html-diff-marker-inspector ul,
+.html-diff-marker-inspector li {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.html-diff-marker-toolbar kbd,
+.html-diff-marker-inspector kbd,
+.html-diff-marker-settings-panel kbd {
+  display: inline-block !important;
+  padding: 1px 5px !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+  font-family: var(--hdm-font-mono) !important;
+  color: var(--hdm-text-tertiary) !important;
+  line-height: 1.2 !important;
+}
+
+/* ---------- code 标签恢复 ---------- */
+.html-diff-marker-toolbar code,
+.html-diff-marker-inspector code,
+.html-diff-marker-settings-panel code,
+.html-diff-marker-modal-overlay code,
+.html-diff-marker-toast code,
+.html-diff-marker-multi-toolbar code {
+  display: inline !important;
+  font-family: var(--hdm-font-mono) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  color: var(--hdm-text-primary) !important;
+}
+
+/* ---------- SVG 图标正常显示 ---------- */
+.html-diff-marker-toolbar svg,
+.html-diff-marker-inspector svg,
+.html-diff-marker-settings-panel svg,
+.html-diff-marker-modal-overlay svg,
+.html-diff-marker-toast svg {
+  display: inline-block !important;
+  width: 1em !important;
+  height: 1em !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.html-diff-marker-multi-toolbar svg {
+  display: inline-block !important;
+  width: 14px !important;
+  height: 14px !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.html-diff-marker-wake-btn svg,
+.html-diff-marker-wake-btn svg * {
+  display: inline-block !important;
+  width: 18px !important;
+  height: 18px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  flex-shrink: 0 !important;
+}
+
+/* ---------- a 标签恢复 ---------- */
+.html-diff-marker-toolbar a,
+.html-diff-marker-inspector a,
+.html-diff-marker-settings-panel a,
+.html-diff-marker-modal-overlay a {
+  display: inline !important;
+  color: var(--hdm-primary) !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+/* ============================================================
+   全局滚动条美化
+   ============================================================ */
+.html-diff-marker-inspector-body::-webkit-scrollbar,
+.html-diff-marker-textarea::-webkit-scrollbar,
+.html-diff-marker-modal-body::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+.html-diff-marker-inspector-body::-webkit-scrollbar-track,
+.html-diff-marker-textarea::-webkit-scrollbar-track,
+.html-diff-marker-modal-body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.html-diff-marker-inspector-body::-webkit-scrollbar-thumb,
+.html-diff-marker-textarea::-webkit-scrollbar-thumb,
+.html-diff-marker-modal-body::-webkit-scrollbar-thumb {
+  background: var(--hdm-border-hover) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  transition: background var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-inspector-body::-webkit-scrollbar-thumb:hover,
+.html-diff-marker-textarea::-webkit-scrollbar-thumb:hover,
+.html-diff-marker-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--hdm-text-tertiary) !important;
+}
+
+/* Firefox 滚动条 */
+.html-diff-marker-inspector-body,
+.html-diff-marker-textarea,
+.html-diff-marker-modal-body {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--hdm-border-hover) transparent !important;
+}
+
+/* ============================================================
+   基础组件 — 按钮
+   ============================================================ */
+
+/* 按钮基础样式 */
+.html-diff-marker-toolbar .html-diff-marker-btn,
+.html-diff-marker-inspector .html-diff-marker-btn,
+.html-diff-marker-settings-panel .html-diff-marker-btn,
+.html-diff-marker-modal-overlay .html-diff-marker-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--hdm-space-1) !important;
+  padding: 0 var(--hdm-space-4) !important;
+  height: var(--hdm-btn-height-md) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--hdm-radius-md) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  transition: all var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+}
+
+/* 主按钮 Primary */
+.html-diff-marker-toolbar .html-diff-marker-btn--primary,
+.html-diff-marker-inspector .html-diff-marker-btn--primary,
+.html-diff-marker-settings-panel .html-diff-marker-btn--primary,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--primary {
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--primary:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--primary:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--primary:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--primary:hover {
+  background: var(--hdm-gradient-btn-primary-hover) !important;
+  box-shadow: 0 4px 14px var(--hdm-primary-alpha-40) !important;
+  transform: translateY(-1px) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--primary:active,
+.html-diff-marker-inspector .html-diff-marker-btn--primary:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--primary:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--primary:active {
+  background: var(--hdm-gradient-btn-primary-active) !important;
+  box-shadow: 0 1px 4px var(--hdm-primary-alpha-30) !important;
+  transform: translateY(0) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--primary:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--primary.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--primary:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--primary.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--primary:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--primary.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--primary:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--primary.html-diff-marker-btn--disabled {
+  background: var(--hdm-border-hover) !important;
+  color: var(--hdm-text-disabled) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* 次要按钮 Secondary */
+.html-diff-marker-toolbar .html-diff-marker-btn--secondary,
+.html-diff-marker-inspector .html-diff-marker-btn--secondary,
+.html-diff-marker-settings-panel .html-diff-marker-btn--secondary,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--secondary {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-secondary) !important;
+  border-color: var(--hdm-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--secondary:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--secondary:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--secondary:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--secondary:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--secondary:active,
+.html-diff-marker-inspector .html-diff-marker-btn--secondary:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--secondary:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--secondary:active {
+  background: var(--hdm-primary-50) !important;
+  color: var(--hdm-primary-hover) !important;
+  border-color: var(--hdm-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--secondary:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--secondary.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--secondary:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--secondary.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--secondary:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--secondary.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--secondary:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--secondary.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-disabled) !important;
+  color: var(--hdm-text-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  cursor: not-allowed !important;
+}
+
+/* 危险按钮 Danger */
+.html-diff-marker-toolbar .html-diff-marker-btn--danger,
+.html-diff-marker-inspector .html-diff-marker-btn--danger,
+.html-diff-marker-settings-panel .html-diff-marker-btn--danger,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--danger {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-error) !important;
+  border-color: var(--hdm-error-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--danger:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--danger:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--danger:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--danger:hover {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error-hover) !important;
+  border-color: var(--hdm-error) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--danger:active,
+.html-diff-marker-inspector .html-diff-marker-btn--danger:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--danger:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--danger:active {
+  background: var(--hdm-error-bg-hover) !important;
+  color: var(--hdm-error-active) !important;
+  border-color: var(--hdm-error-hover) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--danger:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--danger.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--danger:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--danger.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--danger:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--danger.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--danger:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--danger.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-error-disabled) !important;
+  border-color: var(--hdm-error-border) !important;
+  cursor: not-allowed !important;
+}
+
+/* 幽灵按钮 Ghost / 小型按钮 */
+.html-diff-marker-toolbar .html-diff-marker-btn--ghost,
+.html-diff-marker-inspector .html-diff-marker-btn--ghost,
+.html-diff-marker-settings-panel .html-diff-marker-btn--ghost,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--ghost {
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-text-secondary) !important;
+  border-color: var(--hdm-border) !important;
+  height: 24px !important;
+  padding: 0 var(--hdm-space-3) !important;
+  font-size: var(--hdm-font-sm) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--ghost:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--ghost:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--ghost:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--ghost:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--ghost:active,
+.html-diff-marker-inspector .html-diff-marker-btn--ghost:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--ghost:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--ghost:active {
+  background: var(--hdm-primary-50) !important;
+  color: var(--hdm-primary-hover) !important;
+  border-color: var(--hdm-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--ghost:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--ghost.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--ghost:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--ghost.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--ghost:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--ghost.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--ghost:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--ghost.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-disabled) !important;
+  color: var(--hdm-text-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  cursor: not-allowed !important;
+}
+
+/* 成功按钮 Success */
+.html-diff-marker-toolbar .html-diff-marker-btn--success,
+.html-diff-marker-inspector .html-diff-marker-btn--success,
+.html-diff-marker-settings-panel .html-diff-marker-btn--success,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--success {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-success) !important;
+  border-color: var(--hdm-success-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--success:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--success:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--success:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--success:hover {
+  background: var(--hdm-success-bg) !important;
+  color: var(--hdm-success-hover) !important;
+  border-color: var(--hdm-success) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--success:active,
+.html-diff-marker-inspector .html-diff-marker-btn--success:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--success:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--success:active {
+  background: var(--hdm-success-bg-hover) !important;
+  color: var(--hdm-success-active) !important;
+  border-color: var(--hdm-success-hover) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--success:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--success.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--success:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--success.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--success:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--success.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--success:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--success.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-success-disabled) !important;
+  border-color: var(--hdm-success-border) !important;
+  cursor: not-allowed !important;
+}
+
+/* 图标按钮 Icon */
+.html-diff-marker-toolbar .html-diff-marker-btn--icon,
+.html-diff-marker-inspector .html-diff-marker-btn--icon,
+.html-diff-marker-settings-panel .html-diff-marker-btn--icon,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--icon {
+  background: transparent !important;
+  color: var(--hdm-text-secondary) !important;
+  border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border-radius: var(--hdm-radius-sm) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--icon:hover,
+.html-diff-marker-inspector .html-diff-marker-btn--icon:hover,
+.html-diff-marker-settings-panel .html-diff-marker-btn--icon:hover,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--icon:hover {
+  background: var(--hdm-bg-hover) !important;
+  color: var(--hdm-text-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--icon:active,
+.html-diff-marker-inspector .html-diff-marker-btn--icon:active,
+.html-diff-marker-settings-panel .html-diff-marker-btn--icon:active,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--icon:active {
+  background: var(--hdm-border) !important;
+  color: var(--hdm-text-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn--icon:disabled,
+.html-diff-marker-toolbar .html-diff-marker-btn--icon.html-diff-marker-btn--disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--icon:disabled,
+.html-diff-marker-inspector .html-diff-marker-btn--icon.html-diff-marker-btn--disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--icon:disabled,
+.html-diff-marker-settings-panel .html-diff-marker-btn--icon.html-diff-marker-btn--disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--icon:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-btn--icon.html-diff-marker-btn--disabled {
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+}
+
+/* ---------- 旧类名兼容（保持向后兼容） ---------- */
+.html-diff-marker-toolbar .html-diff-marker-btn-primary,
+.html-diff-marker-inspector .html-diff-marker-btn-primary,
+.html-diff-marker-settings-panel .html-diff-marker-btn-primary,
+.html-diff-marker-modal-overlay .html-diff-marker-btn-primary {
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn-secondary,
+.html-diff-marker-inspector .html-diff-marker-btn-secondary,
+.html-diff-marker-settings-panel .html-diff-marker-btn-secondary,
+.html-diff-marker-modal-overlay .html-diff-marker-btn-secondary {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-secondary) !important;
+  border: 1px solid var(--hdm-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn-success,
+.html-diff-marker-inspector .html-diff-marker-btn-success,
+.html-diff-marker-settings-panel .html-diff-marker-btn-success,
+.html-diff-marker-modal-overlay .html-diff-marker-btn-success {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-success) !important;
+  border: 1px solid var(--hdm-success-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-btn-danger,
+.html-diff-marker-inspector .html-diff-marker-btn-danger,
+.html-diff-marker-settings-panel .html-diff-marker-btn-danger,
+.html-diff-marker-modal-overlay .html-diff-marker-btn-danger {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-error) !important;
+  border: 1px solid var(--hdm-error-border) !important;
+}
+
+/* ============================================================
+   基础组件 — 输入框
+   ============================================================ */
+
+/* 文本输入框 Text Input */
+.html-diff-marker-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  height: var(--hdm-input-height-md) !important;
+  padding: 0 var(--hdm-space-3) !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-regular) !important;
+  color: var(--hdm-text-primary) !important;
+  line-height: 1.5 !important;
+  outline: none !important;
+  transition: border-color var(--hdm-transition-fast),
+    box-shadow var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-input:hover {
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-input:focus {
+  border-color: var(--hdm-primary) !important;
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+.html-diff-marker-input:disabled {
+  background: var(--hdm-bg-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+}
+.html-diff-marker-input--error {
+  border-color: var(--hdm-error) !important;
+}
+.html-diff-marker-input--error:focus {
+  border-color: var(--hdm-error) !important;
+  box-shadow: var(--hdm-shadow-focus-ring-error) !important;
+}
+
+/* 小型输入框（样式编辑区使用） */
+.html-diff-marker-inspector .html-diff-marker-input--sm {
+  height: var(--hdm-input-height-sm) !important;
+  padding: 0 var(--hdm-space-2) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-family: var(--hdm-font-mono) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+}
+
+/* 文本域 Textarea */
+.html-diff-marker-textarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 80px !important;
+  padding: var(--hdm-space-2) var(--hdm-space-3) !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-regular) !important;
+  color: var(--hdm-text-primary) !important;
+  line-height: 1.6 !important;
+  outline: none !important;
+  resize: vertical !important;
+  transition: border-color var(--hdm-transition-fast),
+    box-shadow var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-textarea:hover {
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-textarea:focus {
+  border-color: var(--hdm-primary) !important;
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+.html-diff-marker-textarea:disabled {
+  background: var(--hdm-bg-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+}
+.html-diff-marker-textarea--error {
+  border-color: var(--hdm-error) !important;
+}
+.html-diff-marker-textarea--error:focus {
+  border-color: var(--hdm-error) !important;
+  box-shadow: var(--hdm-shadow-focus-ring-error) !important;
+}
+
+/* 等宽字体文本域（HTML 编辑区） */
+.html-diff-marker-textarea--mono {
+  font-family: var(--hdm-font-mono) !important;
+  font-size: var(--hdm-font-sm) !important;
+}
+
+/* 旧类名兼容 */
+.html-diff-marker-text-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-size: var(--hdm-font-base) !important;
+  outline: none !important;
+  transition: border-color var(--hdm-transition-fast),
+    box-shadow var(--hdm-transition-fast) !important;
+  font-family: var(--hdm-font-family) !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  height: var(--hdm-input-height-md) !important;
+}
+/* 样式编辑区的输入框和下拉框高度统一为 30px */
+.html-diff-marker-inspector .html-diff-marker-text-input {
+  height: var(--hdm-input-height-sm) !important;
+  padding: 0 var(--hdm-space-2) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-family: var(--hdm-font-mono) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+}
+.html-diff-marker-text-input:focus {
+  border-color: var(--hdm-primary) !important;
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+
+/* ============================================================
+   基础组件 — 颜色选择器（增强包装）
+   ============================================================ */
+.html-diff-marker-color-wrap {
+  position: relative !important;
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  cursor: pointer !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.html-diff-marker-color-wrap:hover {
+  border-color: var(--hdm-primary) !important;
+}
+.html-diff-marker-color-wrap::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 3px !important;
+  left: 3px !important;
+  right: 3px !important;
+  bottom: 3px !important;
+  background-color: inherit !important;
+  border-radius: 2px !important;
+  pointer-events: none !important;
+}
+.html-diff-marker-style-color {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+.html-diff-marker-style-color::-webkit-color-swatch-wrapper {
+  padding: 0 !important;
+}
+.html-diff-marker-style-color::-webkit-color-swatch {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* ============================================================
+   基础组件 — 下拉框 Select
+   ============================================================ */
+
+/* 外层包装容器（美化原生 select） */
+.html-diff-marker-select-wrap {
+  position: relative !important;
+  width: 100% !important;
+  height: var(--hdm-input-height-md) !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  transition: border-color var(--hdm-transition-fast),
+    box-shadow var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-select-wrap:hover {
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-select-wrap:focus-within {
+  border-color: var(--hdm-primary) !important;
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+.html-diff-marker-select-wrap--disabled {
+  background: var(--hdm-bg-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  cursor: not-allowed !important;
+}
+.html-diff-marker-select-wrap--disabled .html-diff-marker-select {
+  cursor: not-allowed !important;
+  color: var(--hdm-text-disabled) !important;
+}
+.html-diff-marker-select-wrap--error {
+  border-color: var(--hdm-error) !important;
+}
+.html-diff-marker-select-wrap--error:focus-within {
+  border-color: var(--hdm-error) !important;
+  box-shadow: var(--hdm-shadow-focus-ring-error) !important;
+}
+
+/* 小型下拉框 */
+.html-diff-marker-select-wrap--sm {
+  height: var(--hdm-input-height-sm) !important;
+}
+.html-diff-marker-select-wrap--sm .html-diff-marker-select {
+  padding: 0 28px 0 var(--hdm-space-2) !important;
+  font-size: var(--hdm-font-sm) !important;
+}
+.html-diff-marker-select-wrap--sm .html-diff-marker-select-arrow {
+  right: 6px !important;
+  font-size: 10px !important;
+}
+
+/* 原生 select（透明化，由外层提供视觉） */
+.html-diff-marker-select {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 28px 0 var(--hdm-space-3) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: inherit !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-primary) !important;
+  line-height: 1.5 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-select:disabled {
+  cursor: not-allowed !important;
+  color: var(--hdm-text-disabled) !important;
+}
+
+/* 自定义箭头 */
+.html-diff-marker-select-arrow {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 12px !important;
+  color: var(--hdm-text-tertiary) !important;
+  pointer-events: none !important;
+  line-height: 1 !important;
+  transition: transform var(--hdm-transition-fast) !important;
+}
+
+/* ============================================================
+   基础组件 — 复选框 Checkbox
+   ============================================================ */
+
+.html-diff-marker-checkbox-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--hdm-space-2) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-secondary) !important;
+  line-height: 1.4 !important;
+}
+.html-diff-marker-checkbox-wrap--disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+/* 原生 checkbox（隐藏，用 ::before 模拟） */
+.html-diff-marker-checkbox {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 自定义复选框外观 */
+.html-diff-marker-checkbox-custom {
+  position: relative !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1.5px solid var(--hdm-border-hover) !important;
+  border-radius: 4px !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+}
+
+/* hover 态 */
+.html-diff-marker-checkbox-wrap:hover .html-diff-marker-checkbox-custom {
+  border-color: var(--hdm-primary-light) !important;
+}
+
+/* 选中态 */
+.html-diff-marker-checkbox:checked + .html-diff-marker-checkbox-custom {
+  background: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary) !important;
+}
+
+/* 选中对勾 */
+.html-diff-marker-checkbox:checked + .html-diff-marker-checkbox-custom::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 4px !important;
+  top: 1px !important;
+  width: 5px !important;
+  height: 9px !important;
+  border: solid var(--hdm-text-white) !important;
+  border-width: 0 1.5px 1.5px 0 !important;
+  transform: rotate(45deg) !important;
+  box-sizing: content-box !important;
+}
+
+/* focus 态 */
+.html-diff-marker-checkbox:focus + .html-diff-marker-checkbox-custom {
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+  border-color: var(--hdm-primary) !important;
+}
+
+/* disabled 态 */
+.html-diff-marker-checkbox:disabled + .html-diff-marker-checkbox-custom {
+  background: var(--hdm-bg-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  cursor: not-allowed !important;
+}
+.html-diff-marker-checkbox:disabled:checked + .html-diff-marker-checkbox-custom {
+  background: var(--hdm-border-hover) !important;
+  border-color: var(--hdm-border-hover) !important;
+}
+
+/* ============================================================
+   页面标记视觉
+   ============================================================ */
+
+/* 悬停高亮（选择模式）— 紫色系 outline + 背景色 */
+.html-diff-marker-highlight-hover {
+  outline: 2px solid var(--hdm-primary-light) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-hover-bg) !important;
+  cursor: crosshair !important;
+  transition: all var(--hdm-transition-fast) !important;
+}
+
+/* 已选中标记 — 绿色 outline + 背景色 */
+.html-diff-marker-selected {
+  outline: 2px solid var(--hdm-success) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-selected-bg) !important;
+  position: relative !important;
+  transition: all var(--hdm-transition-base) !important;
+}
+
+/* 已修改标记 — 橙色 outline + 背景色 */
+.html-diff-marker-modified {
+  outline: 2px solid var(--hdm-warning) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-modified-bg) !important;
+  position: relative !important;
+  transition: all var(--hdm-transition-base) !important;
+}
+
+/* 多选高亮 — 紫色虚线 outline */
+.html-diff-marker-multi-selected {
+  outline: 2px dashed var(--hdm-primary) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-multi-bg) !important;
+  position: relative !important;
+  transition: all var(--hdm-transition-base) !important;
+}
+
+/* ============================================================
+   多选工具栏 (Multi-select Toolbar)
+   ============================================================ */
+
+/* 整体框架 */
+.html-diff-marker-multi-toolbar {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  box-shadow: var(--hdm-shadow-md) !important;
+  z-index: calc(var(--hdm-z-toolbar) + 10) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: normal !important;
+  line-height: 1.5 !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 90vw !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+}
+
+/* 按钮通用样式 */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn {
+  height: var(--hdm-btn-height-sm) !important;
+  padding: 0 var(--hdm-space-3) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border: 1px solid transparent !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  font-family: var(--hdm-font-family) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  min-width: auto !important;
+  overflow: visible !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+/* 按钮内的图标容器 */
+.html-diff-marker-multi-toolbar .multi-btn-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+/* 组合标记按钮（主色 - 渐变） */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--primary {
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border-color: transparent !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--primary:hover {
+  background: var(--hdm-gradient-btn-primary-hover) !important;
+  box-shadow: 0 4px 14px var(--hdm-primary-alpha-40) !important;
+  transform: translateY(-1px) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--primary:active {
+  background: var(--hdm-gradient-btn-primary-active) !important;
+  box-shadow: 0 1px 4px var(--hdm-primary-alpha-30) !important;
+  transform: translateY(0) !important;
+}
+
+/* 成功按钮（组合标记） */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--success {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-success) !important;
+  border-color: var(--hdm-success-border) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--success:hover {
+  background: var(--hdm-success-bg) !important;
+  color: var(--hdm-success-hover) !important;
+  border-color: var(--hdm-success) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--success:active {
+  background: var(--hdm-success-bg-hover) !important;
+  color: var(--hdm-success-active) !important;
+  border-color: var(--hdm-success-hover) !important;
+}
+
+/* 复制按钮（次要） */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--secondary {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-secondary) !important;
+  border-color: var(--hdm-border) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--secondary:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--secondary:active {
+  background: var(--hdm-primary-bg-soft) !important;
+  color: var(--hdm-primary-hover) !important;
+  border-color: var(--hdm-primary) !important;
+}
+
+/* 删除按钮（危险） */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--danger {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-error) !important;
+  border-color: var(--hdm-error-border) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--danger:hover {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error-hover) !important;
+  border-color: var(--hdm-error) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--danger:active {
+  background: var(--hdm-error-bg-hover) !important;
+  color: var(--hdm-error-active) !important;
+  border-color: var(--hdm-error-hover) !important;
+}
+
+/* 取消选择按钮（幽灵） */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--ghost {
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-text-secondary) !important;
+  border-color: var(--hdm-border) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--ghost:hover {
+  color: var(--hdm-text-primary) !important;
+  border-color: var(--hdm-border-hover) !important;
+  background: var(--hdm-bg-hover) !important;
+}
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn--ghost:active {
+  background: var(--hdm-border) !important;
+  color: var(--hdm-text-primary) !important;
+}
+
+/* 禁用态 */
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn:disabled,
+.html-diff-marker-multi-toolbar .html-diff-marker-multi-btn.html-diff-marker-btn--disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+/* 计数标签 */
+.html-diff-marker-multi-count {
+  margin-left: 4px !important;
+  padding-left: 8px !important;
+  border-left: 1px solid var(--hdm-border) !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-tertiary) !important;
+  white-space: nowrap !important;
+  font-family: var(--hdm-font-family) !important;
+  display: inline !important;
+  line-height: 1 !important;
+}
+
+.html-diff-marker-multi-count b,
+.html-diff-marker-multi-count strong,
+.html-diff-marker-multi-count-num {
+  color: var(--hdm-primary) !important;
+  font-weight: 500 !important;
+  display: inline !important;
+}
+
+
+
+
+/* ============================================================
+   编号徽章
+   ============================================================ */
+.html-diff-marker-badge {
+  position: absolute !important;
+  top: -11px !important;
+  right: -11px !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: var(--hdm-theme-primary) !important;
+  color: var(--hdm-text-white) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  z-index: var(--hdm-z-badge) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+  line-height: 24px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  text-align: center !important;
+  transition: all var(--hdm-transition-fast) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.html-diff-marker-badge.modified {
+  background: var(--hdm-warning) !important;
+}
+.html-diff-marker-badge:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px var(--hdm-black-alpha-20) !important;
+}
+
+/* 浮层版本（body 层级，fixed 定位） */
+.html-diff-marker-badge-floating {
+  position: fixed !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: var(--hdm-theme-primary) !important;
+  color: var(--hdm-text-white) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  z-index: var(--hdm-z-badge) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+  line-height: 24px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  text-align: center !important;
+  transition: transform var(--hdm-transition-fast) !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.html-diff-marker-badge-floating.modified {
+  background: var(--hdm-warning) !important;
+}
+.html-diff-marker-badge-floating:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px var(--hdm-black-alpha-20) !important;
+}
+.html-diff-marker-badge-hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   删除角标
+   ============================================================ */
+.html-diff-marker-remove-badge {
+  position: absolute !important;
+  top: -12px !important;
+  left: -12px !important;
+  background: var(--hdm-error) !important;
+  color: var(--hdm-text-white) !important;
+  font-size: 14px !important;
+  font-weight: var(--hdm-font-bold) !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: var(--hdm-radius-full) !important;
+  z-index: var(--hdm-z-remove) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: var(--hdm-shadow-sm) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: all var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-remove-badge:hover {
+  background: var(--hdm-error-hover) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 2px 8px var(--hdm-black-alpha-25) !important;
+}
+
+/* 浮层版本（body 层级，fixed 定位） */
+.html-diff-marker-remove-badge-floating {
+  position: fixed !important;
+  background: var(--hdm-error) !important;
+  color: var(--hdm-text-white) !important;
+  font-size: 14px !important;
+  font-weight: var(--hdm-font-bold) !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: var(--hdm-radius-full) !important;
+  z-index: var(--hdm-z-remove) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: var(--hdm-shadow-sm) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: transform var(--hdm-transition-fast) !important;
+  pointer-events: auto !important;
+}
+.html-diff-marker-remove-badge-floating:hover {
+  background: var(--hdm-error-hover) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 2px 8px var(--hdm-black-alpha-25) !important;
+}
+
+/* ============================================================
+   大小调整把手（8 方向）
+   ============================================================ */
+.html-diff-marker-resize-handle {
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1.5px solid var(--hdm-theme-primary) !important;
+  border-radius: 2px !important;
+  z-index: var(--hdm-z-handles) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: all var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-resize-handle:hover {
+  background: var(--hdm-theme-primary) !important;
+  border-color: var(--hdm-theme-primary-dark) !important;
+  transform: scale(1.2) !important;
+}
+/* 各方向位置 */
+.html-diff-marker-handle-n  { top: -5px !important; left: calc(50% - 4px) !important; cursor: ns-resize !important; }
+.html-diff-marker-handle-s  { bottom: -5px !important; left: calc(50% - 4px) !important; cursor: ns-resize !important; }
+.html-diff-marker-handle-e  { top: calc(50% - 4px) !important; right: -5px !important; cursor: ew-resize !important; }
+.html-diff-marker-handle-w  { top: calc(50% - 4px) !important; left: -5px !important; cursor: ew-resize !important; }
+.html-diff-marker-handle-ne { top: -5px !important; right: -5px !important; cursor: nesw-resize !important; }
+.html-diff-marker-handle-nw { top: -5px !important; left: -5px !important; cursor: nwse-resize !important; }
+.html-diff-marker-handle-se { bottom: -5px !important; right: -5px !important; cursor: nwse-resize !important; }
+.html-diff-marker-handle-sw { bottom: -5px !important; left: -5px !important; cursor: nesw-resize !important; }
+
+/* 浮层版本（body 层级，fixed 定位） */
+.html-diff-marker-resize-handle-floating {
+  position: fixed !important;
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--hdm-bg-white) !important;
+  border: 1.5px solid var(--hdm-theme-primary) !important;
+  border-radius: 2px !important;
+  z-index: var(--hdm-z-handles) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: transform var(--hdm-transition-fast) !important;
+  pointer-events: auto !important;
+}
+.html-diff-marker-resize-handle-floating:hover {
+  background: var(--hdm-theme-primary) !important;
+  border-color: var(--hdm-theme-primary-dark) !important;
+  transform: scale(1.2) !important;
+}
+/* 浮层把手方向类（通过 JS 设置 left/top） */
+.html-diff-marker-handle-floating-n  { cursor: ns-resize !important; }
+.html-diff-marker-handle-floating-s  { cursor: ns-resize !important; }
+.html-diff-marker-handle-floating-e  { cursor: ew-resize !important; }
+.html-diff-marker-handle-floating-w  { cursor: ew-resize !important; }
+.html-diff-marker-handle-floating-ne { cursor: nesw-resize !important; }
+.html-diff-marker-handle-floating-nw { cursor: nwse-resize !important; }
+.html-diff-marker-handle-floating-se { cursor: nwse-resize !important; }
+.html-diff-marker-handle-floating-sw { cursor: nesw-resize !important; }
+
+/* ============================================================
+   尺寸信息浮窗
+   ============================================================ */
+.html-diff-marker-size-display {
+  position: fixed !important;
+  background: var(--hdm-mark-size-display-bg) !important;
+  color: var(--hdm-text-white) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  padding: 6px 12px !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  z-index: 9999999 !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: var(--hdm-shadow-md) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  line-height: 1.4 !important;
+}
+
+/* ============================================================
+   辅助线
+   ============================================================ */
+.html-diff-marker-guide-line {
+  position: fixed !important;
+  background: var(--hdm-error) !important;
+  z-index: 9999998 !important;
+  pointer-events: none !important;
+}
+.html-diff-marker-guide-line-v {
+  width: 1px !important;
+  top: 0 !important;
+  height: 100vh !important;
+  box-shadow: var(--hdm-mark-guide-shadow) !important;
+}
+.html-diff-marker-guide-line-h {
+  height: 1px !important;
+  left: 0 !important;
+  width: 100vw !important;
+  box-shadow: var(--hdm-mark-guide-shadow) !important;
+}
+
+/* ============================================================
+   组合标记样式
+   ============================================================ */
+.html-diff-marker-group-wrap {
+  position: absolute !important;
+  z-index: 2147483644 !important;
+  pointer-events: none !important;
+  transform-origin: top left !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+.html-diff-marker-group-outline {
+  position: absolute !important;
+  inset: 0 !important;
+  outline: 2px dashed var(--hdm-primary) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-group-bg) !important;
+  pointer-events: none !important;
+  z-index: 99998 !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  transition: all var(--hdm-transition-base) !important;
+}
+
+.html-diff-marker-group-badge {
+  background: var(--hdm-primary-hover) !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  padding: 2px 10px !important;
+  border-radius: 12px !important;
+  line-height: 18px !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.html-diff-marker-group-handle {
+  width: 10px !important;
+  height: 10px !important;
+  background: var(--hdm-bg-white) !important;
+  border: 2px solid var(--hdm-primary) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  pointer-events: auto !important;
+  box-shadow: 0 1px 3px var(--hdm-black-alpha-30) !important;
+}
+.html-diff-marker-group-handle:hover {
+  background: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-hover) !important;
+  transform: scale(1.2) !important;
+  box-shadow: 0 2px 8px var(--hdm-primary-alpha-50) !important;
+}
+
+/* 浮层版本（body 层级，fixed 定位） */
+.html-diff-marker-group-outline-floating {
+  position: fixed !important;
+  outline: 2px dashed var(--hdm-primary) !important;
+  outline-offset: 2px !important;
+  background-color: var(--hdm-mark-group-bg) !important;
+  pointer-events: none !important;
+  z-index: var(--hdm-z-floating) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  transition: all var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-group-badge-floating {
+  background: var(--hdm-primary-hover) !important;
+}
+
+.html-diff-marker-group-handle-floating {
+  position: fixed !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: var(--hdm-bg-white) !important;
+  border: 2px solid var(--hdm-primary) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  pointer-events: auto !important;
+  box-shadow: 0 1px 3px var(--hdm-black-alpha-30) !important;
+  z-index: var(--hdm-z-handles) !important;
+  transition: transform var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-group-handle-floating:hover {
+  background: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-hover) !important;
+  transform: scale(1.2) !important;
+  box-shadow: 0 2px 8px var(--hdm-primary-alpha-50) !important;
+}
+/* 浮层把手方向类（通过 JS 设置 left/top，这里只设置 cursor） */
+.html-diff-marker-group-handle-float-nw { cursor: nwse-resize !important; }
+.html-diff-marker-group-handle-float-n  { cursor: ns-resize !important; }
+.html-diff-marker-group-handle-float-ne { cursor: nesw-resize !important; }
+.html-diff-marker-group-handle-float-w  { cursor: ew-resize !important; }
+.html-diff-marker-group-handle-float-e  { cursor: ew-resize !important; }
+.html-diff-marker-group-handle-float-sw { cursor: nesw-resize !important; }
+.html-diff-marker-group-handle-float-s  { cursor: ns-resize !important; }
+.html-diff-marker-group-handle-float-se { cursor: nwse-resize !important; }
+
+/* ============================================================
+   工具栏 (Toolbar) — V5 Mac 风格
+   ============================================================ */
+
+/* ---------- 整体框架 ---------- */
+.html-diff-marker-toolbar {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 300px !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  padding: 0 !important;
+  border-radius: var(--hdm-radius-xl) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  z-index: var(--hdm-z-toolbar) !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+/* 最小化（折叠）状态：只保留头部 */
+.html-diff-marker-toolbar.html-diff-marker-collapsed .html-diff-marker-toolbar-body,
+.html-diff-marker-toolbar.html-diff-marker-collapsed .html-diff-marker-toolbar-footer {
+  display: none !important;
+}
+.html-diff-marker-toolbar.html-diff-marker-collapsed .html-diff-marker-toolbar-header {
+  cursor: pointer !important;
+}
+
+/* ---------- 头部区域（渐变） ---------- */
+.html-diff-marker-toolbar-header {
+  background: var(--hdm-theme-gradient) !important;
+  padding: 14px 16px 12px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  color: var(--hdm-text-white) !important;
+  cursor: move !important;
+  user-select: none !important;
+  flex-shrink: 0 !important;
+}
+
+.html-diff-marker-toolbar-title {
+  font-size: 15px !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  letter-spacing: 0.3px !important;
+  color: var(--hdm-text-white) !important;
+  line-height: 1.3 !important;
+}
+
+/* 窗口控制按钮组 */
+.html-diff-marker-toolbar-window-ctrl {
+  display: flex !important;
+  gap: 6px !important;
+}
+
+.html-diff-marker-toolbar .html-diff-marker-ctrl-btn {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: var(--hdm-white-alpha-20) !important;
+  border: none !important;
+  color: var(--hdm-text-white) !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: background var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  font-family: var(--hdm-font-family) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-ctrl-btn:hover {
+  background: var(--hdm-white-alpha-28) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-ctrl-btn:active {
+  background: var(--hdm-white-alpha-38) !important;
+}
+
+/* ---------- 主体区域 ---------- */
+.html-diff-marker-toolbar-body {
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+/* 第一行：4 个操作按钮 */
+.html-diff-marker-toolbar-btn-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-toolbar .html-diff-marker-action-btn {
+  flex: 1 1 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 34px !important;
+  min-width: 0 !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  background: var(--hdm-bg-white) !important;
+  font-size: 12px !important;
+  font-weight: var(--hdm-font-medium) !important;
+  color: var(--hdm-text-primary) !important;
+  cursor: pointer !important;
+  transition: all var(--hdm-transition-fast) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-sizing: border-box !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  user-select: none !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  float: none !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-action-btn:hover {
+  background: var(--hdm-bg-hover) !important;
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-action-btn:active {
+  background: var(--hdm-bg-surface) !important;
+}
+
+/* 删除按钮（危险色） */
+.html-diff-marker-toolbar .html-diff-marker-action-btn.html-diff-marker-btn--danger {
+  color: var(--hdm-error) !important;
+  border-color: var(--hdm-error-border) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-action-btn.html-diff-marker-btn--danger:hover {
+  background: var(--hdm-error-bg) !important;
+  border-color: var(--hdm-error-border-hover) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-action-btn.html-diff-marker-btn--danger:active {
+  background: var(--hdm-error-bg-hover) !important;
+  border-color: var(--hdm-error) !important;
+  color: var(--hdm-error-hover) !important;
+}
+
+/* 选择按钮激活态 */
+.html-diff-marker-toolbar .html-diff-marker-action-btn.html-diff-marker-btn--active {
+  background: var(--hdm-theme-primary) !important;
+  border-color: var(--hdm-theme-primary) !important;
+  color: var(--hdm-text-white) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-action-btn.html-diff-marker-btn--active:hover {
+  background: var(--hdm-theme-primary-dark) !important;
+  border-color: var(--hdm-theme-primary-dark) !important;
+}
+
+/* 导出按钮行：左侧重置 + 中间导出 + 右侧设置 */
+.html-diff-marker-export-row {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* 侧边方块按钮（重置 / 设置） */
+.html-diff-marker-toolbar .html-diff-marker-side-btn {
+  width: 36px !important;
+  height: 40px !important;
+  border: 1.5px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  background: var(--hdm-bg-white) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all var(--hdm-transition-fast) !important;
+  flex-shrink: 0 !important;
+  color: var(--hdm-text-secondary) !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-side-btn:hover {
+  border-color: var(--hdm-theme-primary-light) !important;
+  color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-side-btn:active {
+  background: var(--hdm-bg-surface) !important;
+}
+.html-diff-marker-side-btn svg,
+.html-diff-marker-side-btn svg * {
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* 导出大按钮（次要按钮样式：白色背景 + 边框） */
+.html-diff-marker-toolbar .html-diff-marker-export-btn {
+  flex: 1 !important;
+  height: 40px !important;
+  border: 1.5px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  background: var(--hdm-bg-white) !important;
+  font-size: 13px !important;
+  font-weight: var(--hdm-font-medium) !important;
+  color: var(--hdm-text-secondary) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transition: all var(--hdm-transition-fast) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-sizing: border-box !important;
+  padding: 0 12px !important;
+  user-select: none !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-export-btn:hover {
+  border-color: var(--hdm-theme-primary-light) !important;
+  color: var(--hdm-theme-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-export-btn:active {
+  background: var(--hdm-bg-surface) !important;
+}
+.html-diff-marker-export-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+}
+
+/* ---------- 底部信息栏 ---------- */
+.html-diff-marker-toolbar-footer {
+  padding: 8px 14px !important;
+  background: var(--hdm-bg-secondary) !important;
+  border-top: 1px solid var(--hdm-divider) !important;
+  font-size: 11px !important;
+  color: var(--hdm-text-tertiary) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  font-family: var(--hdm-font-family) !important;
+  box-sizing: border-box !important;
+}
+
+/* 快捷键提示 */
+.html-diff-marker-shortcut {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.html-diff-marker-kbd {
+  display: inline-block !important;
+  padding: 1px 5px !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+  font-family: "SF Mono", Menlo, Consolas, monospace !important;
+  color: var(--hdm-text-secondary) !important;
+  line-height: 1.4 !important;
+  box-shadow: none !important;
+  font-weight: normal !important;
+  min-width: auto !important;
+  height: auto !important;
+}
+
+.html-diff-marker-kbd-plus {
+  display: none !important;
+}
+
+.html-diff-marker-shortcut-label {
+  color: var(--hdm-text-tertiary) !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+/* 计数显示 */
+.html-diff-marker-counts {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+}
+.html-diff-marker-counts b {
+  color: var(--hdm-theme-count-text) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+}
+.html-diff-marker-counts-sep {
+  color: var(--hdm-border-hover) !important;
+}
+
+/* ============================================================
+   唤醒按钮 (Wake Button) — V5
+   ============================================================ */
+.html-diff-marker-wake-btn {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: var(--hdm-theme-gradient) !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  z-index: var(--hdm-z-toolbar) !important;
+  box-shadow: 0 4px 14px rgba(139,92,246,0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  user-select: none !important;
+  transition: all var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+  color: var(--hdm-text-white) !important;
+}
+.html-diff-marker-wake-btn:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px var(--hdm-primary-alpha-40) !important;
+}
+.html-diff-marker-wake-btn:active {
+  transform: scale(1.1) !important;
+}
+
+/* 脉冲动画（首次出现） */
+@keyframes html-diff-marker-wake-pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.html-diff-marker-wake-btn.html-diff-marker-wake-pulse {
+  animation: html-diff-marker-wake-pulse 0.5s ease-out !important;
+}
+
+/* ============================================================
+   检查面板 (Inspector Panel) — 柔雾紫主题
+   ============================================================ */
+
+/* ---------- 整体框架 ---------- */
+.html-diff-marker-inspector {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  width: 340px !important;
+  height: 620px !important;
+  min-width: 320px !important;
+  min-height: 200px !important;
+  background: var(--hdm-bg-white) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  z-index: var(--hdm-z-panel) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  color: var(--hdm-text-primary) !important;
+  box-sizing: border-box !important;
+}
+
+/* 最小化状态 */
+.html-diff-marker-inspector.html-diff-marker-collapsed {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-body,
+.html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-inspector-actions,
+.html-diff-marker-inspector.html-diff-marker-collapsed .html-diff-marker-resize-handle-se {
+  display: none !important;
+}
+
+/* ---------- 面板头部结构 ---------- */
+/* 顶部色条 */
+.html-diff-marker-inspector-top-bar {
+  height: 3px !important;
+  width: 100% !important;
+  background: var(--hdm-theme-primary) !important;
+  flex-shrink: 0 !important;
+}
+
+/* 窗口控制栏（已废弃，保留兼容） */
+.html-diff-marker-inspector-controls {
+  display: none !important;
+}
+
+.html-diff-marker-inspector-header {
+  background: #ffffff !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 标题行 */
+.html-diff-marker-inspector-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex: 1 !important;
+}
+
+.html-diff-marker-inspector-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--hdm-text-primary) !important;
+  line-height: 1.3 !important;
+}
+
+/* 头部右侧按钮组（折叠/关闭） */
+.html-diff-marker-inspector-header-btns {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+.html-diff-marker-inspector .html-diff-marker-inspector-header-btn {
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--hdm-text-secondary) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s !important;
+  box-sizing: border-box !important;
+  font-family: var(--hdm-font-family) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-inspector-header-btn:hover {
+  background: var(--hdm-bg-hover) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-inspector-header-btn:active {
+  background: var(--hdm-divider) !important;
+}
+.html-diff-marker-inspector-selector {
+  font-size: 11px !important;
+  color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  font-family: "SF Mono", Menlo, Consolas, monospace !important;
+  flex-shrink: 0 !important;
+}
+
+.html-diff-marker-inspector .html-diff-marker-inspector-copy-btn {
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+  background: var(--hdm-white-alpha-10) !important;
+  color: var(--hdm-text-white-sub) !important;
+  border: none !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all var(--hdm-transition-fast) !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+}
+.html-diff-marker-inspector .html-diff-marker-inspector-copy-btn:hover {
+  background: var(--hdm-white-alpha-20) !important;
+  color: var(--hdm-text-white) !important;
+}
+
+/* ---------- 面板主体（滚动区域） ---------- */
+.html-diff-marker-inspector-body {
+  padding: 0 !important;
+  background: var(--hdm-bg-white) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  flex: 1 !important;
+  box-sizing: border-box !important;
+}
+
+/* ============================================================
+   V5 编辑面板 — 分组系统
+   ============================================================ */
+
+/* 分组容器 */
+.html-diff-marker-group {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+  box-sizing: border-box !important;
+  background: var(--hdm-bg-white) !important;
+}
+.html-diff-marker-group:last-child {
+  border-bottom: none !important;
+}
+
+/* 分组头部 */
+.html-diff-marker-group-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 12px !important;
+  gap: 8px !important;
+}
+
+/* 分组标题 */
+.html-diff-marker-group-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--hdm-text-primary) !important;
+  font-family: var(--hdm-font-family) !important;
+  line-height: 1.3 !important;
+  flex-shrink: 0 !important;
+}
+
+/* 分组右侧操作区 */
+.html-diff-marker-group-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+/* 分组重置按钮 */
+.html-diff-marker-inspector .html-diff-marker-group-reset {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 22px !important;
+  min-width: fit-content !important;
+  flex-shrink: 0 !important;
+  padding: 0 10px !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-family: var(--hdm-font-family) !important;
+  font-weight: 500 !important;
+  transition: background var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  float: none !important;
+  width: auto !important;
+}
+.html-diff-marker-inspector .html-diff-marker-group-reset:hover {
+  filter: brightness(0.95) !important;
+  color: var(--hdm-theme-primary-dark) !important;
+}
+
+/* 单位切换 */
+.html-diff-marker-unit-toggle {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+.html-diff-marker-inspector .html-diff-marker-unit-btn {
+  height: 22px !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-tertiary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-family: var(--hdm-font-mono) !important;
+  font-weight: 500 !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+.html-diff-marker-inspector .html-diff-marker-unit-btn + .html-diff-marker-unit-btn {
+  margin-left: 0 !important;
+}
+.html-diff-marker-inspector .html-diff-marker-unit-btn--active {
+  background: var(--hdm-theme-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border-color: var(--hdm-theme-primary) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-unit-btn:hover:not(.html-diff-marker-unit-btn--active) {
+  background: var(--hdm-bg-hover) !important;
+  color: var(--hdm-text-secondary) !important;
+}
+
+/* 大小调整重置按钮（单位切换容器内） */
+.html-diff-marker-inspector .html-diff-marker-unit-reset {
+  height: 22px !important;
+  padding: 0 10px !important;
+  font-size: 11px !important;
+  color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-family: var(--hdm-font-family) !important;
+  font-weight: 500 !important;
+  transition: background var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.html-diff-marker-unit-reset:hover {
+  filter: brightness(0.95) !important;
+}
+
+/* 样式属性行 */
+.html-diff-marker-style-prop-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
+  min-height: 28px !important;
+}
+.html-diff-marker-style-prop-row:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 样式属性标签 */
+.html-diff-marker-style-prop-label {
+  font-size: 12px !important;
+  color: var(--hdm-text-secondary) !important;
+  font-family: var(--hdm-font-family) !important;
+  flex-shrink: 0 !important;
+  min-width: 60px !important;
+  line-height: 1.4 !important;
+}
+
+/* 样式属性控件区 */
+.html-diff-marker-style-prop-control {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+/* 样式属性重置按钮 */
+.html-diff-marker-inspector .html-diff-marker-style-prop-reset {
+  width: 28px !important;
+  height: 28px !important;
+  flex-shrink: 0 !important;
+  background: var(--hdm-primary-bg) !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  color: var(--hdm-primary) !important;
+  transition: all var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-style-prop-reset:hover {
+  background: var(--hdm-primary-bg-hover) !important;
+  color: var(--hdm-primary-hover) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-style-prop-reset svg,
+.html-diff-marker-inspector .html-diff-marker-style-prop-reset svg * {
+  width: 14px !important;
+  height: 14px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* 样式编辑区内颜色选择器使用基础组件定义，此处不再重复 */
+
+/* 重置全部按钮 */
+.html-diff-marker-reset-all-wrap {
+  margin-bottom: 12px !important;
+}
+.html-diff-marker-inspector .html-diff-marker-reset-all-btn {
+  width: 100% !important;
+  height: 32px !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+  border: 1px solid var(--hdm-theme-alpha-20) !important;
+  border-radius: 6px !important;
+}
+.html-diff-marker-inspector .html-diff-marker-reset-all-btn:hover {
+  background: var(--hdm-theme-alpha-20) !important;
+  border-color: var(--hdm-theme-primary) !important;
+}
+.html-diff-marker-reset-all-btn svg,
+.html-diff-marker-reset-all-btn svg * {
+  width: 14px !important;
+  height: 14px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* 链接输入框包装 */
+.html-diff-marker-link-input-wrap {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-link-input-wrap .html-diff-marker-input {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.html-diff-marker-link-input-wrap .html-diff-marker-btn--ghost {
+  flex-shrink: 0 !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
+}
+
+/* HTML 编辑标签 */
+.html-diff-marker-html-label {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--hdm-text-secondary) !important;
+  font-family: var(--hdm-font-family) !important;
+  margin-bottom: 6px !important;
+  margin-top: 10px !important;
+  line-height: 1.4 !important;
+}
+.html-diff-marker-html-label:first-child {
+  margin-top: 0 !important;
+}
+
+/* 字体提示条位置调整（V5分组内） */
+.html-diff-marker-group .html-diff-marker-font-hint {
+  margin-top: 8px !important;
+}
+
+/* 滑块在分组内的间距调整 */
+.html-diff-marker-group .html-diff-marker-slider-wrap {
+  margin-bottom: 10px !important;
+}
+.html-diff-marker-group .html-diff-marker-slider-wrap:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 图片上传分组内预览间距 */
+.html-diff-marker-group .html-diff-marker-image-preview {
+  margin-bottom: 8px !important;
+}
+
+/* 样式统计条在分组内 */
+.html-diff-marker-group .html-diff-marker-style-stats {
+  margin-top: 12px !important;
+}
+
+/* textarea 在分组内 */
+.html-diff-marker-group .html-diff-marker-textarea {
+  margin-bottom: 0 !important;
+}
+
+/* ---------- Field row（通用字段行） ---------- */
+.html-diff-marker-field-row {
+  margin-bottom: 14px !important;
+}
+.html-diff-marker-field-row > label {
+  display: block !important;
+  margin-bottom: 6px !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  color: var(--hdm-text-primary) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+/* 字段行头部（带右侧按钮） */
+.html-diff-marker-field-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 6px !important;
+}
+.html-diff-marker-field-header > label {
+  font-weight: var(--hdm-font-semibold) !important;
+  color: var(--hdm-text-primary) !important;
+  font-size: var(--hdm-font-base) !important;
+  margin: 0 !important;
+}
+
+/* 描述预览区 */
+.html-diff-marker-desc-preview {
+  display: none;
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+  background: var(--hdm-bg-secondary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-primary) !important;
+  word-break: break-all !important;
+  line-height: 1.6 !important;
+  font-family: var(--hdm-font-family) !important;
+}
+.html-diff-marker-desc-preview a {
+  color: var(--hdm-primary) !important;
+  text-decoration: underline !important;
+}
+.html-diff-marker-desc-preview-link {
+  color: var(--hdm-primary) !important;
+  text-decoration: underline !important;
+}
+
+/* ---------- 样式分区（通用） ---------- */
+.html-diff-marker-style-section {
+  margin-bottom: 16px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+}
+.html-diff-marker-style-section:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.html-diff-marker-style-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 12px !important;
+}
+.html-diff-marker-style-header > label {
+  font-weight: var(--hdm-font-semibold) !important;
+  color: var(--hdm-text-primary) !important;
+  font-size: var(--hdm-font-md) !important;
+  font-family: var(--hdm-font-family) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* 重置全部按钮（幽灵小按钮） */
+.html-diff-marker-inspector .html-diff-marker-style-reset-all {
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-text-secondary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  padding: 0 10px !important;
+  height: 24px !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  cursor: pointer !important;
+  font-weight: var(--hdm-font-medium) !important;
+  transition: all var(--hdm-transition-fast) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  font-family: var(--hdm-font-family) !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+.html-diff-marker-inspector .html-diff-marker-style-reset-all:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-style-reset-all:active {
+  background: var(--hdm-primary-bg-soft) !important;
+}
+
+/* 样式分组头部右侧按钮组 */
+.html-diff-marker-style-header-actions {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+
+/* ---------- 属性行（通用） ---------- */
+.html-diff-marker-style-row {
+  margin-bottom: 10px !important;
+}
+.html-diff-marker-style-row:last-child {
+  margin-bottom: 0 !important;
+}
+
+.html-diff-marker-style-label {
+  display: block !important;
+  margin-bottom: 5px !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-secondary) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  letter-spacing: 0.01em !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+.html-diff-marker-style-input-wrap {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+
+.html-diff-marker-style-input-wrap .html-diff-marker-input--sm {
+  flex: 1 !important;
+}
+
+/* select 在样式行中的包装（小型） */
+.html-diff-marker-style-input-wrap .html-diff-marker-select-wrap {
+  flex: 1 !important;
+  height: var(--hdm-input-height-sm) !important;
+}
+.html-diff-marker-style-input-wrap .html-diff-marker-select-wrap .html-diff-marker-select {
+  padding: 0 28px 0 8px !important;
+  font-size: var(--hdm-font-sm) !important;
+}
+.html-diff-marker-style-input-wrap .html-diff-marker-select-wrap .html-diff-marker-select-arrow {
+  right: 6px !important;
+  font-size: 10px !important;
+}
+
+/* 微调按钮（±1, ±10） */
+.html-diff-marker-inspector .html-diff-marker-nudge-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  background: var(--hdm-bg-secondary) !important;
+  color: var(--hdm-text-secondary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-xs) !important;
+  font-weight: var(--hdm-font-bold) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: all var(--hdm-transition-fast) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  font-family: var(--hdm-font-family) !important;
+  user-select: none !important;
+}
+.html-diff-marker-inspector .html-diff-marker-nudge-btn:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-nudge-btn:active {
+  background: var(--hdm-primary-bg-soft) !important;
+}
+
+/* ---------- 字体相关（三态提示 + 添加/删除按钮） ---------- */
+
+/* 添加字体按钮 */
+.html-diff-marker-inspector .html-diff-marker-add-font-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  background: var(--hdm-success-bg) !important;
+  color: var(--hdm-success) !important;
+  border: 1px solid var(--hdm-success-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: 16px !important;
+  font-weight: var(--hdm-font-bold) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  font-family: var(--hdm-font-family) !important;
+  user-select: none !important;
+}
+.html-diff-marker-inspector .html-diff-marker-add-font-btn:hover {
+  background: var(--hdm-success-bg-hover) !important;
+}
+
+/* 字体提示条（三态） */
+.html-diff-marker-font-hint {
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  line-height: 1.4 !important;
+  font-family: var(--hdm-font-family) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  border: 1px solid transparent !important;
+}
+/* 默认/警告态（预览失败 - 黄色） */
+.html-diff-marker-font-hint,
+.html-diff-marker-font-hint.warning {
+  background: var(--hdm-warning-bg) !important;
+  border-color: var(--hdm-warning-border) !important;
+  color: var(--hdm-warning-text) !important;
+}
+/* 信息态（引导 - 蓝色） */
+.html-diff-marker-font-hint.info {
+  background: var(--hdm-info-bg) !important;
+  border-color: var(--hdm-info-border) !important;
+  color: var(--hdm-info-text) !important;
+}
+/* 成功态（预览正常 - 绿色） */
+.html-diff-marker-font-hint.success {
+  background: var(--hdm-success-bg) !important;
+  border-color: var(--hdm-success-border) !important;
+  color: var(--hdm-success-text) !important;
+}
+
+/* 删除字体按钮 */
+.html-diff-marker-inspector .html-diff-marker-delete-font-btn {
+  margin-top: 6px !important;
+  width: 100% !important;
+  height: 28px !important;
+  padding: 0 10px !important;
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error-text) !important;
+  border: 1px solid var(--hdm-error-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  font-family: var(--hdm-font-family) !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.html-diff-marker-inspector .html-diff-marker-delete-font-btn:hover {
+  background: var(--hdm-error-bg-hover) !important;
+}
+
+/* 字体选项分组容器 */
+.html-diff-marker-font-group {
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+  background: var(--hdm-bg-secondary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-family: var(--hdm-font-family) !important;
+}
+.html-diff-marker-font-group .html-diff-marker-font-hint {
+  margin-top: 0 !important;
+}
+
+/* ---------- 样式统计条 ---------- */
+.html-diff-marker-style-stats {
+  margin-top: 10px !important;
+  padding: 8px 10px !important;
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary-dark) !important;
+  font-size: var(--hdm-font-sm) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  text-align: center !important;
+  font-weight: var(--hdm-font-medium) !important;
+  font-family: var(--hdm-font-family) !important;
+  line-height: 1.4 !important;
+}
+
+/* ---------- 元素信息区 ---------- */
+.html-diff-marker-element-info {
+  background: var(--hdm-bg-secondary) !important;
+  padding: 10px 12px !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-family: var(--hdm-font-mono) !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-secondary) !important;
+  word-break: break-all !important;
+  line-height: 1.5 !important;
+  margin-top: 14px !important;
+}
+
+/* ---------- 底部操作栏 ---------- */
+.html-diff-marker-inspector-actions {
+  display: flex !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;
+  border-top: 1px solid var(--hdm-border) !important;
+  background: var(--hdm-bg-secondary) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-inspector-actions button {
+  flex: 1 !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  border-radius: var(--hdm-radius-md) !important;
+  cursor: pointer !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  transition: all var(--hdm-transition-base) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: 1px solid transparent !important;
+  box-sizing: border-box !important;
+  font-family: var(--hdm-font-family) !important;
+  line-height: 1 !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+}
+
+/* 删除按钮（危险 - 次要） */
+.html-diff-marker-inspector-actions .html-diff-marker-btn--danger,
+.html-diff-marker-inspector-actions button:first-child {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-error) !important;
+  border-color: var(--hdm-error-border) !important;
+  flex: 1 !important;
+}
+.html-diff-marker-inspector-actions .html-diff-marker-btn--danger:hover,
+.html-diff-marker-inspector-actions button:first-child:hover {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error-hover) !important;
+  border-color: var(--hdm-error) !important;
+}
+
+/* 保存按钮（主按钮 - 渐变紫） */
+.html-diff-marker-inspector-actions .html-diff-marker-btn--primary,
+.html-diff-marker-inspector-actions button:last-child {
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+  flex: 1.2 !important;
+}
+.html-diff-marker-inspector-actions .html-diff-marker-btn--primary:hover,
+.html-diff-marker-inspector-actions button:last-child:hover {
+  background: var(--hdm-gradient-btn-primary-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px var(--hdm-primary-alpha-40) !important;
+}
+
+/* ---------- 右下角拖拽调整大小把手 ---------- */
+.html-diff-marker-resize-handle-se {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  cursor: nwse-resize !important;
+  background: linear-gradient(135deg, transparent 50%, var(--hdm-primary-light) 50%) !important;
+  z-index: 10 !important;
+  border-bottom-right-radius: var(--hdm-radius-xl) !important;
+  transition: all var(--hdm-transition-fast) !important;
+}
+.html-diff-marker-resize-handle-se:hover {
+  background: linear-gradient(135deg, transparent 50%, var(--hdm-primary) 50%) !important;
+}
+
+/* ---------- 图片上传预览区 ---------- */
+.html-diff-marker-image-section-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.html-diff-marker-image-preview {
+  width: 100% !important;
+  height: 120px !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-color: var(--hdm-bg-secondary) !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-image-preview.empty {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--hdm-text-tertiary) !important;
+  font-size: var(--hdm-font-xs) !important;
+  text-align: center !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+/* 背景图预览（80px 固定高度） */
+.html-diff-marker-bg-preview {
+  height: 80px !important;
+}
+
+.html-diff-marker-image-info {
+  flex: 1 !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-tertiary) !important;
+  line-height: 1.4 !important;
+  font-family: var(--hdm-font-family) !important;
+  word-break: break-all !important;
+}
+
+.html-diff-marker-inspector .html-diff-marker-image-btn {
+  width: 100% !important;
+  height: 28px !important;
+  padding: 0 10px !important;
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border: 1px solid var(--hdm-primary-light) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  font-family: var(--hdm-font-family) !important;
+  margin-top: 6px !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+.html-diff-marker-inspector .html-diff-marker-image-btn:hover {
+  background: var(--hdm-primary-bg-soft) !important;
+  border-color: var(--hdm-primary) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-image-btn.remove {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error) !important;
+  border: 1px solid var(--hdm-error-border) !important;
+}
+.html-diff-marker-inspector .html-diff-marker-image-btn.remove:hover {
+  background: var(--hdm-error-bg-hover) !important;
+  border-color: var(--hdm-error) !important;
+}
+
+.html-diff-marker-not-persisted {
+  color: var(--hdm-warning) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  margin-left: 6px !important;
+  font-family: var(--hdm-font-family) !important;
+  display: inline-block !important;
+}
+
+/* ============================================================
+   模态弹窗
+   ============================================================ */
+.html-diff-marker-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: var(--hdm-modal-overlay) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  z-index: var(--hdm-z-modal) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--hdm-font-family) !important;
+  animation: html-diff-marker-modal-fade-in var(--hdm-transition-slow) ease-out !important;
+}
+
+@keyframes html-diff-marker-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 退场动画 */
+.html-diff-marker-modal-overlay.hdm-modal-closing {
+  opacity: 0 !important;
+  transition: opacity 180ms ease-out !important;
+}
+.html-diff-marker-modal-overlay.hdm-modal-closing .html-diff-marker-modal {
+  transform: scale(0.95) !important;
+  opacity: 0 !important;
+  transition: transform 180ms ease-out, opacity 180ms ease-out !important;
+}
+
+.html-diff-marker-modal {
+  background: var(--hdm-bg-white) !important;
+  border-radius: var(--hdm-radius-xl) !important;
+  box-shadow: var(--hdm-shadow-modal) !important;
+  min-width: 380px !important;
+  max-width: 90vw !important;
+  overflow: hidden !important;
+  color: var(--hdm-text-primary) !important;
+  font-family: var(--hdm-font-family) !important;
+  animation: html-diff-marker-modal-scale-in var(--hdm-transition-slow) ease-out !important;
+}
+
+@keyframes html-diff-marker-modal-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.html-diff-marker-modal-header {
+  padding: 14px 20px !important;
+  background: var(--hdm-gradient-header) !important;
+  color: var(--hdm-text-white) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  font-size: var(--hdm-font-lg) !important;
+  font-family: var(--hdm-font-family) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  line-height: 1.3 !important;
+}
+
+/* 弹窗头部标题 */
+.html-diff-marker-modal-header-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--hdm-space-2) !important;
+}
+
+/* 弹窗头部关闭按钮 */
+.html-diff-marker-modal-overlay .html-diff-marker-modal-header-close {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  background: var(--hdm-white-alpha-15) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-header-close:hover {
+  background: var(--hdm-white-alpha-28) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-header-close:active {
+  background: var(--hdm-white-alpha-38) !important;
+}
+
+.html-diff-marker-modal-body {
+  padding: 20px !important;
+  font-size: var(--hdm-font-md) !important;
+  line-height: 1.6 !important;
+  color: var(--hdm-text-primary) !important;
+  font-family: var(--hdm-font-family) !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+}
+
+.html-diff-marker-modal-field {
+  margin-bottom: 14px !important;
+  display: block !important;
+  width: auto !important;
+}
+.html-diff-marker-modal-field:last-child {
+  margin-bottom: 0 !important;
+}
+
+.html-diff-marker-modal-field label {
+  display: block !important;
+  margin-bottom: 6px !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  color: var(--hdm-text-primary) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+.html-diff-marker-modal-field input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-size: var(--hdm-font-base) !important;
+  outline: none !important;
+  transition: border-color var(--hdm-transition-fast),
+    box-shadow var(--hdm-transition-fast) !important;
+  font-family: var(--hdm-font-family) !important;
+  background-color: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  height: 40px !important;
+  line-height: 1.5 !important;
+}
+.html-diff-marker-modal-field input:hover {
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-modal-field input:focus {
+  border-color: var(--hdm-primary) !important;
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+.html-diff-marker-modal-field input:disabled {
+  background: var(--hdm-bg-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+}
+
+.html-diff-marker-modal-hint {
+  margin-top: 6px !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-tertiary) !important;
+  line-height: 1.4 !important;
+  font-family: var(--hdm-font-family) !important;
+}
+.html-diff-marker-modal-hint code {
+  background: var(--hdm-bg-secondary) !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-family: var(--hdm-font-mono) !important;
+  font-size: var(--hdm-font-xs) !important;
+  color: var(--hdm-text-secondary) !important;
+}
+
+.html-diff-marker-modal-footer {
+  padding: 12px 20px !important;
+  border-top: 1px solid var(--hdm-border) !important;
+  background: var(--hdm-bg-secondary) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  font-family: var(--hdm-font-family) !important;
+}
+
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn {
+  height: 34px !important;
+  padding: 0 18px !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--hdm-radius-md) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  cursor: pointer !important;
+  transition: all var(--hdm-transition-base) !important;
+  font-family: var(--hdm-font-family) !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+}
+
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-cancel {
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-secondary) !important;
+  border-color: var(--hdm-border) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-cancel:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border-color: var(--hdm-primary-light) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-cancel:active {
+  background: var(--hdm-primary-50) !important;
+  color: var(--hdm-primary-hover) !important;
+  border-color: var(--hdm-primary) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-cancel:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-cancel.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-disabled) !important;
+  color: var(--hdm-text-disabled) !important;
+  border-color: var(--hdm-border) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-confirm {
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+  padding: 0 22px !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-confirm:hover {
+  background: var(--hdm-gradient-btn-primary-hover) !important;
+  box-shadow: 0 4px 14px var(--hdm-primary-alpha-40) !important;
+  transform: translateY(-1px) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-confirm:active {
+  background: var(--hdm-gradient-btn-primary-active) !important;
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 4px var(--hdm-primary-alpha-30) !important;
+}
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-confirm:disabled,
+.html-diff-marker-modal-overlay .html-diff-marker-modal-btn-confirm.html-diff-marker-btn--disabled {
+  background: var(--hdm-border-hover) !important;
+  color: var(--hdm-text-disabled) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* ============================================================
+   Toast 提示 — 浅色风格（左侧色条）
+   ============================================================ */
+/* ---------- 通用基础样式 ---------- */
+.html-diff-marker-toast-container {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: var(--hdm-z-toast) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  pointer-events: none !important;
+}
+
+.html-diff-marker-toast {
+  position: relative !important;
+  background: var(--hdm-info-bg) !important;
+  color: var(--hdm-info-text) !important;
+  padding: 10px 14px !important;
+  padding-left: 17px !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-size: 12px !important;
+  font-weight: var(--hdm-font-medium) !important;
+  font-family: var(--hdm-font-family) !important;
+  z-index: var(--hdm-z-toast) !important;
+  box-shadow: var(--hdm-shadow-md) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  max-width: 80vw !important;
+  min-width: 200px !important;
+  animation: html-diff-marker-toast-in var(--hdm-transition-base) ease-out !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  border-left: 3px solid var(--hdm-info) !important;
+}
+
+/* ---------- 入场动画 ---------- */
+@keyframes html-diff-marker-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 退场动画（自动消失） ---------- */
+.html-diff-marker-toast.html-diff-marker-toast--leaving {
+  animation: html-diff-marker-toast-out var(--hdm-transition-base) ease-in forwards !important;
+}
+
+@keyframes html-diff-marker-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ---------- 4 种类型 ---------- */
+/* 成功 Success */
+.html-diff-marker-toast--success {
+  background: var(--hdm-success-bg) !important;
+  color: var(--hdm-success-text) !important;
+  border-left-color: var(--hdm-success) !important;
+}
+.html-diff-marker-toast--success .html-diff-marker-toast-icon {
+  color: var(--hdm-success) !important;
+}
+
+/* 警告 Warning */
+.html-diff-marker-toast--warning {
+  background: var(--hdm-warning-bg) !important;
+  color: var(--hdm-warning-text) !important;
+  border-left-color: var(--hdm-warning) !important;
+}
+.html-diff-marker-toast--warning .html-diff-marker-toast-icon {
+  color: var(--hdm-warning) !important;
+}
+
+/* 错误 Error */
+.html-diff-marker-toast--error {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error-text) !important;
+  border-left-color: var(--hdm-error) !important;
+}
+.html-diff-marker-toast--error .html-diff-marker-toast-icon {
+  color: var(--hdm-error) !important;
+}
+
+/* 信息 Info（默认） */
+.html-diff-marker-toast--info {
+  background: var(--hdm-info-bg) !important;
+  color: var(--hdm-info-text) !important;
+  border-left-color: var(--hdm-info) !important;
+}
+.html-diff-marker-toast--info .html-diff-marker-toast-icon {
+  color: var(--hdm-info) !important;
+}
+
+/* ---------- 图标 ---------- */
+.html-diff-marker-toast-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+.html-diff-marker-toast-icon svg,
+.html-diff-marker-toast-icon svg * {
+  width: 16px !important;
+  height: 16px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
+/* ---------- 文字内容 ---------- */
+.html-diff-marker-toast-message {
+  flex: 1 !important;
+  word-break: break-word !important;
+  font-size: 12px !important;
+  font-weight: var(--hdm-font-medium) !important;
+  line-height: 1.4 !important;
+}
+
+/* ============================================================
+   组合编辑面板（Group Inspector）— 简化版
+   ============================================================ */
+.html-diff-marker-group-inspector .html-diff-marker-inspector-body {
+  padding: 16px !important;
+}
+
+.html-diff-marker-group-scale-slider {
+  width: 100% !important;
+  margin: 10px 0 !important;
+}
+
+.html-diff-marker-group-children-list {
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  margin: 10px 0 !important;
+}
+
+.html-diff-marker-group-child-item {
+  padding: 8px 12px !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-secondary) !important;
+  cursor: pointer !important;
+  transition: background var(--hdm-transition-fast) !important;
+  font-family: var(--hdm-font-family) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+.html-diff-marker-group-child-item:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+}
+.html-diff-marker-group-child-item:last-child {
+  border-bottom: none !important;
+}
+
+/* 子项编号徽章 */
+.html-diff-marker-group-child-index {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: var(--hdm-success) !important;
+  color: var(--hdm-text-white) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  font-size: var(--hdm-font-xs) !important;
+  font-weight: var(--hdm-font-bold) !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+/* 子项标签文字 */
+.html-diff-marker-group-child-tag {
+  color: var(--hdm-text-tertiary) !important;
+  font-size: var(--hdm-font-sm) !important;
+}
+
+/* 缩放值显示 */
+.html-diff-marker-group-scale-val {
+  min-width: 48px !important;
+  text-align: right !important;
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-secondary) !important;
+}
+
+/* ============================================================
+   基础组件 — iOS 风格开关 (Switch)
+   ============================================================ */
+.html-diff-marker-switch-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--hdm-space-2) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-secondary) !important;
+  line-height: 1.4 !important;
+}
+.html-diff-marker-switch-wrap--disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+.html-diff-marker-switch-input {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+.html-diff-marker-switch-track {
+  position: relative !important;
+  width: 44px !important;
+  height: 24px !important;
+  background: var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  transition: background-color var(--hdm-transition-base) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-switch-input:checked + .html-diff-marker-switch-track {
+  background: var(--hdm-primary) !important;
+}
+
+.html-diff-marker-switch-thumb {
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: var(--hdm-text-white) !important;
+  border-radius: var(--hdm-radius-full) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  transition: transform var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-switch-input:checked + .html-diff-marker-switch-track .html-diff-marker-switch-thumb {
+  transform: translateX(20px) !important;
+}
+
+.html-diff-marker-switch-input:focus + .html-diff-marker-switch-track {
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+}
+
+.html-diff-marker-switch-input:disabled + .html-diff-marker-switch-track {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.html-diff-marker-switch-label {
+  font-size: var(--hdm-font-base) !important;
+  color: var(--hdm-text-secondary) !important;
+  line-height: 1.4 !important;
+}
+
+/* ============================================================
+   基础组件 — 滑块 (Slider)
+   ============================================================ */
+.html-diff-marker-slider-wrap {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 10px !important;
+}
+
+.html-diff-marker-slider-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 6px !important;
+  width: 100% !important;
+}
+
+.html-diff-marker-slider-label {
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-secondary) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  font-family: var(--hdm-font-family) !important;
+  letter-spacing: 0.01em !important;
+}
+
+.html-diff-marker-slider-value {
+  font-size: var(--hdm-font-sm) !important;
+  color: var(--hdm-text-primary) !important;
+  font-family: var(--hdm-font-mono) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  transition: all var(--hdm-transition-fast) !important;
+  min-width: 50px !important;
+  text-align: right !important;
+  line-height: 1.4 !important;
+}
+.html-diff-marker-slider-value:hover {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+}
+.html-diff-marker-slider-value.html-diff-marker-editing {
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+}
+
+.html-diff-marker-slider-value-input {
+  width: 60px !important;
+  height: 22px !important;
+  padding: 0 6px !important;
+  background: var(--hdm-primary-bg) !important;
+  color: var(--hdm-primary) !important;
+  border: 1px solid var(--hdm-primary-light) !important;
+  border-radius: var(--hdm-radius-xs) !important;
+  font-size: var(--hdm-font-sm) !important;
+  font-family: var(--hdm-font-mono) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  text-align: right !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-slider-value-input:focus {
+  box-shadow: var(--hdm-shadow-focus-ring) !important;
+  border-color: var(--hdm-primary) !important;
+}
+
+.html-diff-marker-slider-track-wrap {
+  position: relative !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+}
+
+.html-diff-marker-slider-track {
+  position: relative !important;
+  width: 100% !important;
+  height: 4px !important;
+  background: var(--hdm-border) !important;
+  border-radius: 2px !important;
+}
+
+.html-diff-marker-slider-fill {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  background: var(--hdm-primary) !important;
+  border-radius: 2px !important;
+  pointer-events: none !important;
+}
+
+.html-diff-marker-slider-thumb {
+  position: absolute !important;
+  top: 50% !important;
+  width: 16px !important;
+  height: 16px !important;
+  background: var(--hdm-text-white) !important;
+  border: 2px solid var(--hdm-primary) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+  transform: translate(-50%, -50%) !important;
+  cursor: grab !important;
+  transition: box-shadow var(--hdm-transition-fast), transform var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  z-index: 2 !important;
+}
+.html-diff-marker-slider-thumb:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+  transform: translate(-50%, -50%) scale(1.05) !important;
+}
+.html-diff-marker-slider-thumb:active {
+  cursor: grabbing !important;
+  transform: translate(-50%, -50%) scale(0.98) !important;
+}
+
+/* ============================================================
+   设置面板
+   ============================================================ */
+.html-diff-marker-settings-panel {
+  position: fixed !important;
+  width: 300px !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: var(--hdm-radius-lg) !important;
+  box-shadow: var(--hdm-shadow-lg) !important;
+  font-family: var(--hdm-font-family) !important;
+  font-size: var(--hdm-font-base) !important;
+  z-index: var(--hdm-z-settings) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  animation: hdm-settings-in 0.18s ease-out !important;
+}
+
+@keyframes hdm-settings-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.html-diff-marker-settings-panel.closing {
+  animation: hdm-settings-out 0.15s ease-out forwards !important;
+}
+
+@keyframes hdm-settings-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+.html-diff-marker-settings-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 14px 16px !important;
+  background: var(--hdm-bg-white) !important;
+  color: var(--hdm-text-primary) !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+}
+
+.html-diff-marker-settings-title {
+  font-size: 13px !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.html-diff-marker-settings-title svg {
+  width: 14px !important;
+  height: 14px !important;
+  color: var(--hdm-text-tertiary) !important;
+}
+
+.html-diff-marker-settings-body {
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+
+.html-diff-marker-settings-desc {
+  font-size: 11px !important;
+  color: var(--hdm-text-tertiary) !important;
+  line-height: 1.4 !important;
+  margin-top: -6px !important;
+  padding-left: 48px !important;
+}
+
+/* ---------- 设置分隔线 ---------- */
+.html-diff-marker-settings-divider {
+  display: none !important;
+}
+
+/* ---------- 设置分组容器 ---------- */
+.html-diff-marker-settings-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  background: #fafafa !important;
+  border-top: 1px solid var(--hdm-divider) !important;
+  padding: 12px 16px !important;
+}
+
+.html-diff-marker-settings-section-title {
+  font-size: 12px !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  color: var(--hdm-text-secondary) !important;
+  margin-bottom: 10px !important;
+}
+
+/* ---------- 主题卡片网格 ---------- */
+.html-diff-marker-settings-theme-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.html-diff-marker-settings-theme-card {
+  background: #fff !important;
+  border: 1.5px solid var(--hdm-border) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  transition: all var(--hdm-transition-fast) !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-settings-theme-card:hover {
+  border-color: var(--hdm-border-hover) !important;
+}
+.html-diff-marker-settings-theme-card.html-diff-marker-settings-theme-card--active {
+  border-color: var(--hdm-theme-primary) !important;
+  background: var(--hdm-theme-soft-bg) !important;
+}
+.html-diff-marker-settings-theme-preview {
+  height: 32px !important;
+  border-radius: 6px 6px 0 0 !important;
+  width: 100% !important;
+}
+.html-diff-marker-settings-theme-name {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--hdm-text-primary) !important;
+  padding: 6px 8px 2px !important;
+  line-height: 1.2 !important;
+  text-align: left !important;
+}
+.html-diff-marker-settings-theme-hex {
+  font-size: 10px !important;
+  font-family: "SF Mono", Menlo, Consolas, monospace !important;
+  color: var(--hdm-text-tertiary) !important;
+  padding: 0 8px 8px !important;
+  line-height: 1.2 !important;
+  text-align: left !important;
+}
+
+/* ---------- 自定义颜色行 ---------- */
+.html-diff-marker-settings-custom-row {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin-bottom: 0 !important;
+}
+
+.html-diff-marker-settings-custom-preview {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--hdm-border) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.html-diff-marker-settings-custom-input {
+  flex: 1 !important;
+  height: 30px !important;
+  padding: 0 8px !important;
+  border: 1px solid var(--hdm-border) !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-family: "SF Mono", Menlo, Consolas, monospace !important;
+  outline: none !important;
+  background: #fff !important;
+  color: var(--hdm-text-primary) !important;
+  box-sizing: border-box !important;
+  line-height: 30px !important;
+}
+.html-diff-marker-settings-custom-input:focus {
+  border-color: var(--hdm-theme-primary) !important;
+}
+
+.html-diff-marker-settings-panel .html-diff-marker-settings-custom-apply {
+  width: 28px !important;
+  height: 28px !important;
+  background: var(--hdm-theme-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+/* ---------- 行容器 ---------- */
+.html-diff-marker-settings-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 16px !important;
+  height: 44px !important;
+  border-bottom: 1px solid var(--hdm-divider) !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+.html-diff-marker-settings-row--last {
+  border-bottom: none !important;
+}
+.html-diff-marker-settings-row span {
+  font-size: 13px !important;
+  color: var(--hdm-text-primary) !important;
+}
+
+/* ---------- iOS 风格开关 ---------- */
+.html-diff-marker-settings-toggle {
+  position: relative !important;
+  width: 44px !important;
+  height: 24px !important;
+  border-radius: 12px !important;
+  background: var(--hdm-border) !important;
+  transition: background 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+}
+.html-diff-marker-settings-toggle::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.html-diff-marker-settings-toggle.html-diff-marker-settings-toggle--on {
+  background: var(--hdm-theme-primary) !important;
+}
+.html-diff-marker-settings-toggle.html-diff-marker-settings-toggle--on::after {
+  transform: translateX(20px) !important;
+}
+.html-diff-marker-settings-toggle.html-diff-marker-settings-toggle--disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* ============================================================
+   工具栏 v4 — 新布局
+   ============================================================ */
+.html-diff-marker-toolbar-v4 .html-diff-marker-toolbar-body {
+  padding: 14px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+/* 4 个圆角按钮（选择/复制/新增/删除） */
+.html-diff-marker-toolbar-v4-btn-row {
+  display: flex !important;
+  gap: var(--hdm-space-2) !important;
+}
+
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn {
+  flex: 1 !important;
+  height: 40px !important;
+  padding: 0 8px !important;
+  background: var(--hdm-primary-bg) !important;
+  border: none !important;
+  border-radius: var(--hdm-radius-lg) !important;
+  font-size: var(--hdm-font-base) !important;
+  font-weight: var(--hdm-font-medium) !important;
+  color: var(--hdm-primary-dark) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  transition: all var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  line-height: 1 !important;
+  font-family: var(--hdm-font-family) !important;
+  white-space: nowrap !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn:hover {
+  background: #DDD6FE !important;
+  color: var(--hdm-primary-dark) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn:active {
+  background: #C4B5FD !important;
+  color: #5B21B6 !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn.html-diff-marker-btn--active {
+  background: var(--hdm-primary) !important;
+  color: var(--hdm-text-white) !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn:disabled,
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn.html-diff-marker-btn--disabled {
+  background: var(--hdm-bg-disabled) !important;
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 删除按钮特殊样式 */
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn.html-diff-marker-btn--danger {
+  background: var(--hdm-error-bg) !important;
+  color: var(--hdm-error) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn.html-diff-marker-btn--danger:hover {
+  background: var(--hdm-error-bg-hover) !important;
+  color: var(--hdm-error-hover) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-action-btn.html-diff-marker-btn--danger.html-diff-marker-btn--active {
+  background: var(--hdm-error) !important;
+  color: var(--hdm-text-white) !important;
+}
+
+/* 底部大导出按钮 */
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-export-btn {
+  width: 100% !important;
+  height: 44px !important;
+  padding: 0 16px !important;
+  background: var(--hdm-gradient-btn-primary) !important;
+  color: var(--hdm-text-white) !important;
+  border: none !important;
+  border-radius: var(--hdm-radius-lg) !important;
+  font-size: var(--hdm-font-md) !important;
+  font-weight: var(--hdm-font-semibold) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transition: all var(--hdm-transition-base) !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  line-height: 1 !important;
+  font-family: var(--hdm-font-family) !important;
+  box-shadow: var(--hdm-shadow-primary-active) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-export-btn:hover {
+  background: var(--hdm-gradient-btn-primary-hover) !important;
+  box-shadow: 0 4px 14px var(--hdm-primary-alpha-40) !important;
+  transform: translateY(-1px) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-export-btn:active {
+  background: var(--hdm-gradient-btn-primary-active) !important;
+  box-shadow: 0 1px 4px var(--hdm-primary-alpha-30) !important;
+  transform: translateY(0) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-export-btn:disabled {
+  background: var(--hdm-border-hover) !important;
+  color: var(--hdm-text-disabled) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 底部两侧小图标按钮行 */
+.html-diff-marker-toolbar-v4-bottom-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-icon-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--hdm-text-secondary) !important;
+  border: none !important;
+  border-radius: var(--hdm-radius-sm) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all var(--hdm-transition-fast) !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  font-family: var(--hdm-font-family) !important;
+  user-select: none !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-icon-btn:hover {
+  background: var(--hdm-bg-hover) !important;
+  color: var(--hdm-text-primary) !important;
+}
+.html-diff-marker-toolbar .html-diff-marker-toolbar-v4-icon-btn:active {
+  background: var(--hdm-border) !important;
+  color: var(--hdm-text-primary) !important;
+}
+
+/* ============================================================
+   显示设置：隐藏徽章/把手/快捷键提示
+   ============================================================ */
+.html-diff-marker-hide-badges .html-diff-marker-badge,
+.html-diff-marker-hide-badges .html-diff-marker-badge-floating,
+.html-diff-marker-hide-badges .html-diff-marker-remove-badge,
+.html-diff-marker-hide-badges .html-diff-marker-remove-badge-floating,
+.html-diff-marker-hide-badges .html-diff-marker-group-badge {
+  display: none !important;
+}
+
+.html-diff-marker-hide-handles .html-diff-marker-resize-handle,
+.html-diff-marker-hide-handles .html-diff-marker-resize-handle-floating,
+.html-diff-marker-hide-handles .html-diff-marker-group-handle,
+.html-diff-marker-hide-handles .html-diff-marker-group-handle-floating {
+  display: none !important;
+}
+
+.html-diff-marker-hide-shortcut-hint .html-diff-marker-shortcut {
+  display: none !important;
+}

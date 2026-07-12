@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG 二分排查 - 找出破坏 SVG 的 CSS 属性</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 30px;
+      background: #f3f4f6;
+    }
+    h1 { font-size: 20px; margin-bottom: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f3f4f6;
+      font-weight: 600;
+    }
+    .icon-box {
+      width: 60px;
+      height: 60px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      background: white;
+      color: #1f2937;
+    }
+    .status {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status.unknown { color: #6b7280; }
+    .console {
+      margin-top: 20px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+    .console .good { color: #86efac; }
+    .console .bad { color: #fca5a5; }
+    .console .key { color: #93c5fd; }
+  </style>
+</head>
+<body>
+
+<h1>🔬 SVG 二分排查 - 哪条 CSS 属性搞坏了图标？</h1>
+
+<div class="grid" id="test-grid">
+  <!-- 0. 基准：纯 SVG -->
+  <div class="card">
+    <h3>0. 纯 SVG（基准）</h3>
+    <div class="icon-box" id="t0">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div class="status unknown">基准参考</div>
+  </div>
+  
+  <!-- 1. all:unset 仅 wrapper -->
+  <div class="card">
+    <h3>1. wrapper all:unset</h3>
+    <div class="icon-box" id="t1" style="all: unset;">
+      <div style="width:60px;height:60px;border:2px dashed #d1d5db;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="status unknown">测试中</div>
+  </div>
+</div>
+
+<div class="console" id="console">正在生成测试用例...</div>
+
+<script>
+  // 动态生成测试用例，逐步添加属性
+  const testCases = [
+    { id: 't2', label: '2. *{all:unset} 无恢复', css: '' },
+    { id: 't3', label: '3. + display:block', css: 'display: block !important;' },
+    { id: 't4', label: '4. + width/height', css: 'display: block !important; width: 24px !important; height: 24px !important;' },
+    { id: 't5', label: '5. + stroke color', css: 'display:block!important;width:24px!important;height:24px!important;stroke:#1f2937!important;' },
+    { id: 't6', label: '6. + stroke-width', css: 'display:block!important;width:24px!important;height:24px!important;stroke:#1f2937!important;stroke-width:2px!important;' },
+    { id: 't7', label: '7. + fill:none', css: 'display:block!important;width:24px!important;height:24px!important;stroke:#1f2937!important;stroke-width:2px!important;fill:none!important;' },
+    { id: 't8', label: '8. + svg * 全部', css: 'display:block!important;width:24px!important;height:24px!important;stroke:#1f2937!important;stroke-width:2px!important;fill:none!important;' },
+    { id: 't9', label: '9. 完整恢复 + box-sizing', css: '' },
+  ];
+  
+  const grid = document.getElementById('test-grid');
+  const svgInner = '<circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>';
+  
+  // 生成 CSS 样式
+  let styleText = '';
+  
+  testCases.forEach((tc, i) => {
+    // all:unset 基础
+    styleText += `#${tc.id}-wrapper * { all: unset !important; box-sizing: border-box !important; }\n`;
+    
+    if (tc.id === 't8') {
+      // svg * 也应用
+      styleText += `#${tc.id}-wrapper svg, #${tc.id}-wrapper svg * { ${tc.css} }\n`;
+    } else if (tc.id === 't9') {
+      // 完整恢复（模拟插件的方式）
+      styleText += `
+        #${tc.id}-wrapper svg {
+          display: block !important;
+          width: 24px !important;
+          height: 24px !important;
+          fill: none !important;
+          stroke: #1f2937 !important;
+          stroke-width: 2px !important;
+          stroke-linecap: round !important;
+          stroke-linejoin: round !important;
+        }
+        #${tc.id}-wrapper svg * {
+          fill: none !important;
+          stroke: #1f2937 !important;
+          stroke-width: 2px !important;
+          stroke-linecap: round !important;
+          stroke-linejoin: round !important;
+          display: block !important;
+        }
+      `;
+    } else if (tc.id !== 't2') {
+      // 仅 svg 元素
+      styleText += `#${tc.id}-wrapper svg { ${tc.css} }\n`;
+    }
+  });
+  
+  const styleEl = document.createElement('style');
+  styleEl.textContent = styleText;
+  document.head.appendChild(styleEl);
+  
+  // 生成 HTML
+  testCases.forEach(tc => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <h3>${tc.label}</h3>
+      <div id="${tc.id}-wrapper">
+        <div style="width:60px;height:60px;border:2px dashed #d1d5db;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            ${svgInner}
+          </svg>
+        </div>
+      </div>
+      <div class="status unknown" id="${tc.id}-status">检测中</div>
+    `;
+    grid.appendChild(card);
+  });
+  
+  // 检测每个测试用例
+  function detect() {
+    let out = '';
+    
+    // 基准
+    const t0Svg = document.querySelector('#t0 svg circle');
+    const base = getComputedStyle(t0Svg);
+    out += `======== 基准 (纯 SVG) ========\n`;
+    out += `  stroke: ${base.stroke}\n`;
+    out += `  strokeWidth: ${base.strokeWidth}\n`;
+    out += `  fill: ${base.fill}\n`;
+    out += `  display: ${base.display}\n`;
+    out += `\n`;
+    
+    testCases.forEach(tc => {
+      const wrapper = document.getElementById(tc.id + '-wrapper');
+      const circle = wrapper.querySelector('circle');
+      const svg = wrapper.querySelector('svg');
+      
+      if (circle) {
+        const s = getComputedStyle(circle);
+        const svgS = getComputedStyle(svg);
+        const hasStroke = s.stroke !== 'none' && s.stroke !== 'rgba(0, 0, 0, 0)';
+        const hasWidth = parseFloat(s.strokeWidth) > 0;
+        const hasSize = svgS.width !== '0px' && svgS.height !== '0px';
+        const visible = hasStroke && hasWidth && hasSize;
+        
+        const statusEl = document.getElementById(tc.id + '-status');
+        statusEl.textContent = visible ? '✅ 可见' : '❌ 不可见';
+        statusEl.style.color = visible ? '#16a34a' : '#dc2626';
+        
+        out += `======== ${tc.label} ========\n`;
+        out += `  SVG display: ${svgS.display}, size: ${svgS.width}x${svgS.height}\n`;
+        out += `  circle stroke: ${s.stroke}\n`;
+        out += `  circle strokeWidth: ${s.strokeWidth}\n`;
+        out += `  circle fill: ${s.fill}\n`;
+        out += `  circle display: ${s.display}\n`;
+        out += `  circle visibility: ${s.visibility}\n`;
+        out += `  circle opacity: ${s.opacity}\n`;
+        out += `  结果: ${visible ? '✅ 可见' : '❌ 不可见'}\n`;
+        out += `\n`;
+      }
+    });
+    
+    document.getElementById('console').textContent = out;
+  }
+  
+  setTimeout(detect, 200);
+</script>
+
+</body>
+</html>

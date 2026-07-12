@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>样式隔离测试</title>
+<style>
+  :root {
+    --hdm-theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+    --hdm-z-toolbar: 2147483600;
+    --hdm-primary-alpha-40: rgba(112, 100, 154, 0.4);
+    --hdm-transition-base: 0.2s ease;
+  }
+
+  /* 模拟样式隔离重置 */
+  .html-diff-marker-wake-btn {
+    all: initial !important;
+    box-sizing: border-box !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: #333 !important;
+  }
+
+  /* 唤醒按钮具体样式 */
+  .html-diff-marker-wake-btn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 16px !important;
+    height: 16px !important;
+    background: var(--hdm-theme-gradient) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    z-index: var(--hdm-z-toolbar) !important;
+    box-shadow: 0 2px 8px var(--hdm-primary-alpha-40) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    user-select: none !important;
+    transition: all var(--hdm-transition-base) !important;
+    box-sizing: border-box !important;
+  }
+
+  body { background: #f0f0f0; margin: 0; padding: 20px; }
+  .info { font-family: sans-serif; font-size: 14px; color: #333; }
+</style>
+</head>
+<body>
+  <div class="info">
+    <h2>样式隔离测试页</h2>
+    <p>右上角应该有一个紫色渐变小圆点（唤醒按钮）。</p>
+    <p>如果看不到，说明 all: initial 和后续样式有冲突。</p>
+  </div>
+
+  <div class="html-diff-marker-wake-btn"></div>
+
+  <script>
+    const btn = document.querySelector('.html-diff-marker-wake-btn');
+    const rect = btn.getBoundingClientRect();
+    const styles = getComputedStyle(btn);
+    console.log('=== 唤醒按钮测试 ===');
+    console.log('rect:', JSON.stringify({
+      top: rect.top, left: rect.left,
+      width: rect.width, height: rect.height
+    }));
+    console.log('position:', styles.position);
+    console.log('display:', styles.display);
+    console.log('visibility:', styles.visibility);
+    console.log('z-index:', styles.zIndex);
+    console.log('width:', styles.width);
+    console.log('height:', styles.height);
+    console.log('background:', styles.backgroundImage);
+    console.log('opacity:', styles.opacity);
+  </script>
+</body>
+</html>

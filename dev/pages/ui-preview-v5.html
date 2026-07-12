@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Diff Marker UI 预览 — v5 完整方案</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .preview-title {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .preview-title h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+  }
+  .preview-title p {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .preview-section {
+    max-width: 1400px;
+    margin: 0 auto 50px;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .preview-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .item-label {
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+  }
+
+  /* ============================================================
+     主题变量体系
+     ============================================================ */
+  :root {
+    --theme-primary: #70649A;
+    --theme-primary-light: #8B7FB3;
+    --theme-primary-dark: #5A4F7D;
+    --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+    --theme-soft-bg: #F0EEF7;
+    --theme-soft-text: #5A4F7D;
+    --theme-count-text: #70649A;
+    
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-tertiary: #6B7280;
+    --border: #D1D5DB;
+    --border-light: #E5E7EB;
+    --border-lighter: #F3F4F6;
+    --bg-hover: #F9FAFB;
+    --radius: 8px;
+  }
+
+  /* 主题1：深藏青 #211E55 */
+  .theme-teal {
+    --theme-primary: #211E55;
+    --theme-primary-light: #3D3A75;
+    --theme-primary-dark: #15133D;
+    --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+    --theme-soft-bg: #EDECF5;
+    --theme-soft-text: #15133D;
+    --theme-count-text: #211E55;
+  }
+  /* 主题2：灰绿 #6A8372 */
+  .theme-green {
+    --theme-primary: #6A8372;
+    --theme-primary-light: #8A9E8F;
+    --theme-primary-dark: #526958;
+    --theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);
+    --theme-soft-bg: #EEF2EF;
+    --theme-soft-text: #526958;
+    --theme-count-text: #6A8372;
+  }
+  /* 主题3：暮紫 #70649A */
+  .theme-purple {
+    --theme-primary: #70649A;
+    --theme-primary-light: #8B7FB3;
+    --theme-primary-dark: #5A4F7D;
+    --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+    --theme-soft-bg: #F0EEF7;
+    --theme-soft-text: #5A4F7D;
+    --theme-count-text: #70649A;
+  }
+  /* 主题4：暖棕 #9E7A7A */
+  .theme-brown {
+    --theme-primary: #9E7A7A;
+    --theme-primary-light: #B89595;
+    --theme-primary-dark: #7E5E5E;
+    --theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);
+    --theme-soft-bg: #F5EFEF;
+    --theme-soft-text: #7E5E5E;
+    --theme-count-text: #9E7A7A;
+  }
+
+  /* ============================================================
+     工具栏 — v5 设计
+     ============================================================ */
+  .hdm-toolbar {
+    width: 300px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    font-family: inherit;
+  }
+
+  /* 顶部渐变条 */
+  .hdm-toolbar-header {
+    background: var(--theme-gradient);
+    padding: 14px 16px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: #fff;
+    cursor: move;
+  }
+  .hdm-toolbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .hdm-toolbar-window-ctrl {
+    display: flex;
+    gap: 6px;
+  }
+  .hdm-ctrl-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.15s;
+  }
+  .hdm-ctrl-btn:hover { background: rgba(255,255,255,0.3); }
+
+  /* 主体白色区域 */
+  .hdm-toolbar-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* 一排4个按钮 */
+  .hdm-btn-row {
+    display: flex;
+    gap: 8px;
+  }
+  .hdm-action-btn {
+    flex: 1;
+    height: 34px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .hdm-action-btn:hover {
+    background: var(--bg-hover);
+    border-color: #d1d5db;
+  }
+  .hdm-action-btn:active {
+    background: #f3f4f6;
+  }
+  .hdm-action-btn--danger {
+    color: #ef4444;
+    border-color: #fecaca;
+  }
+  .hdm-action-btn--danger:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+  }
+  .hdm-action-btn--active {
+    background: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: #fff;
+  }
+  .hdm-action-btn--active:hover {
+    background: var(--theme-primary-dark);
+    border-color: var(--theme-primary-dark);
+  }
+
+  /* 导出按钮行：左侧重置 + 中间导出 + 右侧设置 */
+  .hdm-export-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .hdm-side-btn {
+    width: 36px;
+    height: 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+  .hdm-side-btn:hover {
+    border-color: var(--theme-primary-light);
+    color: var(--theme-primary);
+    background: #faf5ff;
+  }
+  .hdm-side-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  .hdm-export-btn {
+    flex: 1;
+    height: 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .hdm-export-btn:hover {
+    border-color: var(--theme-primary-light);
+    color: var(--theme-primary);
+  }
+  .hdm-export-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 底部行：快捷键（左）+ 计数（右） */
+  .hdm-toolbar-footer {
+    padding: 8px 14px;
+    background: #fafafa;
+    border-top: 1px solid var(--border-lighter);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hdm-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .hdm-kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Mono", "Menlo", monospace;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .hdm-counts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .hdm-counts b {
+    color: var(--theme-count-text);
+    font-weight: 600;
+  }
+  .hdm-counts-sep {
+    color: #d1d5db;
+  }
+
+  /* ============================================================
+     编辑面板 — v5 设计（全滑块）
+     ============================================================ */
+  .hdm-inspector {
+    width: 340px;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+    font-family: inherit;
+  }
+
+  /* 顶部细色条 */
+  .hdm-inspector-topline {
+    height: 3px;
+    background: var(--theme-primary);
+  }
+
+  /* 面板头部 */
+  .hdm-inspector-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-lighter);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hdm-inspector-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .hdm-inspector-selector {
+    font-size: 11px;
+    color: var(--theme-primary);
+    background: var(--theme-soft-bg);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* 分组 */
+  .hdm-group {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-lighter);
+  }
+  .hdm-group:last-child {
+    border-bottom: none;
+  }
+  .hdm-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .hdm-group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .hdm-reset-btn {
+    font-size: 11px;
+    color: var(--theme-primary);
+    background: var(--theme-soft-bg);
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .hdm-reset-btn:hover { background: #ede9fe; }
+
+  .hdm-unit-toggle {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .hdm-unit-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .hdm-unit-btn.active {
+    background: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: #fff;
+  }
+
+  /* 滑块行 */
+  .hdm-slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 0;
+  }
+  .hdm-slider-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .hdm-slider-label {
+    color: var(--text-tertiary);
+  }
+  .hdm-slider-value {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    cursor: text;
+    padding: 1px 4px;
+    border-radius: 3px;
+    transition: background 0.15s;
+  }
+  .hdm-slider-value:hover {
+    background: #f3f4f6;
+  }
+
+  /* 滑块轨道 */
+  .hdm-slider-track {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+  .hdm-slider-fill {
+    height: 100%;
+    background: var(--theme-primary);
+    border-radius: 2px;
+  }
+  .hdm-slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border: 2px solid var(--theme-primary);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+  }
+
+  /* ============================================================
+     Toast & 开关
+     ============================================================ */
+  .hdm-toast-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hdm-toast {
+    width: 320px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-family: inherit;
+  }
+  .hdm-toast-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .hdm-toast--success {
+    background: #ecfdf5;
+    color: #065f46;
+    border-left: 3px solid #10b981;
+  }
+  .hdm-toast--warning {
+    background: #fffbeb;
+    color: #92400e;
+    border-left: 3px solid #f59e0b;
+  }
+  .hdm-toast--error {
+    background: #fef2f2;
+    color: #991b1b;
+    border-left: 3px solid #ef4444;
+  }
+  .hdm-toast--info {
+    background: #eff6ff;
+    color: #1e40af;
+    border-left: 3px solid #3b82f6;
+  }
+
+  .hdm-switch-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 300px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    font-family: inherit;
+  }
+  .hdm-switch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .hdm-switch-row:last-child {
+    border-bottom: none;
+  }
+  .hdm-switch-label {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  .hdm-switch {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: #e5e7eb;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .hdm-switch.on {
+    background: var(--theme-primary);
+  }
+  .hdm-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hdm-switch.on .hdm-switch-thumb {
+    transform: translateX(20px);
+  }
+
+  /* ============================================================
+     元素标记视觉
+     ============================================================ */
+  .hdm-mark-demo {
+    width: 240px;
+    height: 160px;
+    background: #f9fafb;
+    border: 1px dashed #e5e7eb;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  .hdm-mark-element {
+    position: absolute;
+    left: 50px;
+    top: 45px;
+    width: 140px;
+    height: 70px;
+    background: #fff;
+    border: 2px solid var(--theme-primary);
+    border-radius: 4px;
+  }
+
+  /* 把手在下层 */
+  .hdm-mark-handle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border: 1.5px solid var(--theme-primary);
+    border-radius: 2px;
+    z-index: 2;
+  }
+  .hdm-mark-handle.tl { top: -5px; left: -5px; cursor: nwse-resize; }
+  .hdm-mark-handle.tr { top: -5px; right: -5px; cursor: nesw-resize; }
+  .hdm-mark-handle.bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+  .hdm-mark-handle.br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+  /* 删除角标 */
+  .hdm-mark-remove {
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    width: 18px;
+    height: 18px;
+    background: #ef4444;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(239,68,68,0.3);
+    z-index: 3;
+  }
+
+  /* 徽章在上层（最高层级） */
+  .hdm-mark-badge {
+    position: absolute;
+    top: -11px;
+    right: -11px;
+    width: 24px;
+    height: 24px;
+    background: var(--theme-primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    z-index: 10;
+  }
+
+  /* ============================================================
+     主题选择器
+     ============================================================ */
+  .theme-selector-panel {
+    width: 300px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    overflow: hidden;
+    font-family: inherit;
+  }
+  .theme-selector-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .theme-selector-body {
+    padding: 14px;
+  }
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 2px solid transparent;
+  }
+  .theme-card:hover {
+    background: #f9fafb;
+  }
+  .theme-card.active {
+    border-color: var(--theme-primary);
+    background: var(--theme-soft-bg);
+  }
+  .theme-color-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .theme-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .theme-hex {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .custom-color-section {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 14px;
+  }
+  .custom-color-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .custom-color-input-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .custom-color-input {
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: "SF Mono", Menlo, monospace;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .custom-color-input:focus {
+    border-color: var(--theme-primary);
+  }
+  .custom-color-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, #ccc 0%, #999 100%);
+  }
+  .custom-color-apply-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .custom-color-apply-btn:hover {
+    background: var(--theme-soft-bg);
+    color: var(--theme-primary);
+    border-color: var(--theme-primary);
+  }
+
+  /* ============================================================
+     说明区域
+     ============================================================ */
+  .notes-section {
+    max-width: 1200px;
+    margin: 0 auto 50px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .notes-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .notes-content {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.8;
+  }
+  .notes-content h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+  .notes-content h4:first-child { margin-top: 0; }
+  .notes-content ul {
+    padding-left: 20px;
+    margin: 6px 0;
+  }
+  .notes-content li {
+    margin: 4px 0;
+  }
+  .tag-q {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="preview-title">
+  <h1>HTML Diff Marker UI 预览 — v5 完整方案</h1>
+  <p>四套预设主题 + 自定义颜色 + 工具栏重设计 + 全滑块编辑面板</p>
+</div>
+
+<!-- 工具栏 -->
+<div class="preview-section">
+  <div class="section-title">工具栏 (Toolbar) — v5 新布局</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">默认状态 — 暮紫主题</div>
+      <div class="hdm-toolbar theme-purple">
+        <div class="hdm-toolbar-header">
+          <div class="hdm-toolbar-title">HTML Diff Marker</div>
+          <div class="hdm-toolbar-window-ctrl">
+            <button class="hdm-ctrl-btn">−</button>
+            <button class="hdm-ctrl-btn">×</button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-body">
+          <div class="hdm-btn-row">
+            <button class="hdm-action-btn hdm-action-btn--active">选择</button>
+            <button class="hdm-action-btn">复制</button>
+            <button class="hdm-action-btn">新增</button>
+            <button class="hdm-action-btn hdm-action-btn--danger">删除</button>
+          </div>
+          <div class="hdm-export-row">
+            <button class="hdm-side-btn" title="重置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <button class="hdm-export-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+              导出 Diff
+            </button>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-footer">
+          <div class="hdm-shortcut">
+            <span class="hdm-kbd">⌥</span>
+            <span class="hdm-kbd">⌘</span>
+            <span>快速选择</span>
+          </div>
+          <div class="hdm-counts">
+            <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 四套主题配色 -->
+<div class="preview-section">
+  <div class="section-title">主题配色（四套可选）</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">深藏青 #211E55</div>
+      <div class="hdm-toolbar theme-teal">
+        <div class="hdm-toolbar-header">
+          <div class="hdm-toolbar-title">HTML Diff Marker</div>
+          <div class="hdm-toolbar-window-ctrl">
+            <button class="hdm-ctrl-btn">−</button>
+            <button class="hdm-ctrl-btn">×</button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-body">
+          <div class="hdm-btn-row">
+            <button class="hdm-action-btn hdm-action-btn--active">选择</button>
+            <button class="hdm-action-btn">复制</button>
+            <button class="hdm-action-btn">新增</button>
+            <button class="hdm-action-btn hdm-action-btn--danger">删除</button>
+          </div>
+          <div class="hdm-export-row">
+            <button class="hdm-side-btn" title="重置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <button class="hdm-export-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+              导出 Diff
+            </button>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-footer">
+          <div class="hdm-shortcut">
+            <span class="hdm-kbd">⌥</span>
+            <span class="hdm-kbd">⌘</span>
+            <span>快速选择</span>
+          </div>
+          <div class="hdm-counts">
+            <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">灰绿 #6A8372</div>
+      <div class="hdm-toolbar theme-green">
+        <div class="hdm-toolbar-header">
+          <div class="hdm-toolbar-title">HTML Diff Marker</div>
+          <div class="hdm-toolbar-window-ctrl">
+            <button class="hdm-ctrl-btn">−</button>
+            <button class="hdm-ctrl-btn">×</button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-body">
+          <div class="hdm-btn-row">
+            <button class="hdm-action-btn hdm-action-btn--active">选择</button>
+            <button class="hdm-action-btn">复制</button>
+            <button class="hdm-action-btn">新增</button>
+            <button class="hdm-action-btn hdm-action-btn--danger">删除</button>
+          </div>
+          <div class="hdm-export-row">
+            <button class="hdm-side-btn" title="重置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <button class="hdm-export-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+              导出 Diff
+            </button>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-footer">
+          <div class="hdm-shortcut">
+            <span class="hdm-kbd">⌥</span>
+            <span class="hdm-kbd">⌘</span>
+            <span>快速选择</span>
+          </div>
+          <div class="hdm-counts">
+            <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">暮紫 #70649A</div>
+      <div class="hdm-toolbar theme-purple">
+        <div class="hdm-toolbar-header">
+          <div class="hdm-toolbar-title">HTML Diff Marker</div>
+          <div class="hdm-toolbar-window-ctrl">
+            <button class="hdm-ctrl-btn">−</button>
+            <button class="hdm-ctrl-btn">×</button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-body">
+          <div class="hdm-btn-row">
+            <button class="hdm-action-btn hdm-action-btn--active">选择</button>
+            <button class="hdm-action-btn">复制</button>
+            <button class="hdm-action-btn">新增</button>
+            <button class="hdm-action-btn hdm-action-btn--danger">删除</button>
+          </div>
+          <div class="hdm-export-row">
+            <button class="hdm-side-btn" title="重置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <button class="hdm-export-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+              导出 Diff
+            </button>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-footer">
+          <div class="hdm-shortcut">
+            <span class="hdm-kbd">⌥</span>
+            <span class="hdm-kbd">⌘</span>
+            <span>快速选择</span>
+          </div>
+          <div class="hdm-counts">
+            <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">暖棕 #9E7A7A</div>
+      <div class="hdm-toolbar theme-brown">
+        <div class="hdm-toolbar-header">
+          <div class="hdm-toolbar-title">HTML Diff Marker</div>
+          <div class="hdm-toolbar-window-ctrl">
+            <button class="hdm-ctrl-btn">−</button>
+            <button class="hdm-ctrl-btn">×</button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-body">
+          <div class="hdm-btn-row">
+            <button class="hdm-action-btn hdm-action-btn--active">选择</button>
+            <button class="hdm-action-btn">复制</button>
+            <button class="hdm-action-btn">新增</button>
+            <button class="hdm-action-btn hdm-action-btn--danger">删除</button>
+          </div>
+          <div class="hdm-export-row">
+            <button class="hdm-side-btn" title="重置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+            <button class="hdm-export-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+              导出 Diff
+            </button>
+            <button class="hdm-side-btn" title="设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdm-toolbar-footer">
+          <div class="hdm-shortcut">
+            <span class="hdm-kbd">⌥</span>
+            <span class="hdm-kbd">⌘</span>
+            <span>快速选择</span>
+          </div>
+          <div class="hdm-counts">
+            <b>1</b> 标记 <span class="hdm-counts-sep">·</span> <b>1</b> 修改
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑面板 -->
+<div class="preview-section">
+  <div class="section-title">编辑面板 (Inspector) — 全滑块交互</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">位置 & 大小 & 字号 — 暮紫主题</div>
+      <div class="hdm-inspector theme-purple">
+        <div class="hdm-inspector-topline"></div>
+        <div class="hdm-inspector-header">
+          <div class="hdm-inspector-title">元素编辑</div>
+          <span class="hdm-inspector-selector">#btn-primary</span>
+        </div>
+
+        <!-- 位置调整 -->
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">位置调整</div>
+            <button class="hdm-reset-btn">重置</button>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">X（左偏移）</span>
+              <span class="hdm-slider-value">0px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 50%;"></div>
+              <div class="hdm-slider-thumb" style="left: 50%;"></div>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">Y（上偏移）</span>
+              <span class="hdm-slider-value">0px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 50%;"></div>
+              <div class="hdm-slider-thumb" style="left: 50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 大小调整 -->
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">大小调整</div>
+            <div class="hdm-unit-toggle">
+              <button class="hdm-unit-btn active">px</button>
+              <button class="hdm-unit-btn">%</button>
+              <button class="hdm-reset-btn">重置</button>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">宽度</span>
+              <span class="hdm-slider-value">86px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 35%;"></div>
+              <div class="hdm-slider-thumb" style="left: 35%;"></div>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">高度</span>
+              <span class="hdm-slider-value">36px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 20%;"></div>
+              <div class="hdm-slider-thumb" style="left: 20%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 字号调整 -->
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">文字样式</div>
+            <button class="hdm-reset-btn">重置</button>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">字号</span>
+              <span class="hdm-slider-value">14px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 45%;"></div>
+              <div class="hdm-slider-thumb" style="left: 45%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">位置 & 大小 & 字号 — 深藏青主题</div>
+      <div class="hdm-inspector theme-teal">
+        <div class="hdm-inspector-topline"></div>
+        <div class="hdm-inspector-header">
+          <div class="hdm-inspector-title">元素编辑</div>
+          <span class="hdm-inspector-selector">#btn-primary</span>
+        </div>
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">位置调整</div>
+            <button class="hdm-reset-btn">重置</button>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">X（左偏移）</span>
+              <span class="hdm-slider-value">0px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 50%;"></div>
+              <div class="hdm-slider-thumb" style="left: 50%;"></div>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">Y（上偏移）</span>
+              <span class="hdm-slider-value">0px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 50%;"></div>
+              <div class="hdm-slider-thumb" style="left: 50%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">大小调整</div>
+            <div class="hdm-unit-toggle">
+              <button class="hdm-unit-btn active">px</button>
+              <button class="hdm-unit-btn">%</button>
+              <button class="hdm-reset-btn">重置</button>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">宽度</span>
+              <span class="hdm-slider-value">86px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 35%;"></div>
+              <div class="hdm-slider-thumb" style="left: 35%;"></div>
+            </div>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">高度</span>
+              <span class="hdm-slider-value">36px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 20%;"></div>
+              <div class="hdm-slider-thumb" style="left: 20%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="hdm-group">
+          <div class="hdm-group-header">
+            <div class="hdm-group-title">文字样式</div>
+            <button class="hdm-reset-btn">重置</button>
+          </div>
+          <div class="hdm-slider-row">
+            <div class="hdm-slider-label-row">
+              <span class="hdm-slider-label">字号</span>
+              <span class="hdm-slider-value">14px</span>
+            </div>
+            <div class="hdm-slider-track">
+              <div class="hdm-slider-fill" style="width: 45%;"></div>
+              <div class="hdm-slider-thumb" style="left: 45%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 元素标记视觉 -->
+<div class="preview-section">
+  <div class="section-title">元素标记视觉 — 徽章在把手之上</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">暮紫主题 — z-index: 徽章(10) > 删除(3) > 把手(2)</div>
+      <div class="hdm-mark-demo">
+        <div class="hdm-mark-element theme-purple">
+          <div class="hdm-mark-remove">×</div>
+          <div class="hdm-mark-handle tl"></div>
+          <div class="hdm-mark-handle tr"></div>
+          <div class="hdm-mark-handle bl"></div>
+          <div class="hdm-mark-handle br"></div>
+          <div class="hdm-mark-badge">1</div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-item">
+      <div class="item-label">深藏青主题</div>
+      <div class="hdm-mark-demo">
+        <div class="hdm-mark-element theme-teal">
+          <div class="hdm-mark-remove">×</div>
+          <div class="hdm-mark-handle tl"></div>
+          <div class="hdm-mark-handle tr"></div>
+          <div class="hdm-mark-handle bl"></div>
+          <div class="hdm-mark-handle br"></div>
+          <div class="hdm-mark-badge">1</div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-item">
+      <div class="item-label">灰绿主题</div>
+      <div class="hdm-mark-demo">
+        <div class="hdm-mark-element theme-green">
+          <div class="hdm-mark-remove">×</div>
+          <div class="hdm-mark-handle tl"></div>
+          <div class="hdm-mark-handle tr"></div>
+          <div class="hdm-mark-handle bl"></div>
+          <div class="hdm-mark-handle br"></div>
+          <div class="hdm-mark-badge">1</div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-item">
+      <div class="item-label">暖棕主题</div>
+      <div class="hdm-mark-demo">
+        <div class="hdm-mark-element theme-brown">
+          <div class="hdm-mark-remove">×</div>
+          <div class="hdm-mark-handle tl"></div>
+          <div class="hdm-mark-handle tr"></div>
+          <div class="hdm-mark-handle bl"></div>
+          <div class="hdm-mark-handle br"></div>
+          <div class="hdm-mark-badge">1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast & 开关 -->
+<div class="preview-section">
+  <div class="section-title">Toast & 开关</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">Toast 提示（浅色）</div>
+      <div class="hdm-toast-group">
+        <div class="hdm-toast hdm-toast--success">
+          <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>操作成功，样式已保存</span>
+        </div>
+        <div class="hdm-toast hdm-toast--warning">
+          <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>字体不可用，请检查字体是否已安装</span>
+        </div>
+        <div class="hdm-toast hdm-toast--error">
+          <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span>导出失败，请重试</span>
+        </div>
+        <div class="hdm-toast hdm-toast--info">
+          <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>点击「+ 添加自定义字体」开始添加</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">设置面板（iOS 开关）— 暮紫主题</div>
+      <div class="hdm-switch-group theme-purple">
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">显示编号徽章</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">显示拖拽把手</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">启用快捷键提示</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">自动导出 Diff</span>
+          <div class="hdm-switch"><div class="hdm-switch-thumb"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-item">
+      <div class="item-label">设置面板（iOS 开关）— 深藏青主题</div>
+      <div class="hdm-switch-group theme-teal">
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">显示编号徽章</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">显示拖拽把手</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">启用快捷键提示</span>
+          <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+        </div>
+        <div class="hdm-switch-row">
+          <span class="hdm-switch-label">自动导出 Diff</span>
+          <div class="hdm-switch"><div class="hdm-switch-thumb"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 主题选择器（含自定义颜色） -->
+<div class="preview-section">
+  <div class="section-title">主题选择器（含自定义颜色功能）</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <div class="item-label">主题选择面板 — 暮紫主题</div>
+      <div class="theme-selector-panel theme-purple">
+        <div class="theme-selector-header">主题设置</div>
+        <div class="theme-selector-body">
+          <div class="theme-grid">
+            <div class="theme-card" data-theme="teal">
+              <div class="theme-color-swatch" style="background: #211E55;"></div>
+              <span class="theme-name">深藏青</span>
+              <span class="theme-hex">#211E55</span>
+            </div>
+            <div class="theme-card" data-theme="green">
+              <div class="theme-color-swatch" style="background: #6A8372;"></div>
+              <span class="theme-name">灰绿</span>
+              <span class="theme-hex">#6A8372</span>
+            </div>
+            <div class="theme-card active" data-theme="purple">
+              <div class="theme-color-swatch" style="background: #70649A;"></div>
+              <span class="theme-name">暮紫</span>
+              <span class="theme-hex">#70649A</span>
+            </div>
+            <div class="theme-card" data-theme="brown">
+              <div class="theme-color-swatch" style="background: #9E7A7A;"></div>
+              <span class="theme-name">暖棕</span>
+              <span class="theme-hex">#9E7A7A</span>
+            </div>
+          </div>
+          <div class="custom-color-section">
+            <label class="custom-color-label">自定义主色</label>
+            <div class="custom-color-input-wrap">
+              <input type="text" class="custom-color-input" placeholder="#XXXXXX" value="#FF5733">
+              <div class="custom-color-preview" style="background: linear-gradient(135deg, #FF8A65, #FF5733);"></div>
+              <button class="custom-color-apply-btn">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 说明区域 -->
+<div class="notes-section">
+  <div class="notes-title">本次调整说明</div>
+  <div class="notes-content">
+
+    <h4>工具栏调整</h4>
+    <ul>
+      <li>快捷键提示改为 Mac 风格（⌥⌘ + 快速选择），使用原生键盘样式</li>
+      <li>移除了「已激活」状态指示和计数行（顶部），计数移到底部右侧</li>
+      <li>底部行：左侧快捷键 + 右侧计数（1 标记 · 1 修改）</li>
+      <li>导出按钮两侧增加正方形按钮：左侧重置（↺）、右侧设置（⚙）</li>
+      <li><span class="tag-q">关于「已激活」</span> 确实没有「未激活」状态，工具栏显示就是激活状态，所以去掉了状态指示</li>
+    </ul>
+
+    <h4>编辑面板调整</h4>
+    <ul>
+      <li>位置、大小、字号均使用滑块交互</li>
+      <li>右侧数值支持双击编辑（预览中 hover 有背景变化提示可点击）</li>
+      <li>大小调整保留单位切换（px / %）</li>
+      <li>每个分组右上角有独立的「重置」按钮</li>
+    </ul>
+
+    <h4>元素标记视觉调整</h4>
+    <ul>
+      <li>编号徽章 z-index 最高（10），在把手和删除角标之上</li>
+      <li>删除角标 z-index: 3，把手 z-index: 2</li>
+      <li>徽章稍大（24px），视觉上更突出</li>
+    </ul>
+
+    <h4>主题配色系统</h4>
+    <ul>
+      <li>四套预设主题：深藏青 #211E55、灰绿 #6A8372、暮紫 #70649A、暖棕 #9E7A7A</li>
+      <li>自定义颜色功能：输入主色 #XXXXXX，系统自动计算衍生色（浅色、深色、柔和背景色）</li>
+      <li>无网络依赖，所有颜色计算在本地完成</li>
+    </ul>
+
+  </div>
+</div>
+
+</body>
+</html>

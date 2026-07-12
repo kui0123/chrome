@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模态弹窗按钮布局修复验证</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f5f7;
+  padding: 40px;
+}
+.test-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.test-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.test-header h1 {
+  font-size: 24px;
+  color: #1F2937;
+  margin-bottom: 8px;
+}
+.test-header p {
+  font-size: 14px;
+  color: #6B7280;
+}
+.demo-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  text-align: center;
+}
+.demo-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(112,100,154,0.3);
+  transition: all 180ms ease;
+}
+.demo-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(112,100,154,0.4);
+}
+.demo-btn:active {
+  transform: translateY(0);
+}
+
+/* 引入插件样式 */
+@import url('../extension/content/content.css');
+</style>
+</head>
+<body>
+
+<div class="test-container">
+  <div class="test-header">
+    <h1>模态弹窗按钮布局修复验证</h1>
+    <p>点击下方按钮打开模态弹窗，验证取消和确认按钮是否正确右对齐</p>
+  </div>
+  
+  <div class="demo-box">
+    <button class="demo-btn" onclick="testModal()">打开测试弹窗</button>
+  </div>
+</div>
+
+<script>
+// 模拟插件的模态弹窗创建逻辑
+function testModal() {
+  // 创建遮罩层
+  const overlay = document.createElement('div');
+  overlay.className = 'html-diff-marker-modal-overlay';
+  
+  // 创建弹窗
+  const modal = document.createElement('div');
+  modal.className = 'html-diff-marker-modal';
+  
+  // 创建头部
+  const header = document.createElement('div');
+  header.className = 'html-diff-marker-modal-header';
+  
+  const headerTitle = document.createElement('div');
+  headerTitle.className = 'html-diff-marker-modal-header-title';
+  headerTitle.textContent = '测试弹窗';
+  header.appendChild(headerTitle);
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'html-diff-marker-modal-header-close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = () => closeModal(overlay);
+  header.appendChild(closeBtn);
+  
+  modal.appendChild(header);
+  
+  // 创建内容区域
+  const body = document.createElement('div');
+  body.className = 'html-diff-marker-modal-body';
+  body.innerHTML = '<p>这是一个测试弹窗，用于验证取消和确认按钮是否正确右对齐。</p>';
+  modal.appendChild(body);
+  
+  // 创建底部按钮区域
+  const footer = document.createElement('div');
+  footer.className = 'html-diff-marker-modal-footer';
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'html-diff-marker-modal-btn html-diff-marker-modal-btn-cancel';
+  cancelBtn.textContent = '取消';
+  cancelBtn.onclick = () => closeModal(overlay);
+  
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'html-diff-marker-modal-btn html-diff-marker-modal-btn-confirm';
+  confirmBtn.textContent = '确认';
+  confirmBtn.onclick = () => closeModal(overlay);
+  
+  footer.appendChild(cancelBtn);
+  footer.appendChild(confirmBtn);
+  modal.appendChild(footer);
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  // 点击遮罩关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal(overlay);
+  });
+}
+
+function closeModal(overlay) {
+  overlay.classList.add('hdm-modal-closing');
+  setTimeout(() => {
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }, 180);
+}
+</script>
+
+</body>
+</html>

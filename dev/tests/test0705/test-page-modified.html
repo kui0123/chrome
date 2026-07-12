@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Diff Marker - 测试页面</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .header {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .header h1 {
+    font-size: 28px;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .header p {
+    color: #666;
+    font-size: 14px;
+  }
+  .info-box {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 12px 20px;
+    margin-top: 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #1565c0;
+  }
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .section-title {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  /* 导航栏 */
+  .navbar {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .navbar .logo {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .navbar ul {
+    list-style: none;
+    display: flex;
+    gap: 8px;
+  }
+  .navbar ul li a {
+    color: #a0a0b0;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .navbar ul li a:hover {
+    background: #2d2d4a;
+    color: white;
+  }
+  .navbar ul li a.active {
+    background: #4a4aff;
+    color: white;
+  }
+
+  /* 按钮组 */
+  .button-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #4a4aff; color: white; }
+  .btn-primary:hover { background: #3a3aff; transform: translateY(-1px); }
+  .btn-secondary { background: #e8e8e8; color: #333; }
+  .btn-secondary:hover { background: #ddd; }
+  .btn-success { background: #4caf50; color: white; }
+  .btn-danger { background: #f44336; color: white; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid #4a4aff;
+    color: #4a4aff;
+  }
+
+  /* 卡片组件 */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+  }
+  .card-image {
+    height: 140px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 48px;
+  }
+  .card-body { padding: 20px; }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a2e;
+  }
+  .card-text {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .card-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #4a4aff;
+  }
+  .card-btn {
+    padding: 6px 14px;
+    background: #f0f0ff;
+    color: #4a4aff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* 表单组件 */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: #4a4aff;
+    box-shadow: 0 0 0 3px rgba(74,74,255,0.1);
+  }
+  .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* 标签组件 */
+  .tag-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-blue { background: #e3f2fd; color: #1976d2; }
+  .tag-green { background: #e8f5e9; color: #388e3c; }
+  .tag-orange { background: #fff3e0; color: #f57c00; }
+  .tag-red { background: #ffebee; color: #c62828; }
+  .tag-purple { background: #f3e5f5; color: #7b1fa2; }
+
+  /* 警告/提示框 */
+  .alert {
+    padding: 14px 20px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .alert-info { background: #e3f2fd; color: #1565c0; border-left: 4px solid #2196f3; }
+  .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #4caf50; }
+  .alert-warning { background: #fff3e0; color: #e65100; border-left: 4px solid #ff9800; }
+  .alert-danger { background: #ffebee; color: #c62828; border-left: 4px solid #f44336; }
+
+  /* 列表组件 */
+  .list-group {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .list-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item:hover { background: #f8f9fa; }
+  .list-item-text { font-size: 14px; color: #333; }
+  .badge {
+    background: #4a4aff;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* 页脚 */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 头部 -->
+  <div class="header">
+    <h1>🧪 HTML Diff Marker 测试页面</h1>
+    <p>本页面包含多种常见 HTML 组件，用于测试 Chrome 扩展的标记和 Diff 生成功能。</p>
+    <div class="info-box">
+      <strong>💡 测试步骤：</strong>
+      1) 点击扩展图标 → 2) 开始选择元素 → 3) 点击下方任意组件 → 4) 编辑修改内容 → 5) 生成 Diff
+    </div>
+  </div>
+
+  <!-- 导航栏测试 -->
+  <div class="section">
+    <div class="section-title">① 导航栏组件</div>
+    <nav class="navbar">
+      <div class="logo">MyBrand</div>
+      <ul>
+        <li><a href="#" class="active">首页</a></li>
+        <li><a href="#">产品</a></li>
+        <li><a href="#">关于</a></li>
+        <li><a href="https://bytedance.larkoffice.com/docx/CwXKd4wbZopcVfxAGUhc2faAnYb" class="">联系</a></li>
+      </ul>
+      <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">登录</button>
+    </nav>
+  </div>
+
+  <!-- 按钮组件测试 -->
+  <div class="section">
+    <div class="section-title">② 按钮组件</div>
+    <div class="button-group">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-secondary">次要按钮</button>
+      <button class="btn btn-success">成功按钮</button>
+      <button class="btn btn-danger">危险按钮</button>
+      <button class="btn btn-outline">轮廓按钮</button>
+    </div>
+  </div>
+
+  <!-- 卡片组件测试 -->
+  <div class="section">
+    <div class="section-title">③ 卡片组件</div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-image">📦</div>
+        <div class="card-body">
+          <h3 class="card-title">产品卡片 A</h3>
+          <p class="card-text">这是一个示例产品卡片描述，展示产品的基本信息和特性介绍。</p>
+          <div class="card-footer">
+            <span class="card-price">¥299</span>
+            <button class="card-btn">查看详情</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image" style="background: linear-gradient(rgba(34, 22, 55, 0.6), rgba(34, 22, 55, 0.6)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;">🎨</div>
+        <div class="card-body">
+          <h3 class="card-title">产品卡片 B</h3>
+          <p class="card-text">另一个不同样式的卡片组件，用于测试不同 HTML 结构。</p>
+          <div class="card-footer">
+            <span class="card-price">¥499</span>
+            <button class="card-btn">加入购物车</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🚀</div>
+        <div class="card-body">
+          <h3 class="card-title">产品卡片 C</h3>
+          <p class="card-text">卡片组件可以通过修改背景色、字体大小、间距等进行样式调整。</p>
+          <div class="card-footer">
+            <span class="card-price">¥999</span>
+            <button class="card-btn">立即购买</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 表单组件测试 -->
+  <div class="section">
+    <div class="section-title" style="width: 952px; height: 33px; font-family: Georgia, serif;">④ 表单组件</div>
+    <form onsubmit="event.preventDefault(); alert('表单已提交（测试）');">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">姓名</label>
+          <input type="text" class="form-input" placeholder="请输入姓名">
+        </div>
+        <div class="form-group">
+          <input type="email" class="form-input" placeholder="example@email.com" style="margin-top: 26px;">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">留言内容</label>
+        <textarea class="form-textarea" placeholder="请输入您想说的话..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">提交表单</button>
+    </form>
+  </div>
+
+  <!-- 标签组件测试 -->
+  <div class="section">
+    <div class="section-title">⑤ 标签 / Badge 组件</div>
+    <div class="tag-group">
+      <span class="tag tag-blue">蓝色</span>
+      <span class="tag tag-green">绿色</span>
+      <span class="tag tag-orange">橙色</span>
+      <span class="tag tag-red">红色</span>
+      <span class="tag tag-purple">紫色</span>
+    </div>
+  </div>
+
+  <!-- 警告框测试 -->
+  <div class="section">
+    <div class="section-title">⑥ 警告 / 提示框</div>
+    <div class="alert alert-info">ℹ️ 这是一个信息提示框，用于显示一般性信息。</div>
+    <div class="alert alert-success">✅ 操作成功完成！数据已保存。</div>
+    <div class="alert alert-warning">⚠️ 注意：此操作可能会影响现有数据。</div>
+    <div class="alert alert-danger">❌ 错误：操作失败，请检查后重试。</div>
+  </div>
+
+  <!-- 列表组件测试 -->
+  <div class="section">
+    <div class="section-title">⑦ 列表组件</div>
+    <div class="list-group">
+      <div class="list-item">
+        <span class="list-item-text">📝 完成产品设计文档</span>
+        <span class="badge">已完成</span>
+      </div>
+      <div class="list-item">
+        <span class="list-item-text">🎨 设计首页视觉稿</span>
+        <span class="badge" style="background: #f57c00;">进行中</span>
+      </div>
+      <div class="list-item">
+        <span class="list-item-text">🔧 修复登录页面 Bug</span>
+        <span class="badge" style="background: #9e9e9e;">待开始</span>
+      </div>
+      <div class="list-item">
+        <span class="list-item-text">📱 响应式布局适配</span>
+        <span class="badge" style="background: #9e9e9e;">待开始</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer">
+    © 2026 HTML Diff Marker Test Page · 用于测试 Chrome 扩展
+  </div>
+
+</div>
+<div class="" contenteditable="false" style="font-family: Georgia, serif; display: flex; width: 234px; height: 32.5px; left: 957px; top: -365px;">测试</div>
+</body>
+</html>

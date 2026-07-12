@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>JS 内联样式修复 SVG 图标 - 验证测试</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 30px;
+      background: #f3f4f6;
+    }
+    h1 { font-size: 22px; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .icon-box {
+      width: 64px;
+      height: 64px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      background: #fafafa;
+      color: #1f2937;
+    }
+    .status {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status.pass { color: #16a34a; }
+    .status.fail { color: #dc2626; }
+    .console {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+    .console .good { color: #86efac; }
+    .console .bad { color: #fca5a5; }
+    .console .key { color: #93c5fd; }
+    .console .warn { color: #fde047; }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 24px 0 12px;
+      color: #111827;
+    }
+    
+    .demo-toolbar {
+      width: 280px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .demo-toolbar-header {
+      background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+      padding: 12px 14px 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .demo-window-ctrl { display: flex; gap: 5px; }
+    .demo-ctrl-btn {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .demo-toolbar-body { padding: 12px; }
+    .demo-btn-row { display: flex; gap: 8px; align-items: center; }
+    .demo-side-btn {
+      width: 34px; height: 38px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    .demo-export-btn {
+      flex: 1; height: 38px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      color: #6b7280;
+      display: flex; align-items: center; justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>✅ JS 内联样式修复 SVG 图标 - 验证测试</h1>
+<p class="subtitle">根因：all:unset 重置了 SVG 几何属性（r/cx/cy/d 等）→ JS 内联样式强制恢复</p>
+
+<!-- ========================================
+     第一部分：单个图标对比
+     ======================================== -->
+<div class="section-title">一、单个图标修复前后对比</div>
+<div class="grid">
+  
+  <div class="card">
+    <h3>1. 纯 SVG（基准）</h3>
+    <div class="icon-box" id="t0-box">
+      <svg id="t0" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#1f2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div class="status" id="s0">基准</div>
+  </div>
+  
+  <div class="card">
+    <h3>2. all:unset（未修复）</h3>
+    <style>
+      #t1-box * { all: unset !important; box-sizing: border-box !important; }
+    </style>
+    <div class="icon-box" id="t1-box">
+      <svg id="t1" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#1f2937" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div class="status" id="s1">检测中</div>
+  </div>
+  
+  <div class="card">
+    <h3>3. CSS 恢复（失败）</h3>
+    <style>
+      #t2-box * { all: unset !important; box-sizing: border-box !important; }
+      #t2-box svg, #t2-box svg * {
+        display: block !important;
+        fill: none !important;
+        stroke: #1f2937 !important;
+        stroke-width: 2px !important;
+        stroke-linecap: round !important;
+        stroke-linejoin: round !important;
+      }
+      #t2-box svg { width: 28px !important; height: 28px !important; }
+    </style>
+    <div class="icon-box" id="t2-box">
+      <svg id="t2" viewBox="0 0 24 24" width="28" height="28">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div class="status" id="s2">检测中</div>
+  </div>
+  
+  <div class="card">
+    <h3>4. ✅ JS 内联修复</h3>
+    <style>
+      #t3-box * { all: unset !important; box-sizing: border-box !important; }
+    </style>
+    <div class="icon-box" id="t3-box">
+      <svg id="t3" viewBox="0 0 24 24" width="28" height="28">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+      </svg>
+    </div>
+    <div class="status" id="s3">修复中</div>
+  </div>
+  
+</div>
+
+<!-- ========================================
+     第二部分：多图标类型测试
+     ======================================== -->
+<div class="section-title">二、多种图标类型修复验证（JS 内联方案）</div>
+<div class="grid" id="multi-test">
+  <!-- 将由 JS 动态生成 -->
+</div>
+
+<!-- ========================================
+     第三部分：完整工具栏模拟
+     ======================================== -->
+<div class="section-title">三、完整工具栏模拟</div>
+<div style="display: flex; gap: 20px;">
+  
+  <div>
+    <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">修复前（CSS 方案）</div>
+    <style>
+      #toolbar-css * { all: unset !important; box-sizing: border-box !important; }
+      #toolbar-css .demo-side-btn svg,
+      #toolbar-css .demo-side-btn svg *,
+      #toolbar-css .demo-export-btn svg,
+      #toolbar-css .demo-export-btn svg * {
+        fill: none !important;
+        stroke: currentColor !important;
+        stroke-width: 2px !important;
+        stroke-linecap: round !important;
+        stroke-linejoin: round !important;
+      }
+      #toolbar-css .demo-side-btn svg,
+      #toolbar-css .demo-export-btn svg {
+        width: 14px !important;
+        height: 14px !important;
+        display: block !important;
+      }
+      #toolbar-css .demo-ctrl-btn svg,
+      #toolbar-css .demo-ctrl-btn svg * {
+        stroke: white !important;
+        stroke-width: 2px !important;
+        fill: none !important;
+      }
+      #toolbar-css .demo-ctrl-btn svg {
+        width: 12px !important;
+        height: 12px !important;
+        display: block !important;
+      }
+    </style>
+    <div class="demo-toolbar" id="toolbar-css">
+      <div class="demo-toolbar-header">
+        <span>HTML Diff Marker</span>
+        <div class="demo-window-ctrl">
+          <div class="demo-ctrl-btn" id="tbc-minus"></div>
+          <div class="demo-ctrl-btn" id="tbc-close"></div>
+        </div>
+      </div>
+      <div class="demo-toolbar-body">
+        <div class="demo-btn-row">
+          <button class="demo-side-btn" id="tbc-reset"></button>
+          <button class="demo-export-btn" id="tbc-export"><span class="icon-slot"></span><span>导出 Diff</span></button>
+          <button class="demo-side-btn" id="tbc-settings"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div>
+    <div style="font-size: 12px; color: #16a34a; margin-bottom: 8px;">✅ 修复后（JS 内联方案）</div>
+    <style>
+      #toolbar-js * { all: unset !important; box-sizing: border-box !important; }
+    </style>
+    <div class="demo-toolbar" id="toolbar-js">
+      <div class="demo-toolbar-header">
+        <span>HTML Diff Marker</span>
+        <div class="demo-window-ctrl">
+          <div class="demo-ctrl-btn" id="tbj-minus"></div>
+          <div class="demo-ctrl-btn" id="tbj-close"></div>
+        </div>
+      </div>
+      <div class="demo-toolbar-body">
+        <div class="demo-btn-row">
+          <button class="demo-side-btn" id="tbj-reset"></button>
+          <button class="demo-export-btn" id="tbj-export"><span class="icon-slot"></span><span>导出 Diff</span></button>
+          <button class="demo-side-btn" id="tbj-settings"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="console" id="console">初始化中...</div>
+
+<script>
+  // ============================================================
+  // 核心修复函数：enforceSvgIconStyles
+  // ============================================================
+  function enforceSvgIconStyles(svgEl, options) {
+    if (!svgEl || svgEl.tagName.toLowerCase() !== 'svg') return svgEl;
+    
+    options = options || {};
+    var color = options.color || 'currentColor';
+    var strokeWidth = options.strokeWidth || 2;
+    var fill = options.fill || 'none';
+    var size = options.size || null;
+    
+    // 修复 SVG 根元素
+    svgEl.style.setProperty('display', 'block', 'important');
+    if (size) {
+      svgEl.style.setProperty('width', size, 'important');
+      svgEl.style.setProperty('height', size, 'important');
+    }
+    
+    // 遍历所有子元素，恢复几何属性和样式属性
+    var children = svgEl.querySelectorAll('*');
+    for (var i = 0; i < children.length; i++) {
+      var el = children[i];
+      var tag = el.tagName.toLowerCase();
+      
+      // 通用视觉属性
+      el.style.setProperty('fill', fill, 'important');
+      el.style.setProperty('stroke', color, 'important');
+      el.style.setProperty('stroke-width', strokeWidth, 'important');
+      el.style.setProperty('stroke-linecap', 'round', 'important');
+      el.style.setProperty('stroke-linejoin', 'round', 'important');
+      el.style.setProperty('display', 'block', 'important');
+      
+      // 按元素类型恢复几何属性
+      switch (tag) {
+        case 'circle':
+          if (el.getAttribute('cx') !== null) {
+            el.style.setProperty('cx', el.getAttribute('cx') + 'px', 'important');
+          }
+          if (el.getAttribute('cy') !== null) {
+            el.style.setProperty('cy', el.getAttribute('cy') + 'px', 'important');
+          }
+          if (el.getAttribute('r') !== null) {
+            el.style.setProperty('r', el.getAttribute('r') + 'px', 'important');
+          }
+          break;
+          
+        case 'ellipse':
+          if (el.getAttribute('cx') !== null) {
+            el.style.setProperty('cx', el.getAttribute('cx') + 'px', 'important');
+          }
+          if (el.getAttribute('cy') !== null) {
+            el.style.setProperty('cy', el.getAttribute('cy') + 'px', 'important');
+          }
+          if (el.getAttribute('rx') !== null) {
+            el.style.setProperty('rx', el.getAttribute('rx') + 'px', 'important');
+          }
+          if (el.getAttribute('ry') !== null) {
+            el.style.setProperty('ry', el.getAttribute('ry') + 'px', 'important');
+          }
+          break;
+          
+        case 'rect':
+          ['x', 'y', 'width', 'height', 'rx', 'ry'].forEach(function(attr) {
+            if (el.getAttribute(attr) !== null) {
+              el.style.setProperty(attr, el.getAttribute(attr) + 'px', 'important');
+            }
+          });
+          break;
+          
+        case 'path':
+          if (el.getAttribute('d') !== null) {
+            el.style.setProperty('d', 'path("' + el.getAttribute('d') + '")', 'important');
+          }
+          break;
+          
+        case 'line':
+          ['x1', 'y1', 'x2', 'y2'].forEach(function(attr) {
+            if (el.getAttribute(attr) !== null) {
+              el.style.setProperty(attr, el.getAttribute(attr) + 'px', 'important');
+            }
+          });
+          break;
+          
+        case 'polyline':
+        case 'polygon':
+          if (el.getAttribute('points') !== null) {
+            el.style.setProperty('points', el.getAttribute('points'), 'important');
+          }
+          break;
+      }
+    }
+    
+    return svgEl;
+  }
+  
+  // 便捷函数：将 SVG HTML 字符串插入到容器中并修复样式
+  function insertSvgIcon(container, svgHtml, options) {
+    container.innerHTML = svgHtml;
+    var svg = container.querySelector('svg');
+    if (svg) {
+      enforceSvgIconStyles(svg, options);
+    }
+    return svg;
+  }
+  
+  // ============================================================
+  // 测试图标集合
+  // ============================================================
+  const SVG_TEST_ICONS = {
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    export: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M20 6 9 17l-5-5"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  };
+  
+  // 工具栏用的小图标（14px）
+  const TOOLBAR_ICONS = {
+    settings: SVG_TEST_ICONS.settings.replace('width:24px;height:24px', 'width:14px;height:14px'),
+    reset: SVG_TEST_ICONS.reset.replace('width:24px;height:24px', 'width:14px;height:14px'),
+    export: SVG_TEST_ICONS.export.replace('width:24px;height:24px', 'width:14px;height:14px'),
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M5 12h14"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  };
+  
+  // ============================================================
+  // 执行测试
+  // ============================================================
+  
+  // 测试 1-4：单个图标对比
+  // t0: 纯 SVG（基准）- 不需要修复
+  // t1: all:unset 无修复
+  // t2: CSS 恢复
+  // t3: JS 内联修复（我们现在做）
+  
+  // 立即修复 t3
+  (function() {
+    const svg = document.getElementById('t3');
+    enforceSvgIconStyles(svg, { color: '#1f2937', strokeWidth: 2, fill: 'none' });
+  })();
+  
+  // 生成多图标测试
+  const multiContainer = document.getElementById('multi-test');
+  Object.keys(SVG_TEST_ICONS).forEach(name => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <h3>${name}</h3>
+      <div class="icon-box" id="multi-${name}-box">
+        ${SVG_TEST_ICONS[name]}
+      </div>
+      <div class="status" id="multi-${name}-status">修复中</div>
+    `;
+    multiContainer.appendChild(card);
+    
+    // 对每个图标应用 all:unset + JS 修复
+    const box = document.getElementById(`multi-${name}-box`);
+    box.style.setProperty('all', 'unset', 'important');
+    box.style.setProperty('display', 'flex', 'important');
+    box.style.setProperty('align-items', 'center', 'important');
+    box.style.setProperty('justify-content', 'center', 'important');
+    box.style.setProperty('width', '64px', 'important');
+    box.style.setProperty('height', '64px', 'important');
+    box.style.setProperty('border', '2px dashed #d1d5db', 'important');
+    box.style.setProperty('border-radius', '8px', 'important');
+    box.style.setProperty('background', '#fafafa', 'important');
+    
+    const svg = box.querySelector('svg');
+    // 先确认 all:unset 破坏了它
+    // 然后用 JS 修复
+    enforceSvgIconStyles(svg, { color: '#1f2937', strokeWidth: 2, fill: 'none', size: '24px' });
+  });
+  
+  // 完整工具栏模拟
+  // CSS 方案（左）
+  document.getElementById('tbc-reset').innerHTML = TOOLBAR_ICONS.reset;
+  document.getElementById('tbc-settings').innerHTML = TOOLBAR_ICONS.settings;
+  document.querySelector('#tbc-export .icon-slot').innerHTML = TOOLBAR_ICONS.export;
+  document.getElementById('tbc-minus').innerHTML = TOOLBAR_ICONS.minus;
+  document.getElementById('tbc-close').innerHTML = TOOLBAR_ICONS.close;
+  
+  // JS 方案（右）
+  insertSvgIcon(document.getElementById('tbj-reset'), TOOLBAR_ICONS.reset, { color: '#6b7280', strokeWidth: 2, size: '14px' });
+  insertSvgIcon(document.getElementById('tbj-settings'), TOOLBAR_ICONS.settings, { color: '#6b7280', strokeWidth: 2, size: '14px' });
+  insertSvgIcon(document.querySelector('#tbj-export .icon-slot'), TOOLBAR_ICONS.export, { color: '#6b7280', strokeWidth: 2, size: '14px' });
+  insertSvgIcon(document.getElementById('tbj-minus'), TOOLBAR_ICONS.minus, { color: 'white', strokeWidth: 2, size: '12px' });
+  insertSvgIcon(document.getElementById('tbj-close'), TOOLBAR_ICONS.close, { color: 'white', strokeWidth: 2, size: '14px' });
+  
+  // ============================================================
+  // 检测结果
+  // ============================================================
+  function checkVisible(svgEl) {
+    if (!svgEl) return { visible: false, reason: 'no svg' };
+    const circle = svgEl.querySelector('circle');
+    const path = svgEl.querySelector('path');
+    const target = circle || path;
+    if (!target) return { visible: false, reason: 'no shape elements' };
+    
+    const cs = getComputedStyle(target);
+    const hasStroke = cs.stroke !== 'none' && cs.stroke !== 'rgba(0, 0, 0, 0)';
+    const hasWidth = parseFloat(cs.strokeWidth) > 0;
+    
+    // 检测几何属性
+    let hasGeometry = false;
+    const tag = target.tagName.toLowerCase();
+    if (tag === 'circle') {
+      const r = parseFloat(cs.r || '0');
+      hasGeometry = r > 0;
+    } else if (tag === 'path') {
+      hasGeometry = cs.d !== 'none';
+    } else if (tag === 'rect') {
+      hasGeometry = parseFloat(cs.width || '0') > 0;
+    }
+    
+    const visible = hasStroke && hasWidth && hasGeometry;
+    return {
+      visible,
+      stroke: cs.stroke,
+      strokeWidth: cs.strokeWidth,
+      display: cs.display,
+      r: cs.r,
+      d: cs.d,
+      hasGeometry
+    };
+  }
+  
+  function runChecks() {
+    let out = '';
+    
+    // 基础对比
+    out += '======== 基础对比测试 ========\n';
+    [0, 1, 2, 3].forEach(i => {
+      const svg = document.getElementById('t' + i);
+      const result = checkVisible(svg);
+      const label = ['基准', 'all:unset未修复', 'CSS恢复', 'JS内联修复'][i];
+      const status = result.visible ? '<span class="good">✅ 可见</span>' : '<span class="bad">❌ 不可见</span>';
+      out += `<span class="key">${label}</span>: ${status}\n`;
+      out += `   stroke: ${result.stroke}, strokeWidth: ${result.strokeWidth}\n`;
+      if (result.r !== undefined) out += `   r: ${result.r}\n`;
+      if (result.d !== undefined) out += `   d: ${result.d ? '有路径' : 'none'}\n`;
+      out += `   几何有效: ${result.hasGeometry ? 'YES' : 'NO'}\n\n`;
+      
+      const statusEl = document.getElementById('s' + i);
+      if (i > 0 && statusEl) {
+        statusEl.textContent = result.visible ? '✅ 可见' : '❌ 不可见';
+        statusEl.className = 'status ' + (result.visible ? 'pass' : 'fail');
+      }
+    });
+    
+    // 多图标测试
+    out += '======== 多图标验证（JS 修复方案） ========\n';
+    let allPass = true;
+    Object.keys(SVG_TEST_ICONS).forEach(name => {
+      const box = document.getElementById(`multi-${name}-box`);
+      const svg = box.querySelector('svg');
+      const result = checkVisible(svg);
+      const status = result.visible ? '<span class="good">✅</span>' : '<span class="bad">❌</span>';
+      out += `${status} ${name}: ${result.visible ? '可见' : '不可见'}\n`;
+      
+      const statusEl = document.getElementById(`multi-${name}-status`);
+      statusEl.textContent = result.visible ? '✅ 修复成功' : '❌ 修复失败';
+      statusEl.className = 'status ' + (result.visible ? 'pass' : 'fail');
+      
+      if (!result.visible) allPass = false;
+    });
+    
+    out += `\n<span class="${allPass ? 'good' : 'bad'}">多图标测试结果: ${allPass ? '全部通过' : '有失败项'}</span>\n`;
+    
+    document.getElementById('console').innerHTML = out;
+  }
+  
+  setTimeout(runChecks, 300);
+</script>
+
+</body>
+</html>

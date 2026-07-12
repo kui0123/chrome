@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编辑面板折叠功能测试</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f0f0f0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    .test-section { margin-bottom: 30px; }
+    .test-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #333; }
+    .test-desc { font-size: 12px; color: #666; margin-bottom: 10px; }
+
+    /* 模拟编辑面板基础样式 */
+    .html-diff-marker-inspector {
+      position: relative;
+      width: 340px;
+      height: 620px;
+      min-width: 320px;
+      min-height: 200px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: #333;
+    }
+
+    /* 折叠状态 */
+    .html-diff-marker-inspector.collapsed {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+    .html-diff-marker-inspector.collapsed .inspector-body,
+    .html-diff-marker-inspector.collapsed .inspector-actions,
+    .html-diff-marker-inspector.collapsed .resize-handle {
+      display: none !important;
+    }
+
+    /* 顶部色条 */
+    .inspector-top-bar {
+      height: 3px;
+      width: 100%;
+      background: #6366f1;
+      flex-shrink: 0;
+    }
+
+    /* 头部 */
+    .inspector-header {
+      background: #fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .inspector-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+    }
+
+    .header-btns {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .header-btn {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      background: transparent;
+      color: #6b7280;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-btn:hover { background: #f3f4f6; }
+
+    /* 主体 */
+    .inspector-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    /* 底部操作栏 */
+    .inspector-actions {
+      padding: 12px 16px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      background: #fff;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+    .btn-primary { background: #6366f1; color: #fff; }
+
+    /* 调整大小把手 */
+    .resize-handle {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 16px;
+      height: 16px;
+      cursor: nwse-resize;
+      background: linear-gradient(135deg, transparent 50%, #a5b4fc 50%);
+    }
+
+    /* 测试信息 */
+    .info-panel {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #92400e;
+    }
+    .info-panel .label { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="test-section">
+    <div class="test-title">测试 1：基础折叠（无内联样式）</div>
+    <div class="test-desc">验证 CSS 类选择器能否正确控制折叠状态</div>
+    <div class="html-diff-marker-inspector" id="panel1">
+      <div class="inspector-top-bar"></div>
+      <div class="inspector-header">
+        <span class="inspector-title">元素编辑</span>
+        <div class="header-btns">
+          <button class="header-btn" onclick="togglePanel('panel1')">−</button>
+          <button class="header-btn">×</button>
+        </div>
+      </div>
+      <div class="inspector-body">
+        <p>这是面板主体内容区域</p>
+        <p>包含各种编辑控件</p>
+        <p>折叠时应该被隐藏</p>
+      </div>
+      <div class="inspector-actions">
+        <button class="btn btn-danger">删除标记</button>
+        <button class="btn btn-primary">保存修改</button>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+    <div class="info-panel">
+      <div><span class="label">当前高度：</span><span id="height1">-</span></div>
+      <div><span class="label">是否折叠：</span><span id="collapsed1">否</span></div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <div class="test-title">测试 2：有内联样式 + !important 的折叠</div>
+    <div class="test-desc">模拟用户调整过面板大小后，内联样式有 height !important 的情况</div>
+    <div class="html-diff-marker-inspector" id="panel2" style="height: 500px !important; width: 400px !important;">
+      <div class="inspector-top-bar"></div>
+      <div class="inspector-header">
+        <span class="inspector-title">元素编辑（有内联高度）</span>
+        <div class="header-btns">
+          <button class="header-btn" onclick="togglePanelWithRemove('panel2')">−</button>
+          <button class="header-btn">×</button>
+        </div>
+      </div>
+      <div class="inspector-body">
+        <p>这个面板有内联 height: 500px !important</p>
+        <p>折叠时需要移除内联样式才能让 CSS 生效</p>
+      </div>
+      <div class="inspector-actions">
+        <button class="btn btn-danger">删除标记</button>
+        <button class="btn btn-primary">保存修改</button>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+    <div class="info-panel">
+      <div><span class="label">当前高度：</span><span id="height2">-</span></div>
+      <div><span class="label">是否折叠：</span><span id="collapsed2">否</span></div>
+      <div><span class="label">内联height：</span><span id="inline2">-</span></div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <div class="test-title">测试 3：只移除内联样式但不加 !important（当前代码逻辑）</div>
+    <div class="test-desc">验证：折叠时 removeProperty，展开时 setProperty(..., 'important')</div>
+    <div class="html-diff-marker-inspector" id="panel3" style="height: 500px !important; width: 400px !important;">
+      <div class="inspector-top-bar"></div>
+      <div class="inspector-header">
+        <span class="inspector-title">模拟当前代码逻辑</span>
+        <div class="header-btns">
+          <button class="header-btn" onclick="togglePanelCurrentLogic('panel3')">−</button>
+          <button class="header-btn">×</button>
+        </div>
+      </div>
+      <div class="inspector-body">
+        <p>测试当前代码的折叠逻辑</p>
+        <p>折叠：removeProperty('height')</p>
+        <p>展开：setProperty('height', '500px', 'important')</p>
+      </div>
+      <div class="inspector-actions">
+        <button class="btn btn-danger">删除标记</button>
+        <button class="btn btn-primary">保存修改</button>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+    <div class="info-panel">
+      <div><span class="label">当前高度：</span><span id="height3">-</span></div>
+      <div><span class="label">是否折叠：</span><span id="collapsed3">否</span></div>
+      <div><span class="label">内联height：</span><span id="inline3">-</span></div>
+      <div><span class="label">savedHeight：</span><span id="saved3">-</span></div>
+    </div>
+  </div>
+
+  <script>
+    let savedHeight3 = '';
+    let savedWidth3 = '';
+
+    function togglePanel(id) {
+      const panel = document.getElementById(id);
+      panel.classList.toggle('collapsed');
+      updateInfo(id);
+    }
+
+    function togglePanelWithRemove(id) {
+      const panel = document.getElementById(id);
+      const isCollapsed = panel.classList.toggle('collapsed');
+      if (isCollapsed) {
+        panel.style.removeProperty('height');
+        panel.style.removeProperty('width');
+      } else {
+        panel.style.setProperty('height', '500px', 'important');
+        panel.style.setProperty('width', '400px', 'important');
+      }
+      updateInfo(id);
+    }
+
+    function togglePanelCurrentLogic(id) {
+      const panel = document.getElementById(id);
+      const isCollapsed = panel.classList.toggle('collapsed');
+      if (isCollapsed) {
+        savedHeight3 = panel.style.getPropertyValue('height') || '';
+        savedWidth3 = panel.style.getPropertyValue('width') || '';
+        panel.style.removeProperty('height');
+        panel.style.removeProperty('width');
+      } else {
+        let restoreHeight = savedHeight3;
+        let restoreWidth = savedWidth3;
+        if (restoreHeight) {
+          panel.style.setProperty('height', restoreHeight, 'important');
+        }
+        if (restoreWidth) {
+          panel.style.setProperty('width', restoreWidth, 'important');
+        }
+      }
+      updateInfo(id);
+      document.getElementById('saved3').textContent = savedHeight3 + ' / ' + savedWidth3;
+    }
+
+    function updateInfo(id) {
+      const panel = document.getElementById(id);
+      const num = id.replace('panel', '');
+      document.getElementById('height' + num).textContent = panel.offsetHeight + 'px';
+      document.getElementById('collapsed' + num).textContent = panel.classList.contains('collapsed') ? '是' : '否';
+      const inlineEl = document.getElementById('inline' + num);
+      if (inlineEl) {
+        inlineEl.textContent = panel.style.height || '(无)';
+      }
+    }
+
+    // 初始化
+    updateInfo('panel1');
+    updateInfo('panel2');
+    updateInfo('panel3');
+  </script>
+
+</body>
+</html>
