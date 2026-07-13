@@ -3787,16 +3787,7 @@
     body.appendChild(sizeGroup);
 
     // ⑥ 样式编辑
-    const styleGroup = createInspectorGroup('样式编辑', false);
-
-    // 重置全部按钮（放在分组内顶部）
-    const resetAllWrap = document.createElement('div');
-    resetAllWrap.className = 'html-diff-marker-reset-all-wrap';
-    const resetAllBtn = document.createElement('button');
-    resetAllBtn.className = 'html-diff-marker-btn--ghost html-diff-marker-reset-all-btn';
-    resetAllBtn.innerHTML = '重置全部';
-    resetAllBtn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation();
+    const styleGroup = createInspectorGroup('样式编辑', true, function() {
       Object.keys(entry.modifiedStyles || {}).forEach(prop => {
         if (prop !== 'position' && prop !== 'left' && prop !== 'top'
           && prop !== 'width' && prop !== 'height') {
@@ -3804,9 +3795,7 @@
         }
       });
       openInspector(entry.id);
-    }, true);
-    resetAllWrap.appendChild(resetAllBtn);
-    styleGroup.appendChild(resetAllWrap);
+    });
 
     // 文字样式属性列表（整合到样式编辑分组）
     let fontHintEl = null;
@@ -3882,18 +3871,6 @@
           propControl.appendChild(addFontBtn);
         }
 
-        // 单个属性重置按钮
-        const propReset = document.createElement('button');
-        propReset.className = 'html-diff-marker-btn--icon html-diff-marker-style-prop-reset';
-        insertSvgIcon(propReset, SVG_ICONS.reset);
-        propReset.setAttribute('title', '重置' + sp.label);
-        propReset.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          applyStyleChange(entry, sp.key, '');
-          openInspector(entry.id);
-        }, true);
-        propControl.appendChild(propReset);
-
         propRow.appendChild(propControl);
         styleGroup.appendChild(propRow);
 
@@ -3943,22 +3920,6 @@
             applyStyleChange(entry, sp.key, v + sp.unit);
           }
         });
-        // 添加重置按钮到滑块 header
-        const sliderHeader = slider.querySelector('.html-diff-marker-slider-header');
-        const propReset = document.createElement('button');
-        propReset.className = 'html-diff-marker-btn--icon html-diff-marker-style-prop-reset';
-        insertSvgIcon(propReset, SVG_ICONS.reset);
-        propReset.setAttribute('title', '重置' + sp.label);
-        hdmSetStyles(propReset, {
-          marginLeft: '8px',
-          flexShrink: '0'
-        });
-        propReset.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          applyStyleChange(entry, sp.key, '');
-          openInspector(entry.id);
-        }, true);
-        sliderHeader.appendChild(propReset);
         styleGroup.appendChild(slider);
       }
     });
@@ -4063,22 +4024,6 @@
             applyStyleChange(entry, sp.key, v + sp.unit);
           }
         });
-        // 添加重置按钮到滑块 header
-        const sliderHeader = slider.querySelector('.html-diff-marker-slider-header');
-        const propReset = document.createElement('button');
-        propReset.className = 'html-diff-marker-btn--icon html-diff-marker-style-prop-reset';
-        insertSvgIcon(propReset, SVG_ICONS.reset);
-        propReset.setAttribute('title', '重置' + sp.label);
-        hdmSetStyles(propReset, {
-          marginLeft: '8px',
-          flexShrink: '0'
-        });
-        propReset.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          applyStyleChange(entry, sp.key, '');
-          openInspector(entry.id);
-        }, true);
-        sliderHeader.appendChild(propReset);
         styleGroup.appendChild(slider);
       } else {
         const textInput = document.createElement('input');
@@ -4090,18 +4035,6 @@
           applyStyleChange(entry, sp.key, this.value);
         });
         propControl.appendChild(textInput);
-
-        // 单个属性重置按钮
-        const propReset = document.createElement('button');
-        propReset.className = 'html-diff-marker-btn--icon html-diff-marker-style-prop-reset';
-        insertSvgIcon(propReset, SVG_ICONS.reset);
-        propReset.setAttribute('title', '重置' + sp.label);
-        propReset.addEventListener('click', function(e) {
-          e.preventDefault(); e.stopPropagation();
-          applyStyleChange(entry, sp.key, '');
-          openInspector(entry.id);
-        }, true);
-        propControl.appendChild(propReset);
 
         propRow.appendChild(propControl);
         styleGroup.appendChild(propRow);

@@ -1136,6 +1136,7 @@
 .html-diff-marker-select-wrap--sm .html-diff-marker-select {
   padding: 0 28px 0 var(--hdm-space-2) !important;
   font-size: var(--hdm-font-sm) !important;
+  height: var(--hdm-input-height-sm) !important;
 }
 .html-diff-marker-select-wrap--sm .html-diff-marker-select-arrow {
   right: 6px !important;
@@ -2205,6 +2206,20 @@
   flex-direction: column !important;
   color: var(--hdm-text-primary) !important;
   box-sizing: border-box !important;
+  --hdm-theme-primary: inherit;
+  --hdm-theme-primary-light: inherit;
+  --hdm-theme-primary-dark: inherit;
+  --hdm-theme-gradient: inherit;
+  --hdm-theme-soft-bg: inherit;
+  --hdm-theme-soft-bg-hover: inherit;
+  --hdm-primary: inherit;
+  --hdm-primary-hover: inherit;
+  --hdm-primary-dark: inherit;
+  --hdm-primary-light: inherit;
+  --hdm-primary-bg: inherit;
+  --hdm-primary-bg-hover: inherit;
+  --hdm-gradient-btn-primary: inherit;
+  --hdm-gradient-btn-primary-hover: inherit;
 }
 
 /* 最小化状态 */
@@ -2462,12 +2477,7 @@
 
 /* 样式属性行 */
 .html-diff-marker-style-prop-row {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  margin-bottom: 8px !important;
-  min-height: 28px !important;
+  margin-bottom: 12px !important;
 }
 .html-diff-marker-style-prop-row:last-child {
   margin-bottom: 0 !important;
@@ -2475,12 +2485,14 @@
 
 /* 样式属性标签 */
 .html-diff-marker-style-prop-label {
-  font-size: 12px !important;
+  display: block !important;
+  font-size: 11px !important;
   color: var(--hdm-text-secondary) !important;
   font-family: var(--hdm-font-family) !important;
   flex-shrink: 0 !important;
   min-width: 60px !important;
   line-height: 1.4 !important;
+  margin-bottom: 5px !important;
 }
 
 /* 样式属性控件区 */
@@ -2750,6 +2762,20 @@
   flex: 1 !important;
 }
 
+/* 编辑面板内小型下拉框（样式编辑区） */
+.html-diff-marker-inspector .html-diff-marker-select-wrap--sm {
+  height: 30px !important;
+}
+.html-diff-marker-inspector .html-diff-marker-select-wrap--sm .html-diff-marker-select {
+  padding: 0 28px 0 8px !important;
+  font-size: var(--hdm-font-sm) !important;
+  height: 30px !important;
+}
+.html-diff-marker-inspector .html-diff-marker-select-wrap--sm .html-diff-marker-select-arrow {
+  right: 6px !important;
+  font-size: 10px !important;
+}
+
 /* select 在样式行中的包装（小型） */
 .html-diff-marker-style-input-wrap .html-diff-marker-select-wrap {
   flex: 1 !important;
@@ -2797,10 +2823,10 @@
 
 /* ---------- 字体相关（三态提示 + 添加/删除按钮） ---------- */
 
-/* 添加字体按钮 */
-.html-diff-marker-inspector .html-diff-marker-add-font-btn {
-  width: 28px !important;
-  height: 28px !important;
+/* 添加字体按钮（提高选择器优先级以覆盖.btn--icon默认样式） */
+.html-diff-marker-inspector .html-diff-marker-btn--icon.html-diff-marker-add-font-btn {
+  width: 30px !important;
+  height: 30px !important;
   padding: 0 !important;
   background: var(--hdm-success-bg) !important;
   color: var(--hdm-success) !important;
@@ -2819,23 +2845,27 @@
   font-family: var(--hdm-font-family) !important;
   user-select: none !important;
 }
-.html-diff-marker-inspector .html-diff-marker-add-font-btn:hover {
+.html-diff-marker-inspector .html-diff-marker-btn--icon.html-diff-marker-add-font-btn:hover {
   background: var(--hdm-success-bg-hover) !important;
+  color: var(--hdm-success) !important;
+  border-color: var(--hdm-success-border) !important;
 }
 
 /* 字体提示条（三态） */
 .html-diff-marker-font-hint {
   margin-top: 6px !important;
-  padding: 8px 10px !important;
+  padding: 0 10px !important;
+  height: 30px !important;
   border-radius: var(--hdm-radius-xs) !important;
   font-size: var(--hdm-font-sm) !important;
   line-height: 1.4 !important;
   font-family: var(--hdm-font-family) !important;
   font-weight: var(--hdm-font-medium) !important;
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   gap: 6px !important;
   border: 1px solid transparent !important;
+  box-sizing: border-box !important;
 }
 /* 默认/警告态（预览失败 - 黄色） */
 .html-diff-marker-font-hint,
