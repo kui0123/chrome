@@ -1,0 +1,42 @@
+extension/content/content.css
+  s_e8025299f35aa5::t_e29ca729859d75 2480
+  s_7e56fd07d2bcfe::t_c4bacfb5208952 1139
+  s_7e56fd07d2bcfe::t_79e07374e07c18 2765-2771,2773-2778
+  s_7e56fd07d2bcfe::t_c8e17109bee295 2772
+  s_7e56fd07d2bcfe::t_3ac4833d40f50c 2826-2827,2848,2850-2851
+  s_e8025299f35aa5::t_a9ea7b95637b26 2488-2489,2495
+  s_7e56fd07d2bcfe::t_ce050fdd66f5e0 2857-2858,2865,2868
+  s_7e56fd07d2bcfe::t_3738b7bcfbed99 2828-2829
+  s_7e56fd07d2bcfe::t_c9f28c58976e42 2209-2222
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5ad3245169900c01b41cb178cbcfb514c5a1ef28",
+  "prompts": {},
+  "humans": {
+    "h_f17389cc6149cd": {
+      "author": "Developer <dev@local>"
+    }
+  },
+  "sessions": {
+    "s_7e56fd07d2bcfe": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a53b70c125d27b23fc0925d",
+        "model": "Doubao_1_6__dev"
+      },
+      "human_author": "Developer <dev@local>"
+    },
+    "s_e8025299f35aa5": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a536176125d27b23fc07a95",
+        "model": "Doubao_1_6__dev"
+      },
+      "human_author": "Developer <dev@local>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
