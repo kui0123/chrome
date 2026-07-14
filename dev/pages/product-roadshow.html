@@ -740,6 +740,16 @@ body {
   display: flex; justify-content: space-between; align-items: center;
 }
 .hdm-inspector-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.hdm-inspector-actions { display: flex; gap: 4px; align-items: center; }
+.hdm-inspector-btn {
+  width: 22px; height: 22px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: none; border-radius: 4px;
+  color: var(--text-tertiary); cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.hdm-inspector-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.hdm-inspector-btn svg { width: 14px; height: 14px; display: block; }
 .hdm-inspector-selector { display: none; }
 .hdm-group { padding: 14px 16px; border-bottom: 1px solid var(--border-lighter); }
 .hdm-group:last-child { border-bottom: none; }
@@ -1215,7 +1225,7 @@ body {
       <div class="pain-card">
         <div class="pain-icon">3</div>
         <h3>歧义酿恶果</h3>
-        <p>描述有歧义，AI "觉得"它懂了，结果目标区域没变，别的地方不知道啥时候被改了。</p>
+        <p>描述有歧义，AI "觉得"它懂了，结果目标区域没变，其他区域被改了。</p>
         <div class="pain-quote">"截图是 xxxx，用户说的是 xx，我应该按用户说的去执行。" — 原来那个位置叫"它"不叫"Ta"。</div>
       </div>
 
@@ -1229,7 +1239,7 @@ body {
       <div class="pain-card">
         <div class="pain-icon">5</div>
         <h3>AI 自作主张</h3>
-        <p>好不容易描述完了，AI 觉得"这样改可能更好"，结果改出来的跟你想要的完全不是一回事。</p>
+        <p>描述了，AI 觉得"这样改可能更好"，结果改出来的跟想要的完全不是一回事。</p>
         <div class="pain-quote">"我根据您的需求进行了优化…" — 谁让你优化的？</div>
       </div>
     </div>
@@ -1288,7 +1298,7 @@ body {
         <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
         <div>
           <h3>四套预设主题 + 任意 HEX 自定义换肤</h3>
-          <p>内置暮紫 / 深藏青 / 灰绿 / 暖棕四套主题；输入任意一个 HEX，自动派生整套协调色板（浅色 / 深色 / 渐变 / 柔和背景），刷新不丢失。</p>
+          <p>内置暮紫 / 深藏青 / 灰绿 / 暖棕四套主题；输入任意一个 HEX，自动派生整套协调色板，刷新不丢失。</p>
         </div>
       </div>
     </div>
@@ -1417,7 +1427,7 @@ body {
   <section id="workflow" class="section">
     <div class="section-label">WORKFLOW</div>
     <h2 class="section-title">四步完成一次差异标注</h2>
-    <p class="section-desc">从打开网页到导出报告，全程不需要写一行代码。点扩展图标或按 <kbd class="hdm-kbd">⌥</kbd>/<kbd class="hdm-kbd">Alt</kbd> + <kbd class="hdm-kbd">E</kbd>，工具栏在隐藏 → 唤醒球 → 完整三态间循环切换。</p>
+    <p class="section-desc">从打开网页到导出报告，全程不需要写一行代码。<br>点扩展图标或按 <kbd class="hdm-kbd">⌥</kbd>/<kbd class="hdm-kbd">Alt</kbd> + <kbd class="hdm-kbd">E</kbd>，工具栏在隐藏 → 唤醒球 → 完整三态间循环切换。</p>
 
     <div class="workflow-steps">
 
@@ -1479,6 +1489,14 @@ body {
               <div class="hdm-inspector-topline"></div>
               <div class="hdm-inspector-header">
                 <div class="hdm-inspector-title">元素编辑</div>
+                <div class="hdm-inspector-actions">
+                  <button class="hdm-inspector-btn" aria-label="收起">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+                  </button>
+                  <button class="hdm-inspector-btn" aria-label="关闭">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                  </button>
+                </div>
               </div>
               <div class="hdm-group">
                 <div class="hdm-group-header">
@@ -1594,11 +1612,8 @@ body {
                   <li><strong>内容编辑</strong>：双击改文案、改 &lt;a&gt; 链接、编辑 HTML、换背景图 / 图片</li>
                   <li><strong>页面内拖动</strong>：直接拖动元素，智能对齐，实时尺寸浮窗</li>
                   <li><strong>面板可折叠</strong>：编辑面板与工具栏均可最小化收起，不遮挡操作视线</li>
+                  <li><strong>字体系统</strong>：十余种中英文字体一键切换；输入自定义字体名即刻加入列表；选择时实时检测可用性，三态提示：绿＝字体可预览、黄＝预览不可用、蓝＝系统默认字体引导。</li>
                 </ul>
-              </div>
-              <div class="step2-guide-section">
-                <h4>字体系统</h4>
-                <p>十余种中英文字体一键切换；输入自定义字体名即刻加入列表；选择时实时检测可用性，三态提示：绿＝字体可预览、黄＝预览不可用、蓝＝系统默认字体引导。</p>
               </div>
               <div class="step2-guide-section">
                 <h4>拖动时出现的辅助线与尺寸提示</h4>
@@ -1705,7 +1720,6 @@ body {
             <span class="workflow-tag">编号 + CSS 选择器</span>
             <span class="workflow-tag">原始 vs 修改后 HTML</span>
             <span class="workflow-tag">已删除组件</span>
-            <span class="workflow-tag">逐行 Diff</span>
             <span class="workflow-tag">完整 JSON</span>
             <span class="workflow-tag">结构化 Diff</span>
           </div>
@@ -1713,7 +1727,7 @@ body {
             <div class="export-showcase">
               <div class="export-header">
                 <h3>Diff 导出报告（发给 AI 的版本）</h3>
-                <p>每个修改项包含：编号 · CSS 选择器 · 标签 · 精确修改值 · 原始 HTML · 修改后 HTML · 逐行 Diff · 给 AI 的评论。删除项单独成节，报告末尾附加完整 JSON。</p>
+                <p>每个修改/删除项包含：编号 · CSS 选择器 · 标签 · 精确修改值 · 原始 HTML · 修改后 HTML · 逐行 Diff · 给 AI 的评论。</p>
               </div>
               <div class="export-body">
                 <div class="export-item">
