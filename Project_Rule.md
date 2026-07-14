@@ -1,4 +1,4 @@
-# HTML Diff Marker - 项目开发规范
+# Mark2AI - 项目开发规范
 
 > **⚠️ 警告：这是本项目最高优先级的文件，每次启动任何代码开发任务前必须完整阅读。**
 >
@@ -387,7 +387,7 @@
 ```json
 {
   "manifest_version": 3,
-  "name": "HTML Diff Marker",
+  "name": "Mark2AI",
   "version": "1.0.0",
   "description": "在Chrome中标记HTML组件的修改，并生成diff文件供AI Agent迭代使用",
   "permissions": [
@@ -399,7 +399,7 @@
   ],
   "host_permissions": ["<all_urls>"],
   "action": {
-    "default_title": "HTML Diff Marker",
+    "default_title": "Mark2AI",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -739,4 +739,4 @@ main          ← 生产分支（稳定）
 
 **文档版本**：1.8
 **最后更新**：2026-07-11
-**适用项目**：HTML Diff Marker Chrome 扩展
+**适用项目**：Mark2AI Chrome 扩展

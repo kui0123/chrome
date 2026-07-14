@@ -1,4 +1,4 @@
-# HTML Diff Marker - Chrome 扩展
+# Mark2AI - Chrome 扩展
 
 > **当前版本: v2.0.0**
 
@@ -406,7 +406,7 @@ extension/
 **解决**：点击浏览器扩展图标，或使用快捷键 `Alt+E`（macOS `⌥+E`）；`Alt+"+"`（macOS `⌥+"+"`）可快速进入选择模式
 
 **问题**：想修改快捷键
-**解决**：访问 `chrome://extensions/shortcuts`，找到 HTML Diff Marker，点击快捷键输入框按下新的组合键即可自定义
+**解决**：访问 `chrome://extensions/shortcuts`，找到 Mark2AI，点击快捷键输入框按下新的组合键即可自定义
 
 **问题**：点击扩展图标没反应
 **解决**：确认当前页面是 http 或 https 页面，不是 chrome:// 等内部页面

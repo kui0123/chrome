@@ -1,5 +1,5 @@
 // ============================================================
-// HTML Diff Marker - Content Script
+// Mark2AI - Content Script
 // ============================================================
 (function() {
   'use strict';
@@ -82,6 +82,23 @@
   function uid() { return 'm_' + Math.random().toString(36).slice(2, 10); }
   function cssProp(k) { return k.replace(/([A-Z])/g, '-$1').toLowerCase(); }
   function escapeHtml(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function isInPluginUI(target) {
+    if (!target || !target.closest) return false;
+    return !!(target.closest('.html-diff-marker-toolbar') ||
+           target.closest('.html-diff-marker-inspector') ||
+           target.closest('.html-diff-marker-multi-toolbar') ||
+           target.closest('.html-diff-marker-settings-panel') ||
+           target.closest('.html-diff-marker-modal-overlay') ||
+           target.closest('.html-diff-marker-toast-container') ||
+           target.closest('.html-diff-marker-badge') ||
+           target.closest('.html-diff-marker-resize-handle') ||
+           target.closest('.html-diff-marker-remove-badge') ||
+           target.closest('.html-diff-marker-group-wrap') ||
+           target.closest('.html-diff-marker-group-outline') ||
+           target.closest('.html-diff-marker-wake-btn') ||
+           target.closest('.html-diff-marker-size-display') ||
+           target.closest('.html-diff-marker-guide-line'));
+  }
   function hdmSetStyle(el, prop, value) {
     if (!el) return;
     var cssProperty = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
@@ -712,9 +729,7 @@
   // ================ 选择模式 ================
   function onHover(e) {
     if (!state.isSelecting) return;
-    if (e.target.closest('.html-diff-marker-toolbar') || e.target.closest('.html-diff-marker-inspector')) return;
-    if (e.target.closest('.html-diff-marker-multi-toolbar') || e.target.closest('.html-diff-marker-settings-panel')) return;
-    if (e.target.closest('.html-diff-marker-modal-overlay') || e.target.closest('.html-diff-marker-toast-container')) return;
+    if (isInPluginUI(e.target)) return;
     if (state.hoveredEl && state.hoveredEl !== e.target)
       state.hoveredEl.classList.remove('html-diff-marker-highlight-hover');
     state.hoveredEl = e.target;
@@ -722,9 +737,7 @@
   }
   function onClick(e) {
     if (!state.isSelecting) return;
-    if (e.target.closest('.html-diff-marker-toolbar') || e.target.closest('.html-diff-marker-inspector')) return;
-    if (e.target.closest('.html-diff-marker-multi-toolbar') || e.target.closest('.html-diff-marker-settings-panel')) return;
-    if (e.target.closest('.html-diff-marker-modal-overlay') || e.target.closest('.html-diff-marker-toast-container')) return;
+    if (isInPluginUI(e.target)) return;
     e.preventDefault(); e.stopPropagation();
     const el = e.target;
     el.classList.remove('html-diff-marker-highlight-hover');
@@ -1058,7 +1071,7 @@
 
   // ================ 标记管理 ================
   function markElement(el) {
-    if (!el || el.closest('.html-diff-marker-toolbar, .html-diff-marker-inspector')) return;
+    if (!el || isInPluginUI(el)) return;
     stopSelecting();
     const selector = buildSelector(el);
     const entry = {
@@ -1909,11 +1922,7 @@
     const t = e.target;
     if (!t) return;
     // 忽略工具栏和面板内的双击
-    if (t.closest('.html-diff-marker-toolbar') || t.closest('.html-diff-marker-inspector')) return;
-    if (t.closest('.html-diff-marker-multi-toolbar') || t.closest('.html-diff-marker-settings-panel')) return;
-    if (t.closest('.html-diff-marker-modal-overlay') || t.closest('.html-diff-marker-toast-container')) return;
-    // 忽略徽章、把手、删除角标
-    if (t.classList && (t.classList.contains('html-diff-marker-badge') || t.classList.contains('html-diff-marker-resize-handle') || t.classList.contains('html-diff-marker-remove-badge'))) return;
+    if (isInPluginUI(t)) return;
 
     // 查找被标记的元素（向上找有 html-diff-marker-selected 或 modified 类的元素）
     let markedEl = t.closest('.html-diff-marker-selected, .html-diff-marker-modified');
@@ -2603,7 +2612,6 @@
       hdmSetStyles(contentP, {
         margin: '0',
         fontSize: '13px',
-        color: 'var(--hdm-text-secondary)',
         lineHeight: '1.6'
       });
       body.appendChild(contentP);
@@ -2716,7 +2724,7 @@
       title: title || '确认',
       content: message,
       type: 'confirm',
-      confirmText: '确定',
+      confirmText: '确认删除',
       cancelText: '取消',
       onConfirm: function() { if (onConfirm) onConfirm(true); },
       onCancel: function() { if (onCancel) onCancel(false); }
@@ -3116,7 +3124,7 @@
 
     const title = document.createElement('div');
     title.className = 'html-diff-marker-toolbar-title';
-    title.textContent = 'HTML Diff Marker';
+    title.textContent = 'Mark2AI';
     header.appendChild(title);
 
     const windowCtrl = document.createElement('div');
@@ -3322,7 +3330,7 @@
     if (state.wakeBtn) { return; }
     const btn = document.createElement('div');
     btn.className = 'html-diff-marker-wake-btn';
-    btn.setAttribute('title', 'HTML Diff Marker - 点击显示工具栏');
+    btn.setAttribute('title', 'Mark2AI - 点击显示工具栏');
     insertSvgIcon(btn, '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>', { size: '18px' });
     btn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();

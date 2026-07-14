@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mark2AI V2.0 — 产品路演</title>
+<style>
+/* ================================================================
+   Mark2AI V2.0 产品路演页面
+   ================================================================ */
+
+/* ===== 全局重置与基础样式 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ================================================================
+   主题变量体系（默认暮紫）
+   ================================================================ */
+:root {
+  --theme-primary: #70649A;
+  --theme-primary-light: #8B7FB3;
+  --theme-primary-dark: #5A4F7D;
+  --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --theme-soft-bg: #F0EEF7;
+  --theme-soft-text: #5A4F7D;
+  --theme-count-text: #70649A;
+  --theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+
+  --text-primary: #1F2937;
+  --text-secondary: #4B5563;
+  --text-tertiary: #6B7280;
+  --text-disabled: #9CA3AF;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-tertiary: #F3F4F6;
+  --bg-hover: #F9FAFB;
+  --border: #D1D5DB;
+  --border-light: #E5E7EB;
+  --border-lighter: #F3F4F6;
+  --divider: #F3F4F6;
+
+  --success: #10B981;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --success-text: #065F46;
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-text: #92400E;
+  --error: #EF4444;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --error-text: #991B1B;
+  --info: #3B82F6;
+  --info-bg: #EFF6FF;
+  --info-border: #BFDBFE;
+  --info-text: #1E40AF;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+  --shadow-modal: 0 25px 50px -12px rgba(0,0,0,0.25);
+  --shadow-focus: 0 0 0 3px rgba(139,92,246,0.15);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 四套预设主题 */
+[data-roadshow-theme="deep-cyan"] {
+  --theme-primary: #211E55; --theme-primary-light: #3D3A75; --theme-primary-dark: #15133D;
+  --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+  --theme-soft-bg: #EDECF5; --theme-soft-text: #15133D; --theme-count-text: #211E55;
+  --theme-shadow: 0 2px 8px rgba(33,30,85,0.3);
+}
+[data-roadshow-theme="gray-green"] {
+  --theme-primary: #6A8372; --theme-primary-light: #8A9E8F; --theme-primary-dark: #526958;
+  --theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);
+  --theme-soft-bg: #EEF2EF; --theme-soft-text: #526958; --theme-count-text: #6A8372;
+  --theme-shadow: 0 2px 8px rgba(106,131,114,0.3);
+}
+[data-roadshow-theme="dusk-purple"] {
+  --theme-primary: #70649A; --theme-primary-light: #8B7FB3; --theme-primary-dark: #5A4F7D;
+  --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+  --theme-soft-bg: #F0EEF7; --theme-soft-text: #5A4F7D; --theme-count-text: #70649A;
+  --theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+}
+[data-roadshow-theme="warm-brown"] {
+  --theme-primary: #9E7A7A; --theme-primary-light: #B89595; --theme-primary-dark: #7E5E5E;
+  --theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);
+  --theme-soft-bg: #F5EFEF; --theme-soft-text: #7E5E5E; --theme-count-text: #9E7A7A;
+  --theme-shadow: 0 2px 8px rgba(158,122,122,0.3);
+}
+
+/* ================================================================
+   路演页面布局
+   ================================================================ */
+
+/* 顶部导航 */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px; background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px;
+}
+.top-nav-brand {
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.top-nav-brand .logo-dot {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--theme-gradient);
+}
+.top-nav-links { display: flex; gap: 28px; }
+.top-nav-links a {
+  font-size: 13px; color: var(--text-secondary); text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.top-nav-links a:hover { color: var(--theme-primary); }
+
+/* 主题切换 */
+.theme-switcher-bar {
+  display: flex; align-items: center; gap: 10px;
+}
+.theme-switcher-label {
+  font-size: 11px; color: var(--text-tertiary); margin-right: 2px;
+}
+.theme-dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  cursor: pointer; border: 2px solid transparent;
+  transition: all var(--transition-fast); box-shadow: var(--shadow-sm);
+}
+.theme-dot:hover { transform: scale(1.1); }
+.theme-dot.active { border-color: #fff; box-shadow: 0 0 0 2px var(--theme-primary); }
+.theme-dot[data-theme-target="deep-cyan"] { background: linear-gradient(135deg, #3D3A75, #211E55); }
+.theme-dot[data-theme-target="gray-green"] { background: linear-gradient(135deg, #8A9E8F, #6A8372); }
+.theme-dot[data-theme-target="dusk-purple"] { background: linear-gradient(135deg, #8B7FB3, #70649A); }
+.theme-dot[data-theme-target="warm-brown"] { background: linear-gradient(135deg, #B89595, #9E7A7A); }
+
+/* 主内容区 */
+.main-content {
+  padding-top: 56px;
+}
+
+/* ================================================================
+   Hero 区
+   ================================================================ */
+.hero {
+  text-align: center;
+  padding: 80px 40px 60px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute;
+  top: -30%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: var(--theme-gradient);
+  opacity: 0.06; border-radius: 50%; filter: blur(80px);
+}
+.hero-tag {
+  display: inline-block; padding: 4px 14px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+  font-size: 12px; font-weight: 600; border-radius: var(--radius-full);
+  margin-bottom: 20px; position: relative;
+}
+.hero h1 {
+  font-size: 48px; font-weight: 800; color: var(--text-primary);
+  margin-bottom: 16px; position: relative; letter-spacing: -1px;
+  background: var(--theme-gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero .tagline {
+  font-size: 18px; color: var(--text-secondary);
+  max-width: 580px; margin: 0 auto 12px; position: relative;
+  font-weight: 500;
+}
+.hero .sub-tagline {
+  font-size: 14px; color: var(--text-tertiary);
+  position: relative;
+}
+.hero .sub-tagline code {
+  font-size: 12px; background: var(--bg-tertiary);
+  padding: 2px 8px; border-radius: 4px;
+  font-family: "SF Mono", Menlo, monospace;
+  color: var(--theme-primary);
+}
+.hero-theme-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; margin-top: 28px; position: relative;
+}
+
+/* ================================================================
+   通用 Section
+   ================================================================ */
+.section {
+  max-width: 1080px; margin: 0 auto;
+  padding: 60px 40px;
+}
+.section-label {
+  font-size: 12px; font-weight: 600; color: var(--theme-primary);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.section-title {
+  font-size: 32px; font-weight: 800; color: var(--text-primary);
+  margin-bottom: 12px; letter-spacing: -0.5px;
+}
+.section-desc {
+  font-size: 15px; color: var(--text-secondary);
+  max-width: 640px; line-height: 1.7;
+}
+
+/* ================================================================
+   痛点区
+   ================================================================ */
+.pain-grid {
+  display: grid; grid-template-columns: 1fr; gap: 12px;
+  margin-top: 32px;
+}
+.pain-card {
+  background: #fff; border-radius: var(--radius-xl);
+  padding: 18px 24px; box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  border: 1px solid transparent;
+  display: flex; gap: 20px; align-items: center;
+}
+.pain-card:hover {
+  box-shadow: var(--shadow-lg); transform: translateX(4px);
+  border-color: var(--theme-soft-bg);
+}
+.pain-icon {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+}
+.pain-card-content { flex: 1; display: flex; gap: 24px; align-items: center; }
+.pain-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 2px; flex-shrink: 0; width: 80px;
+}
+.pain-card p {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  flex: 1;
+}
+.pain-quote {
+  flex-shrink: 0; width: 300px; padding: 8px 12px;
+  background: var(--bg-secondary); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-tertiary);
+  border-left: 3px solid var(--theme-primary);
+  font-style: italic;
+}
+
+/* ================================================================
+   差异化对比区
+   ================================================================ */
+.diff-matrix {
+  margin-top: 32px;
+  background: #fff; border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.diff-matrix-row {
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1.1fr;
+  border-bottom: 1px solid var(--border-lighter);
+}
+.diff-matrix-row:last-child { border-bottom: none; }
+.diff-matrix-cell {
+  padding: 14px 14px; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 2px; text-align: center;
+}
+.diff-matrix-row.header .diff-matrix-cell {
+  font-weight: 600; font-size: 11px; color: var(--text-tertiary);
+  background: var(--bg-secondary); text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.diff-matrix-row.header .diff-matrix-cell:first-child {
+  color: var(--text-secondary); align-items: flex-start;
+}
+.diff-matrix-cell:first-child {
+  font-weight: 500; color: var(--text-primary);
+  background: var(--bg-secondary);
+  align-items: flex-start; text-align: left;
+}
+.diff-matrix-row:not(.header) .diff-matrix-cell:not(:first-child) {
+  font-size: 12px;
+}
+.diff-matrix-col-title {
+  font-size: 12px; font-weight: 600; color: var(--text-primary);
+}
+.diff-matrix-col-sub {
+  font-size: 10px; color: var(--text-tertiary);
+  font-weight: 400; white-space: nowrap;
+}
+.diff-matrix-col-sub.our {
+  color: var(--theme-primary); font-weight: 500;
+}
+.diff-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.diff-check.yes {
+  background: var(--success-bg); color: var(--success);
+}
+.diff-check.no {
+  background: var(--bg-tertiary); color: var(--text-disabled);
+}
+.diff-check.partial {
+  background: var(--warning-bg); color: var(--warning);
+}
+
+.diff-card-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 16px; margin-top: 32px;
+}
+.diff-card {
+  background: #fff; border-radius: var(--radius-xl);
+  padding: 22px 24px; box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  border: 1px solid transparent;
+  display: flex; gap: 18px; align-items: flex-start;
+}
+.diff-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--theme-soft-bg);
+  transform: translateY(-2px);
+}
+.diff-card-icon {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+  background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.diff-card-body { flex: 1; }
+.diff-card-vs {
+  font-size: 10px; color: var(--text-tertiary); font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.diff-card-body h3 {
+  font-size: 14px; font-weight: 600; color: var(--text-tertiary);
+  margin-bottom: 8px; line-height: 1.5;
+  text-decoration: line-through; text-decoration-color: var(--error);
+  opacity: 0.7;
+}
+.diff-card-body .solution {
+  font-size: 14px; color: var(--text-primary); line-height: 1.6;
+  font-weight: 600;
+}
+.diff-card-body .solution strong {
+  color: var(--theme-primary); font-weight: 700;
+}
+
+.diff-kicker {
+  margin-top: 32px; padding: 28px 32px;
+  background: var(--theme-gradient); color: #fff;
+  border-radius: var(--radius-xl);
+  display: flex; gap: 24px; align-items: center;
+}
+.diff-kicker-icon {
+  flex-shrink: 0; width: 56px; height: 56px;
+  border-radius: 14px; background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800;
+}
+.diff-kicker h3 {
+  font-size: 18px; font-weight: 700; margin-bottom: 4px;
+}
+.diff-kicker p {
+  font-size: 13px; opacity: 0.9; line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .diff-card-grid { grid-template-columns: 1fr; }
+  .diff-matrix-row { grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; font-size: 11px; }
+  .diff-matrix-cell { padding: 10px 12px; font-size: 11px; }
+  .diff-kicker { flex-direction: column; text-align: center; }
+}
+
+/* ================================================================
+   工作流区
+   ================================================================ */
+.workflow-steps {
+  display: flex; flex-direction: column; gap: 0;
+  margin-top: 40px;
+}
+.workflow-step {
+  display: flex; gap: 40px; align-items: flex-start;
+  padding: 40px 0; border-bottom: 1px solid var(--border-lighter);
+  position: relative;
+}
+.workflow-step:last-child { border-bottom: none; }
+.workflow-step-num {
+  flex-shrink: 0; width: 48px; height: 48px;
+  border-radius: 14px; background: var(--theme-gradient);
+  color: #fff; font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--theme-shadow);
+}
+.workflow-step-content { flex: 1; }
+.workflow-step-content h3 {
+  font-size: 22px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.workflow-step-content p {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+  margin-bottom: 16px;
+}
+.workflow-step-demo {
+  background: #fff; border-radius: var(--radius-xl);
+  padding: 28px; box-shadow: var(--shadow-sm);
+  margin-top: 16px;
+}
+.workflow-step-tags {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+}
+.workflow-tag {
+  font-size: 11px; padding: 3px 10px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+  border-radius: var(--radius-full); font-weight: 500;
+}
+
+/* ================================================================
+   亮点特性区
+   ================================================================ */
+.feature-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  margin-top: 40px;
+}
+.feature-card {
+  background: #fff; border-radius: var(--radius-xl);
+  padding: 28px; box-shadow: var(--shadow-sm);
+  display: flex; gap: 20px; align-items: flex-start;
+  transition: all var(--transition-base);
+}
+.feature-card:hover { box-shadow: var(--shadow-md); }
+.feature-icon {
+  flex-shrink: 0; width: 40px; height: 40px;
+  border-radius: 10px; background: var(--theme-gradient);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700;
+}
+.feature-icon svg { width: 18px; height: 18px; fill: #fff; }
+.feature-card h3 {
+  font-size: 16px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.feature-card p {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+}
+
+/* ================================================================
+   交互体验区
+   ================================================================ */
+.demo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+  margin-top: 40px;
+}
+.demo-card {
+  background: #fff; border-radius: var(--radius-xl);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.demo-card-header {
+  padding: 16px 24px; border-bottom: 1px solid var(--border-light);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.demo-card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.demo-card-tag {
+  font-size: 10px; padding: 2px 8px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+  border-radius: var(--radius-xs); font-weight: 500;
+}
+.demo-card-body { padding: 28px; display: flex; gap: 28px; align-items: flex-start; }
+.demo-card-body .demo-info { flex: 1; }
+.demo-card-body .demo-info h4 {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.demo-card-body .demo-info p {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.7;
+  margin-bottom: 6px;
+}
+.demo-card-body .demo-info ul { list-style: none; padding: 0; }
+.demo-card-body .demo-info li {
+  font-size: 12px; color: var(--text-secondary);
+  padding: 3px 0; padding-left: 16px; position: relative;
+}
+.demo-card-body .demo-info li::before {
+  content: ''; position: absolute; left: 0; top: 10px;
+  width: 6px; height: 6px; background: var(--theme-primary);
+  border-radius: 50%; opacity: 0.6;
+}
+
+/* ================================================================
+   导出成果区
+   ================================================================ */
+.export-showcase {
+  margin-top: 40px;
+  background: #fff; border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.export-header {
+  padding: 20px 28px; background: var(--theme-gradient);
+  color: #fff; height: 88px;
+}
+.export-header h3 { font-size: 16px; font-weight: 600; color: #ffffff; }
+.export-header p { font-size: 12px; opacity: 0.85; margin-top: 4px; color: #d9dfe7; font-weight: 600; }
+.export-body { padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.export-item {
+  padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-md);
+}
+.export-item h4 {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.export-item h4 .badge {
+  font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+}
+.export-item pre {
+  font-family: "SF Mono", Menlo, monospace; font-size: 11px;
+  color: var(--text-secondary); line-height: 1.6;
+  background: #fff; padding: 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-lighter); overflow-x: auto;
+  white-space: pre-wrap;
+}
+.export-item .desc {
+  font-size: 12px; color: var(--text-tertiary); margin-top: 8px;
+}
+
+/* ================================================================
+   底部 CTA
+   ================================================================ */
+.cta {
+  text-align: center; padding: 80px 40px;
+  background: var(--theme-gradient); color: #fff;
+  border-radius: var(--radius-xl); margin: 60px 40px;
+}
+.cta h2 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+.cta p { font-size: 15px; opacity: 0.85; margin-bottom: 28px; }
+.cta-btn {
+  display: inline-block; padding: 14px 36px;
+  background: #fff; color: var(--theme-primary);
+  font-size: 15px; font-weight: 600; border-radius: var(--radius-full);
+  text-decoration: none; transition: all var(--transition-fast);
+  box-shadow: var(--shadow-lg);
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+
+/* ================================================================
+   页面底部
+   ================================================================ */
+.page-footer {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-tertiary); font-size: 12px;
+  border-top: 1px solid var(--border-light); margin-top: 20px;
+}
+.page-footer strong { color: var(--text-secondary); }
+
+/* ================================================================
+   工具栏 V5 组件样式
+   ================================================================ */
+.hdm-toolbar {
+  width: 300px; background: #fff; border-radius: 12px;
+  overflow: hidden; box-shadow: var(--shadow-lg); font-family: inherit;
+}
+.hdm-toolbar-header {
+  background: var(--theme-gradient); padding: 14px 16px 12px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  color: #fff;
+}
+.hdm-toolbar-title { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
+.hdm-toolbar-window-ctrl { display: flex; gap: 6px; }
+.hdm-ctrl-btn {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); border: none; color: #fff;
+  font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; transition: background var(--transition-fast);
+}
+.hdm-ctrl-btn:hover { background: rgba(255,255,255,0.3); }
+.hdm-toolbar-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.hdm-btn-row { display: flex; gap: 8px; }
+.hdm-action-btn {
+  flex: 1; height: 34px; border: 1px solid var(--border-light);
+  border-radius: 6px; background: #fff; font-size: 12px;
+  font-weight: 500; color: var(--text-primary); cursor: pointer;
+  transition: all var(--transition-fast); font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; padding: 0 8px;
+}
+.hdm-action-btn:hover { background: var(--bg-hover); border-color: var(--border); }
+.hdm-action-btn.active {
+  background: var(--theme-primary); border-color: var(--theme-primary); color: #fff;
+}
+.hdm-action-btn.danger { color: var(--error); border-color: var(--error-border); }
+.hdm-export-row { display: flex; gap: 8px; align-items: center; }
+.hdm-side-btn {
+  width: 36px; height: 40px; border: 1.5px solid var(--border);
+  border-radius: 6px; background: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition-fast); flex-shrink: 0; color: var(--text-secondary);
+}
+.hdm-side-btn:hover {
+  border-color: var(--theme-primary-light); color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+}
+.hdm-side-btn svg { width: 14px; height: 14px; stroke-width: 2; }
+.hdm-export-btn {
+  flex: 1; height: 40px; border: 1.5px solid var(--border);
+  border-radius: 6px; background: #fff; font-size: 13px;
+  font-weight: 500; color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all var(--transition-fast); font-family: inherit;
+}
+.hdm-export-btn:hover { border-color: var(--theme-primary-light); color: var(--theme-primary); }
+.hdm-export-btn svg { width: 14px; height: 14px; stroke-width: 2; }
+.hdm-toolbar-footer {
+  padding: 8px 14px; background: #fafafa;
+  border-top: 1px solid var(--border-lighter);
+  font-size: 11px; color: var(--text-tertiary);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.hdm-shortcut { display: flex; align-items: center; gap: 4px; }
+.hdm-kbd {
+  display: inline-block; padding: 1px 5px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 4px;
+  font-size: 10px; font-family: "SF Mono", Menlo, monospace;
+  color: var(--text-secondary); line-height: 1.4;
+}
+.hdm-counts { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.hdm-counts b { color: var(--theme-count-text); font-weight: 600; }
+.hdm-counts-sep { color: #d1d5db; }
+
+/* ================================================================
+   编辑面板 V5 组件样式
+   ================================================================ */
+.hdm-inspector {
+  width: 340px; background: #fff; border-radius: 10px;
+  overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  font-family: inherit; max-height: 620px; overflow-y: auto;
+}
+.hdm-inspector-topline { height: 3px; background: var(--theme-primary); }
+.hdm-inspector-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border-lighter);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.hdm-inspector-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.hdm-inspector-selector { display: none; }
+.hdm-group { padding: 14px 16px; border-bottom: 1px solid var(--border-lighter); }
+.hdm-group:last-child { border-bottom: none; }
+.hdm-group-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.hdm-group-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.hdm-reset-btn {
+  font-size: 11px; color: var(--theme-primary);
+  background: var(--theme-soft-bg); border: none;
+  padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  font-family: inherit; transition: background var(--transition-fast);
+}
+.hdm-reset-btn:hover { background: #e9e4f3; }
+.hdm-unit-toggle { display: flex; gap: 6px; align-items: center; }
+.hdm-unit-btn {
+  font-size: 10px; padding: 3px 8px;
+  border: 1px solid var(--border-light); border-radius: 4px;
+  background: #fff; color: var(--text-tertiary); cursor: pointer; font-family: inherit;
+}
+.hdm-unit-btn.active { background: var(--theme-primary); border-color: var(--theme-primary); color: #fff; }
+.hdm-slider-row { display: flex; flex-direction: column; gap: 6px; padding: 6px 0; }
+.hdm-slider-label-row {
+  display: flex; justify-content: space-between; align-items: center; font-size: 12px;
+}
+.hdm-slider-label { color: var(--text-tertiary); }
+.hdm-slider-value {
+  font-weight: 500; color: var(--text-primary);
+  font-variant-numeric: tabular-nums; font-family: "SF Mono", Menlo, monospace;
+  cursor: text; padding: 1px 4px; border-radius: 3px;
+  transition: background var(--transition-fast);
+}
+.hdm-slider-value:hover { background: var(--bg-tertiary); }
+.hdm-slider-track {
+  height: 4px; background: #e5e7eb; border-radius: 2px;
+  position: relative; cursor: pointer;
+}
+.hdm-slider-fill { height: 100%; background: var(--theme-primary); border-radius: 2px; }
+.hdm-slider-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 16px; height: 16px; background: #fff;
+  border: 2px solid var(--theme-primary); border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15); cursor: pointer;
+}
+.hdm-input-row { margin-bottom: 10px; }
+.hdm-input-row:last-child { margin-bottom: 0; }
+.hdm-input-label {
+  display: block; font-size: 11px; font-weight: 500;
+  color: var(--text-secondary); margin-bottom: 5px;
+}
+.hdm-text-input {
+  width: 100%; height: 32px; padding: 0 10px;
+  border: 1px solid var(--border-light); border-radius: 6px;
+  font-size: 12px; font-family: inherit; color: var(--text-primary);
+  background: #fff; transition: all var(--transition-fast); outline: none;
+}
+.hdm-text-input:focus { border-color: var(--theme-primary); box-shadow: var(--shadow-focus); }
+.hdm-text-input.mono { font-family: "SF Mono", Menlo, monospace; font-size: 11px; }
+.hdm-prop-row { margin-bottom: 12px; }
+.hdm-prop-row:last-child { margin-bottom: 0; }
+.hdm-prop-label {
+  font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  margin-bottom: 5px; display: block;
+}
+.hdm-prop-control { display: flex; gap: 6px; align-items: center; }
+.hdm-prop-control .hdm-text-input { flex: 1; height: 30px; }
+.hdm-color-picker {
+  width: 30px; height: 30px; border: 1px solid var(--border-light);
+  border-radius: 4px; position: relative; cursor: pointer;
+  overflow: hidden; flex-shrink: 0;
+}
+.hdm-color-picker::before {
+  content: ''; position: absolute; inset: 3px;
+  border-radius: 3px; background: var(--theme-primary);
+}
+.hdm-color-picker:hover { border-color: var(--theme-primary); }
+.hdm-prop-reset {
+  width: 28px; height: 28px; background: var(--theme-soft-bg);
+  border: 1px solid transparent; border-radius: 4px;
+  color: var(--theme-primary); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--transition-fast);
+}
+.hdm-prop-reset:hover { background: #e9e4f3; color: var(--theme-primary-dark); }
+.hdm-select {
+  flex: 1; height: 30px; padding: 0 28px 0 10px;
+  border: 1px solid var(--border-light); border-radius: 4px;
+  font-size: 11px; font-family: inherit; color: var(--text-primary);
+  background: #fff; appearance: none; cursor: pointer; outline: none;
+}
+.hdm-select:focus { border-color: var(--theme-primary); box-shadow: var(--shadow-focus); }
+.hdm-select-wrap { flex: 1; position: relative; }
+.hdm-select-wrap::after {
+  content: ''; position: absolute; right: 10px; top: 50%;
+  width: 8px; height: 8px;
+  border-right: 1.5px solid var(--text-tertiary);
+  border-bottom: 1.5px solid var(--text-tertiary);
+  transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+.hdm-add-font-btn {
+  width: 28px; height: 28px; background: var(--success-bg);
+  border: 1px solid var(--success-border); border-radius: 4px;
+  color: var(--success); font-size: 16px; font-weight: bold;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--transition-fast);
+}
+.hdm-add-font-btn:hover { background: #D1FAE5; }
+.hdm-style-stats {
+  margin-top: 10px; padding: 8px 10px;
+  background: var(--theme-soft-bg); color: var(--theme-soft-text);
+  border-radius: 4px; font-size: 11px; font-weight: 500; text-align: center;
+}
+.hdm-inspector-footer {
+  padding: 12px 16px; background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+  display: flex; gap: 10px;
+}
+.hdm-footer-btn {
+  height: 38px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; border: none;
+  transition: all var(--transition-fast);
+  display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; padding: 0 12px;
+}
+.hdm-footer-btn.delete {
+  flex: 1; background: #fff; color: var(--error); border: 1px solid var(--error-border);
+}
+.hdm-footer-btn.delete:hover { background: var(--error-bg); }
+.hdm-footer-btn.save {
+  flex: 1.2; background: var(--theme-gradient); color: #fff;
+  box-shadow: var(--theme-shadow);
+}
+.hdm-footer-btn.save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(112,100,154,0.4); }
+
+/* ================================================================
+   元素标记视觉
+   ================================================================ */
+.hdm-mark-demo {
+  width: 260px; height: 180px; background: #f9fafb;
+  border: 1px dashed var(--border-light); border-radius: 6px;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-tertiary);
+}
+.hdm-mark-element {
+  position: absolute; left: 60px; top: 50px;
+  width: 140px; height: 80px; background: #fff;
+  border: 2px solid var(--theme-primary); border-radius: 4px;
+}
+.hdm-mark-handle {
+  position: absolute; width: 8px; height: 8px;
+  background: #fff; border: 1.5px solid var(--theme-primary);
+  border-radius: 2px; z-index: 2;
+}
+.hdm-mark-handle.tl { top: -5px; left: -5px; cursor: nwse-resize; }
+.hdm-mark-handle.tr { top: -5px; right: -5px; cursor: nesw-resize; }
+.hdm-mark-handle.bl { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.hdm-mark-handle.br { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.hdm-mark-handle.t { top: -5px; left: calc(50% - 4px); cursor: ns-resize; }
+.hdm-mark-handle.b { bottom: -5px; left: calc(50% - 4px); cursor: ns-resize; }
+.hdm-mark-handle.l { top: calc(50% - 4px); left: -5px; cursor: ew-resize; }
+.hdm-mark-handle.r { top: calc(50% - 4px); right: -5px; cursor: ew-resize; }
+.hdm-mark-remove {
+  position: absolute; top: -9px; left: -9px;
+  width: 18px; height: 18px; background: var(--error); color: #fff;
+  border-radius: 50%; font-size: 10px; font-weight: bold;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(239,68,68,0.3); z-index: 3;
+}
+.hdm-mark-badge {
+  position: absolute; top: -11px; right: -11px;
+  width: 24px; height: 24px; background: var(--theme-primary); color: #fff;
+  border-radius: 50%; font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18); z-index: 10;
+}
+
+/* 页面内拖拽 + 对齐辅助线 + 尺寸浮窗示意 */
+.hdm-drag-target {
+  position: absolute; left: 36px; top: 46px;
+  width: 84px; height: 54px; background: #fff;
+  border: 2px solid var(--theme-primary); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-secondary); z-index: 3;
+}
+.hdm-drag-ref {
+  position: absolute; left: 126px; top: 90px;
+  width: 64px; height: 40px; background: #fff;
+  border: 1px dashed var(--border); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--text-tertiary); z-index: 2;
+}
+.hdm-align-guide {
+  position: absolute; background: var(--error); opacity: 0.75; z-index: 4;
+}
+.hdm-align-guide.h { height: 1px; left: 16px; right: 16px; top: 74px; }
+.hdm-align-guide.v { width: 1px; top: 16px; bottom: 16px; left: 110px; }
+.hdm-size-float {
+  position: absolute; left: 122px; top: 42px;
+  padding: 2px 6px; background: var(--bg-primary);
+  border: 1px solid var(--border-light); border-radius: var(--radius-xs);
+  font-size: 10px; color: var(--text-primary);
+  box-shadow: var(--shadow-sm); z-index: 5;
+}
+.hdm-drag-demo {
+  width: 220px; height: 160px;
+}
+
+/* ================================================================
+   设置面板
+   ================================================================ */
+.hdm-settings-panel {
+  width: 260px; background: #fff; border-radius: 10px;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border-light);
+  overflow: hidden; font-family: inherit;
+}
+.hdm-settings-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--border-lighter);
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.hdm-settings-header svg { width: 14px; height: 14px; color: var(--text-tertiary); }
+.hdm-switch-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 16px; height: 44px; border-bottom: 1px solid var(--border-lighter);
+}
+.hdm-switch-row:last-child { border-bottom: none; }
+.hdm-switch-label { font-size: 13px; color: var(--text-primary); }
+.hdm-switch {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: #e5e7eb; position: relative; cursor: pointer;
+  transition: background var(--transition-base); flex-shrink: 0;
+}
+.hdm-switch.on { background: var(--theme-primary); }
+.hdm-switch-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; background: #fff; border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform var(--transition-base);
+}
+.hdm-switch.on .hdm-switch-thumb { transform: translateX(20px); }
+.hdm-theme-section {
+  background: #fafafa; border-top: 1px solid var(--border-lighter);
+  padding: 12px 16px;
+}
+.hdm-theme-section-title {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;
+}
+.hdm-theme-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+}
+.hdm-theme-card {
+  background: #fff; border: 1.5px solid var(--border-light);
+  border-radius: 8px; overflow: hidden; cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.hdm-theme-card:hover { border-color: var(--border); }
+.hdm-theme-card.active { border-color: var(--theme-primary); background: var(--theme-soft-bg); }
+.hdm-theme-preview { height: 32px; border-radius: 6px 6px 0 0; }
+.hdm-theme-name { font-size: 11px; font-weight: 500; color: var(--text-primary); padding: 6px 8px 2px; }
+.hdm-theme-hex { font-size: 10px; font-family: "SF Mono", monospace; color: var(--text-tertiary); padding: 0 8px 8px; }
+.hdm-custom-color-row { display: flex; gap: 8px; align-items: center; }
+.hdm-custom-color-preview {
+  width: 30px; height: 30px; border-radius: 4px;
+  border: 1px solid var(--border-light); flex-shrink: 0;
+}
+.hdm-custom-color-input {
+  flex: 1; height: 30px; padding: 0 8px;
+  border: 1px solid var(--border-light); border-radius: 4px;
+  font-size: 11px; font-family: "SF Mono", monospace;
+  outline: none; background: #fff;
+}
+.hdm-custom-color-input:focus { border-color: var(--theme-primary); }
+.hdm-custom-color-apply {
+  width: 28px; height: 28px; background: var(--theme-primary);
+  color: #fff; border: none; border-radius: 4px; cursor: pointer;
+  font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hdm-custom-color-input.invalid {
+  border-color: var(--error);
+  animation: hdm-shake 0.3s;
+}
+@keyframes hdm-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* ================================================================
+   Toast & 弹窗
+   ================================================================ */
+.hdm-toast-group { display: flex; flex-direction: column; gap: 8px; }
+.hdm-toast {
+  width: 300px; padding: 10px 14px; border-radius: 6px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-family: inherit; position: relative;
+}
+.hdm-toast::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; border-radius: 6px 0 0 6px;
+}
+.hdm-toast-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.hdm-toast-text { flex: 1; }
+.hdm-toast--success { background: var(--success-bg); color: var(--success-text); }
+.hdm-toast--success::before { background: var(--success); }
+.hdm-toast--success .hdm-toast-icon { color: var(--success); }
+.hdm-toast--warning { background: var(--warning-bg); color: var(--warning-text); }
+.hdm-toast--warning::before { background: var(--warning); }
+.hdm-toast--warning .hdm-toast-icon { color: var(--warning); }
+
+.hdm-modal-demo {
+  position: relative; width: 400px; height: 300px;
+  background: #f0f0f0; border-radius: 8px; overflow: hidden;
+}
+.hdm-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+}
+.hdm-modal {
+  width: 320px; background: #fff; border-radius: 12px;
+  overflow: hidden; box-shadow: var(--shadow-modal);
+  font-family: inherit; animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.hdm-modal-header {
+  background: var(--theme-gradient); padding: 14px 20px;
+  color: #fff; font-size: 14px; font-weight: 600;
+}
+.hdm-modal-body { padding: 20px; font-size: 13px; color: var(--text-primary); line-height: 1.6; }
+.hdm-modal-footer {
+  padding: 12px 20px; background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.hdm-modal-btn {
+  height: 32px; padding: 0 16px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  border: none; font-family: inherit; transition: all var(--transition-fast);
+  display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; flex-shrink: 0;
+}
+.hdm-modal-btn.cancel {
+  background: #fff; color: var(--text-secondary); border: 1px solid var(--border);
+}
+.hdm-modal-btn.cancel:hover { background: var(--bg-hover); }
+.hdm-modal-btn.confirm { background: var(--theme-gradient); color: #fff; }
+.hdm-modal-btn.confirm:hover { opacity: 0.9; }
+
+/* 多选工具栏 */
+.hdm-multi-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; background: #fff;
+  border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+.hdm-multi-btn {
+  height: 28px; padding: 0 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  border: none; font-family: inherit; transition: all var(--transition-fast);
+  display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; flex-shrink: 0;
+}
+.hdm-multi-btn.primary { background: var(--theme-gradient); color: #fff; }
+.hdm-multi-btn.secondary { background: #fff; color: var(--text-secondary); border: 1px solid var(--border); }
+.hdm-multi-btn.secondary:hover { background: var(--bg-hover); }
+.hdm-multi-btn.danger { background: #fff; color: var(--error); border: 1px solid var(--error-border); }
+.hdm-multi-btn.danger:hover { background: var(--error-bg); }
+.hdm-multi-btn.ghost { background: transparent; color: var(--text-tertiary); }
+.hdm-multi-btn.ghost:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.hdm-multi-count {
+  font-size: 11px; color: var(--text-tertiary);
+  padding-left: 4px; border-left: 1px solid var(--border-light); margin-left: 4px;
+}
+.hdm-multi-count b { color: var(--theme-primary); font-weight: 500; }
+
+/* ================================================================
+   响应式
+   ================================================================ */
+@media (max-width: 900px) {
+  .pain-grid, .diff-grid, .feature-grid, .demo-grid, .export-body {
+    grid-template-columns: 1fr;
+  }
+  .hero h1 { font-size: 36px; }
+  .section { padding: 40px 24px; }
+  .top-nav { padding: 0 20px; }
+  .top-nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="logo-dot"></div>
+    Mark2AI
+  </div>
+  <div class="top-nav-links">
+    <a href="#pain">痛点</a>
+    <a href="#features">亮点</a>
+    <a href="#diff">差异化</a>
+    <a href="#workflow">工作流</a>
+    <a href="#demo">体验</a>
+  </div>
+</nav>
+
+<main class="main-content">
+
+  <!-- ================================================================
+       Hero
+       ================================================================ -->
+  <section class="hero">
+    <span class="hero-tag">2026 · V2.0</span>
+    <h1>让 AI 听懂你的修改</h1>
+    <p class="tagline">不用翻代码，不用写 Prompt，点一下，改一下，一键发给 AI。</p>
+    <p class="sub-tagline">
+      一键标记 · 调整预览 · 结构化 Diff · 精准实现
+    </p>
+    <div class="hero-theme-bar">
+      <div class="theme-dot active" data-theme-target="dusk-purple" title="暮紫"></div>
+      <div class="theme-dot" data-theme-target="deep-cyan" title="深藏青"></div>
+      <div class="theme-dot" data-theme-target="gray-green" title="灰绿"></div>
+      <div class="theme-dot" data-theme-target="warm-brown" title="暖棕"></div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       痛点
+       ================================================================ -->
+  <section id="pain" class="section">
+    <div class="section-label">PAIN POINTS</div>
+    <h2 class="section-title">AI 生成的网页，修改比做难</h2>
+    <p class="section-desc">五个场景，总有一个让你崩溃过。</p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">1</div>
+        <h3>代码看不懂</h3>
+        <p>AI 给了你一个网页，想微调一下样式。打开代码一看，上千行 HTML/CSS，只能改改文案，元素样式的代码根本看不懂。</p>
+        <div class="pain-quote">"那个 button 的 class 叫 btn-primary，改了会不会影响别的按钮？"</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-icon">2</div>
+        <h3>描述说不准</h3>
+        <p>截图给 AI，想调整某个区域，却叫不准它的名称，也描述不清想要的颜色和尺寸。</p>
+        <div class="pain-quote">"那个稍微大点儿，这个再弄好看点儿…" — AI 烧了海量 Token 来试图理解，最终结果只能摸奖。</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-icon">3</div>
+        <h3>歧义酿恶果</h3>
+        <p>描述有歧义，AI "觉得"它懂了，结果目标区域没变，别的地方不知道啥时候被改了。</p>
+        <div class="pain-quote">"截图是 xxxx，用户说的是 xx，我应该按用户说的去执行。" — 原来那个位置叫"它"不叫"Ta"。</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-icon">4</div>
+        <h3>改得多很苦</h3>
+        <p>10 个元素要调整，建个记事本一条一条写？截图圈一堆红框，最后一起反馈？累。</p>
+        <div class="pain-quote">第 3 条写一半，发现前面两条又不精确了。</div>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-icon">5</div>
+        <h3>AI 自作主张</h3>
+        <p>好不容易描述完了，AI 觉得"这样改可能更好"，结果改出来的跟你想要的完全不是一回事。</p>
+        <div class="pain-quote">"我根据您的需求进行了优化…" — 谁让你优化的？</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       亮点特性
+       ================================================================ -->
+  <section id="features" class="section">
+    <div class="section-label">HIGHLIGHTS</div>
+    <h2 class="section-title">为 AI 协作而生</h2>
+    <p class="section-desc">每一个细节，都是为了让"人标记，AI 执行"这件事更顺畅。</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">11</div>
+        <div>
+          <h3>11 个样式属性，精确到像素</h3>
+          <p>背景色、文本色、字体、字重、字号、内边距、外边距、圆角、边框、显示方式、透明度。拖一下滑块，精确到 px 的值直接发给 AI，不用描述"大一点""好看一点"。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
+        <div>
+          <h3>给 AI 留评论，零歧义</h3>
+          <p>每个标记可以写一段"给 AI 的评论"，比如"这个按钮太淡了，改成主题色"。Diff 导出时一并发给 AI，不用在聊天里重复解释。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <div>
+          <h3>四套主题 + 自定义，调完即所见</h3>
+          <p>暮紫、深藏青、灰绿、暖棕，一键切换。输入 HEX 自定义主题色，实时预览效果。调好再发给 AI，不用猜 AI 会理解成什么颜色。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.86L17.59 12 12 18.14 6.41 12 12 5.86z"/></svg></div>
+        <div>
+          <h3>纯前端，不上传不留痕</h3>
+          <p>所有计算在浏览器本地完成，不联网、不上传、不留痕。你的网页内容不会离开你的设备，发给 AI 的只是你选中的 Diff 报告。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 16c1.66 0 2.99-1.34 2.99-3S13.66 10 12 10c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-5.3-3c0 3.73 2.95 6.79 6.69 7.31l-.69.72h-11v-2h9.03l.66-.66C5.61 16.88 2 14.08 2 10.5c0-2.48 1.51-4.63 3.7-5.67l1.58.79C5.44 6.62 4 8.66 4 10.5zm10.6 0c0-3.73-2.95-6.79-6.69-7.31l.69-.72h11v2h-9.03l-.66.66C18.39 7.12 22 9.92 22 13.5c0 2.48-1.51 4.63-3.7 5.67l-1.58-.79C18.56 17.38 20 15.34 20 13.5z"/></svg></div>
+        <div>
+          <h3>看到好设计，一键变成代码</h3>
+          <p>看到别人的页面上某个按钮/布局做得好？直接在浏览器里选中调整，生成精确到像素的 Diff 发给 AI，让 AI 帮你实现。不用猜颜色值、不用量尺寸。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">&lt;/&gt;</div>
+        <div>
+          <h3>不止改样式，改结构也行</h3>
+          <p>双击元素直接改文案；编辑面板可一键修改 <code>&lt;a&gt;</code> 链接地址；还能直接编辑元素 HTML。结构级改动会一并进入 Diff，AI 不会漏掉。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">图</div>
+        <div>
+          <h3>换背景图，选张本地图就行</h3>
+          <p>上传本地图片作为元素背景，contain 居中实时预览；对 <code>&lt;img&gt;</code> 元素还能直接替换 src 图片，导出时记录来源。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">存</div>
+        <div>
+          <h3>刷新页面甚至重开浏览器，标记还在</h3>
+          <p>标记与修改以 chrome.storage.local 持久化为主、sessionStorage 兜底。刷新、误触关闭甚至重开浏览器后自动恢复，不怕半路丢失。</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⌥</div>
+        <div>
+          <h3>Alt + “+”，三态工具栏随时唤醒</h3>
+          <p>隐藏 → 唤醒按钮 → 完整工具栏三态切换；按 Alt + “+”（Mac 显示 ⌥ + +）秒进选择模式。唤醒按钮一点即出，不打断当前工作流。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       差异化
+       ================================================================ -->
+  <section id="diff" class="section">
+    <div class="section-label">WHY US</div>
+    <h2 class="section-title">赛道里只有我们，把这件事做对了</h2>
+    <p class="section-desc">四类工具，各有各的用，但没有一个解决"把网页修改需求精准传达给 AI"的问题。</p>
+
+    <!-- 竞品矩阵 -->
+    <div class="diff-matrix">
+      <div class="diff-matrix-row header">
+        <div class="diff-matrix-cell">能力</div>
+        <div class="diff-matrix-cell">
+          <span class="diff-matrix-col-title">AI IDE</span>
+          <span class="diff-matrix-col-sub">Trae · Cursor</span>
+        </div>
+        <div class="diff-matrix-cell">
+          <span class="diff-matrix-col-title">截图标注</span>
+          <span class="diff-matrix-col-sub">CleanShot · 系统</span>
+        </div>
+        <div class="diff-matrix-cell">
+          <span class="diff-matrix-col-title">设计工具</span>
+          <span class="diff-matrix-col-sub">VisBug · CSS Peeper</span>
+        </div>
+        <div class="diff-matrix-cell">
+          <span class="diff-matrix-col-title" style="color:var(--theme-primary);">Mark2AI</span>
+          <span class="diff-matrix-col-sub our">我们</span>
+        </div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">浏览器里直接选元素</div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">可视化编辑样式</div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">多元素批量标记</div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">导出结构化 Diff</div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">面向 AI 协作的输出</div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+      </div>
+    </div>
+
+    <!-- 四类竞品深度拆解 -->
+    <div class="diff-card-grid">
+
+      <div class="diff-card">
+        <div class="diff-card-icon">💻</div>
+        <div class="diff-card-body">
+          <div class="diff-card-vs">VS AI IDE · Trae / Cursor / Bolt.new</div>
+          <h3>只能操作自己的项目，还不能拖拽</h3>
+          <p class="solution"><strong>别人的网站、线上页面、本地 HTML，甚至打不开源码的页面，都能标记。</strong>不仅能选，还能直接拖拽调整位置和大小。</p>
+        </div>
+      </div>
+
+      <div class="diff-card">
+        <div class="diff-card-icon">📸</div>
+        <div class="diff-card-body">
+          <div class="diff-card-vs">VS 截图标注 · CleanShot / Skitch</div>
+          <h3>圈了红框，AI 还是不知道改哪儿</h3>
+          <p class="solution"><strong>标记真实 DOM 元素，导出结构化 Diff。</strong>AI 收到精确指令，不是一张要"阅读理解"的图片。</p>
+        </div>
+      </div>
+
+      <div class="diff-card">
+        <div class="diff-card-icon">🔧</div>
+        <div class="diff-card-body">
+          <div class="diff-card-vs">VS 浏览器调试 · VisBug / DevTools</div>
+          <h3>能调样式，但调完就没了</h3>
+          <p class="solution"><strong>标记有编号、编辑有记录、一键导出 Diff。</strong>不是调试工具，是需求描述工具。</p>
+        </div>
+      </div>
+
+      <div class="diff-card">
+        <div class="diff-card-icon">📝</div>
+        <div class="diff-card-body">
+          <div class="diff-card-vs">VS 自己写 · 记事本 / 聊天框</div>
+          <h3>写 5 条需求，3 条不精确，1 条有歧义</h3>
+          <p class="solution"><strong>所见即所得 + 精确到像素的 Diff 报告。</strong>告诉 AI：每一处都是我要改的，严格执行。</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 核心定位收尾 -->
+    <div class="diff-kicker">
+      <div class="diff-kicker-icon">✦</div>
+      <div>
+        <h3>为 AI 协作而设计的网页标记助手</h3>
+        <p>别人做的是"给开发者用的调试工具"和"给设计师用的查看工具"，我们做的是"给 AI 用户的需求描述工具"。<br>在 AI 生成网页 → 人标记修改 → AI 精准执行 这条工作流里，填补中间那道"说不清楚"的 Gap。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       核心工作流
+       ================================================================ -->
+  <section id="workflow" class="section">
+    <div class="section-label">WORKFLOW</div>
+    <h2 class="section-title">四步完成一次差异标注</h2>
+    <p class="section-desc">从打开网页到导出报告，全程不需要写一行代码。</p>
+
+    <div class="workflow-steps">
+
+      <!-- Step 1: 标记 -->
+      <div class="workflow-step">
+        <div class="workflow-step-num">1</div>
+        <div class="workflow-step-content">
+          <h3>一键标记，自动编号</h3>
+          <p>点击任意网页元素，自动生成编号徽章和 8 方向拖拽把手。想标几个标几个，顺序清晰。</p>
+          <div class="workflow-step-tags">
+            <span class="workflow-tag">一键选中</span>
+            <span class="workflow-tag">自动编号</span>
+            <span class="workflow-tag">8 方向把手</span>
+            <span class="workflow-tag">一键删除</span>
+          </div>
+          <div class="workflow-step-demo">
+            <div style="display: flex; gap: 32px; align-items: center; justify-content: center;">
+              <div class="hdm-mark-demo">
+                标记元素示意
+                <div class="hdm-mark-element">
+                  <div class="hdm-mark-remove">×</div>
+                  <div class="hdm-mark-badge">1</div>
+                  <div class="hdm-mark-handle tl"></div>
+                  <div class="hdm-mark-handle t"></div>
+                  <div class="hdm-mark-handle tr"></div>
+                  <div class="hdm-mark-handle r"></div>
+                  <div class="hdm-mark-handle br"></div>
+                  <div class="hdm-mark-handle b"></div>
+                  <div class="hdm-mark-handle bl"></div>
+                  <div class="hdm-mark-handle l"></div>
+                </div>
+              </div>
+              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong style="color:var(--text-primary);">编号徽章</strong>：右上角主色圆形，点击选中</p>
+                <p><strong style="color:var(--text-primary);">删除角标</strong>：左上角红色圆形，点击删除</p>
+                <p><strong style="color:var(--text-primary);">拖拽把手</strong>：8 方向缩放，像素级精调</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: 编辑 -->
+      <div class="workflow-step">
+        <div class="workflow-step-num">2</div>
+        <div class="workflow-step-content">
+          <h3>滑块拖拽 + 页面内直接编辑，所见即所得</h3>
+          <p>打开编辑面板，11 个样式属性精确控制。拖滑块、双击输入、滚轮微调三种方式随意切换；也能直接在页面内拖拽元素，智能对齐参考线和尺寸浮窗实时辅助。</p>
+          <div class="workflow-step-tags">
+            <span class="workflow-tag">11 个样式属性</span>
+            <span class="workflow-tag">页面内拖拽 + 对齐辅助线</span>
+            <span class="workflow-tag">尺寸浮窗</span>
+            <span class="workflow-tag">px / % 双单位</span>
+            <span class="workflow-tag">实时预览</span>
+            <span class="workflow-tag">字体系统（预置 + 自定义 + 检测）</span>
+          </div>
+          <div class="workflow-step-demo">
+            <div style="display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
+              <div class="hdm-mark-demo hdm-drag-demo">
+                页面内拖拽示意
+                <div class="hdm-drag-target">目标</div>
+                <div class="hdm-drag-ref">参考</div>
+                <div class="hdm-align-guide h"></div>
+                <div class="hdm-align-guide v"></div>
+                <div class="hdm-size-float">↔ 120px</div>
+              </div>
+              <div class="hdm-inspector" style="width: 340px;">
+                <div class="hdm-inspector-topline"></div>
+                <div class="hdm-inspector-header">
+                  <div class="hdm-inspector-title">元素编辑</div>
+                </div>
+                <div class="hdm-group">
+                  <div class="hdm-group-header">
+                    <div class="hdm-group-title">位置调整</div>
+                    <button class="hdm-reset-btn">重置</button>
+                  </div>
+                  <div class="hdm-slider-row">
+                    <div class="hdm-slider-label-row">
+                      <span class="hdm-slider-label">X（左偏移）</span>
+                      <span class="hdm-slider-value">0px</span>
+                    </div>
+                    <div class="hdm-slider-track">
+                      <div class="hdm-slider-fill" style="width: 50%;"></div>
+                      <div class="hdm-slider-thumb" style="left: 50%;"></div>
+                    </div>
+                  </div>
+                  <div class="hdm-slider-row">
+                    <div class="hdm-slider-label-row">
+                      <span class="hdm-slider-label">Y（上偏移）</span>
+                      <span class="hdm-slider-value">0px</span>
+                    </div>
+                    <div class="hdm-slider-track">
+                      <div class="hdm-slider-fill" style="width: 50%;"></div>
+                      <div class="hdm-slider-thumb" style="left: 50%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="hdm-group">
+                  <div class="hdm-group-header">
+                    <div class="hdm-group-title">大小调整</div>
+                    <div class="hdm-unit-toggle">
+                      <button class="hdm-unit-btn active">px</button>
+                      <button class="hdm-unit-btn">%</button>
+                      <button class="hdm-reset-btn">重置</button>
+                    </div>
+                  </div>
+                  <div class="hdm-slider-row">
+                    <div class="hdm-slider-label-row">
+                      <span class="hdm-slider-label">宽度</span>
+                      <span class="hdm-slider-value">86px</span>
+                    </div>
+                    <div class="hdm-slider-track">
+                      <div class="hdm-slider-fill" style="width: 35%;"></div>
+                      <div class="hdm-slider-thumb" style="left: 35%;"></div>
+                    </div>
+                  </div>
+                  <div class="hdm-slider-row">
+                    <div class="hdm-slider-label-row">
+                      <span class="hdm-slider-label">高度</span>
+                      <span class="hdm-slider-value">36px</span>
+                    </div>
+                    <div class="hdm-slider-track">
+                      <div class="hdm-slider-fill" style="width: 20%;"></div>
+                      <div class="hdm-slider-thumb" style="left: 20%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="hdm-group">
+                  <div class="hdm-group-header">
+                    <div class="hdm-group-title">文字样式</div>
+                    <button class="hdm-reset-btn">重置</button>
+                  </div>
+                  <div class="hdm-slider-row">
+                    <div class="hdm-slider-label-row">
+                      <span class="hdm-slider-label">字号</span>
+                      <span class="hdm-slider-value">14px</span>
+                    </div>
+                    <div class="hdm-slider-track">
+                      <div class="hdm-slider-fill" style="width: 45%;"></div>
+                      <div class="hdm-slider-thumb" style="left: 45%;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="hdm-group">
+                  <div class="hdm-group-header">
+                    <div class="hdm-group-title">样式编辑</div>
+                    <button class="hdm-reset-btn">重置全部</button>
+                  </div>
+                  <div class="hdm-prop-row">
+                    <label class="hdm-prop-label">背景颜色</label>
+                    <div class="hdm-prop-control">
+                      <div class="hdm-color-picker"></div>
+                      <input type="text" class="hdm-text-input mono" value="#70649A">
+                      <button class="hdm-prop-reset">↺</button>
+                    </div>
+                  </div>
+                  <div class="hdm-prop-row">
+                    <label class="hdm-prop-label">字体</label>
+                    <div class="hdm-prop-control">
+                      <div class="hdm-select-wrap">
+                        <select class="hdm-select">
+                          <option>继承</option>
+                          <option>系统默认</option>
+                        </select>
+                      </div>
+                      <button class="hdm-add-font-btn">+</button>
+                      <button class="hdm-prop-reset">↺</button>
+                    </div>
+                  </div>
+                  <div class="hdm-style-stats">已修改 3 个样式属性</div>
+                </div>
+                <div class="hdm-inspector-footer">
+                  <button class="hdm-footer-btn delete">删除标记</button>
+                  <button class="hdm-footer-btn save">保存修改</button>
+                </div>
+              </div>
+              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8; max-width: 220px;">
+                <p><strong style="color:var(--text-primary);">位置</strong>：X/Y 滑块，±500px 范围</p>
+                <p><strong style="color:var(--text-primary);">大小</strong>：宽/高滑块，px / % 切换</p>
+                <p><strong style="color:var(--text-primary);">文字</strong>：字号滑块，8-72px</p>
+                <p><strong style="color:var(--text-primary);">样式</strong>：颜色、字体、粗细…11 个属性</p>
+                <p><strong style="color:var(--text-primary);">交互</strong>：拖 / 点 / 滚三种方式</p>
+
+                <div class="feature-card" style="margin-top: 20px; padding: 16px; gap: 12px;">
+                  <div class="feature-icon" style="width: 32px; height: 32px; border-radius: 8px; font-size: 14px;">字</div>
+                  <div>
+                    <h3 style="font-size: 14px; margin-bottom: 4px;">字体系统：预置 + 自定义 + 检测</h3>
+                    <p style="font-size: 12px; line-height: 1.5;">十余种中英文字体一键切换；输入自定义字体名即刻加入列表；选择时实时检测可用性，绿/黄/灰三态提示，避免 AI 写出未安装字体。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: 管理 -->
+      <div class="workflow-step">
+        <div class="workflow-step-num">3</div>
+        <div class="workflow-step-content">
+          <h3>批量管理，组合后还能整体缩放/拖拽</h3>
+          <p>标了十几个元素？多选工具栏一键搞定：组合标记、批量复制、统一删除。组合后的标记框支持整体拖拽移动，按住 Ctrl/⌘ 滚轮可对标记框整体缩放显示。底部计数实时同步，改了几个一目了然。</p>
+          <div class="workflow-step-tags">
+            <span class="workflow-tag">多选批量操作</span>
+            <span class="workflow-tag">组合整体缩放/拖拽</span>
+            <span class="workflow-tag">整体缩放显示</span>
+            <span class="workflow-tag">实时计数</span>
+            <span class="workflow-tag">拖拽移动面板</span>
+            <span class="workflow-tag">最小化收起</span>
+          </div>
+          <div class="workflow-step-demo">
+            <div style="display: flex; gap: 32px; align-items: center; justify-content: center; flex-wrap: wrap;">
+              <div class="hdm-toolbar">
+                <div class="hdm-toolbar-header">
+                  <div class="hdm-toolbar-title">Mark2AI</div>
+                  <div class="hdm-toolbar-window-ctrl">
+                    <button class="hdm-ctrl-btn">−</button>
+                    <button class="hdm-ctrl-btn">×</button>
+                  </div>
+                </div>
+                <div class="hdm-toolbar-body">
+                  <div class="hdm-btn-row">
+                    <button class="hdm-action-btn active">选择</button>
+                    <button class="hdm-action-btn">复制</button>
+                    <button class="hdm-action-btn">新增</button>
+                    <button class="hdm-action-btn danger">删除</button>
+                  </div>
+                  <div class="hdm-export-row">
+                    <button class="hdm-side-btn" title="重置">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                      </svg>
+                    </button>
+                    <button class="hdm-export-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 19V5"/>
+                        <path d="m5 12 7-7 7 7"/>
+                      </svg>
+                      导出 Diff
+                    </button>
+                    <button class="hdm-side-btn" title="设置">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="hdm-toolbar-footer">
+                  <div class="hdm-shortcut">
+                    <span>快速选择</span>
+                  </div>
+                  <div class="hdm-counts">
+                    <b>5</b> 标记 <span class="hdm-counts-sep">·</span> <b>3</b> 修改
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                <div class="hdm-multi-toolbar">
+                  <button class="hdm-multi-btn primary">组合标记</button>
+                  <button class="hdm-multi-btn secondary">复制选中</button>
+                  <button class="hdm-multi-btn danger">删除选中</button>
+                  <button class="hdm-multi-btn ghost">取消选择</button>
+                  <span class="hdm-multi-count">已选 <b>3</b></span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8; text-align: center;">
+                  <p><strong style="color:var(--text-primary);">工具栏</strong>：可拖拽、可最小化</p>
+                  <p><strong style="color:var(--text-primary);">多选栏</strong>：批量操作，实时计数</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: 导出 -->
+      <div class="workflow-step">
+        <div class="workflow-step-num">4</div>
+        <div class="workflow-step-content">
+          <h3>一键生成 Diff，删除项也进报告</h3>
+          <p>点一下「导出 Diff」，生成包含编号、CSS 选择器、标签、精确修改值、原始/修改后 HTML 的结构化报告。删除的元素会单独成节，并附带原始 HTML 与完整 JSON；AI Agent 可直接解析。<strong>只包含你标记的部分，不是整个页面源码。</strong></p>
+          <div class="workflow-step-tags">
+            <span class="workflow-tag">编号 + CSS 选择器</span>
+            <span class="workflow-tag">原始 vs 修改后 HTML</span>
+            <span class="workflow-tag">已删除组件</span>
+            <span class="workflow-tag">逐行 Diff</span>
+            <span class="workflow-tag">完整 JSON</span>
+            <span class="workflow-tag">AI Agent 零歧义</span>
+          </div>
+          <div class="workflow-step-demo">
+            <div class="export-showcase">
+              <div class="export-header">
+                <h3>Diff 导出报告（发给 AI 的版本）</h3>
+                <p>每个标记包含：编号 · CSS 选择器 · 标签 · 精确修改值 · 原始 HTML · 修改后 HTML · 逐行 Diff · 给 AI 的评论。报告末尾附加完整 JSON，供 AI Agent 直接解析。</p>
+              </div>
+              <div class="export-body">
+                <div class="export-item">
+                  <h4>标记 #1 · 主按钮 <span class="badge">已修改</span></h4>
+                  <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">选择器：<code>#btn-primary</code> · 给 AI：「这个按钮颜色太淡了，改成主题色，内边距加大到 8px，让它更明显。」</p>
+                  <pre><strong>原始：</strong>
+&lt;button id="btn-primary"
+  class="btn"&gt;确认&lt;/button&gt;
+
+<strong>修改后：</strong>
+&lt;button id="btn-primary"
+  class="btn"
+  style="background:#70649A;
+    color:#fff;padding:8px;"&gt;
+  确认
+&lt;/button&gt;
+
+<strong>Diff：</strong>
+- class="btn"&gt;确认&lt;/button&gt;
++ class="btn"
++   style="background:#70649A;color:#fff;padding:8px;"&gt;
++   确认&lt;/button&gt;</pre>
+                </div>
+                <div class="export-item">
+                  <h4>标记 #2 · 输入框 <span class="badge">已修改</span></h4>
+                  <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">选择器：<code>.form-input</code> · 修改说明：输入框圆角增大到 8px，边框颜色改为主题色</p>
+                  <pre><strong>原始：</strong>
+&lt;input type="text"
+  class="form-input"&gt;
+
+<strong>修改后：</strong>
+&lt;input type="text"
+  class="form-input"
+  style="border-radius:8px;
+    border-color:#70649A;"&gt;
+
+<strong>Diff：</strong>
+- class="form-input"&gt;
++ class="form-input"
++   style="border-radius:8px;border-color:#70649A;"&gt;</pre>
+                </div>
+                <div class="export-item" style="grid-column: 1 / -1;">
+                  <h4>已删除组件 · 旧 Banner <span class="badge" style="background: var(--error-bg); color: var(--error-text);">已删除</span></h4>
+                  <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">选择器：<code>.old-banner</code> · 状态：该元素已从 DOM 中移除，AI 需要同步删除对应代码。</p>
+                  <pre><strong>被删除的原始 HTML：</strong>
+&lt;div class="old-banner"&gt;
+  旧版活动入口
+&lt;/div&gt;
+
+<strong>完整 JSON（节选）：</strong>
+{
+  "totalMarked": 2,
+  "totalModified": 3,
+  "deletedItems": [
+    { "selector": ".old-banner", "deleted": true }
+  ],
+  "items": [ ... ]
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================================================================
+       交互体验区
+       ================================================================ -->
+  <section id="demo" class="section">
+    <div class="section-label">INTERACTIVE</div>
+    <h2 class="section-title">亲手试试</h2>
+    <p class="section-desc">以下组件均可交互 —— 切换主题、拖动滑块、点击开关，感受真实体验。</p>
+
+    <div class="demo-grid">
+      <!-- 设置面板（可交互主题切换） -->
+      <div class="demo-card">
+        <div class="demo-card-header">
+          <span class="demo-card-title">设置面板 · 可交互</span>
+          <span class="demo-card-tag">点击切换主题</span>
+        </div>
+        <div class="demo-card-body">
+          <div class="hdm-settings-panel">
+            <div class="hdm-settings-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              设置
+            </div>
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">显示编号徽章</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">显示拖拽把手</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+            <div class="hdm-switch-row">
+              <span class="hdm-switch-label">启用快捷键提示</span>
+              <div class="hdm-switch on"><div class="hdm-switch-thumb"></div></div>
+            </div>
+            <div class="hdm-theme-section">
+              <div class="hdm-theme-section-title">主题选择</div>
+              <div class="hdm-theme-grid">
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);"></div>
+                  <div class="hdm-theme-name">深藏青</div>
+                  <div class="hdm-theme-hex">#211E55</div>
+                </div>
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%);"></div>
+                  <div class="hdm-theme-name">灰绿</div>
+                  <div class="hdm-theme-hex">#6A8372</div>
+                </div>
+                <div class="hdm-theme-card active">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);"></div>
+                  <div class="hdm-theme-name">暮紫</div>
+                  <div class="hdm-theme-hex">#70649A</div>
+                </div>
+                <div class="hdm-theme-card">
+                  <div class="hdm-theme-preview" style="background: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%);"></div>
+                  <div class="hdm-theme-name">暖棕</div>
+                  <div class="hdm-theme-hex">#9E7A7A</div>
+                </div>
+              </div>
+              <div class="hdm-theme-section-title" style="margin-top: 4px;">自定义颜色</div>
+              <div class="hdm-custom-color-row">
+                <div class="hdm-custom-color-preview" style="background: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);"></div>
+                <input type="text" class="hdm-custom-color-input" placeholder="#70649A" value="#70649A">
+                <button class="hdm-custom-color-apply">→</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast + 弹窗 -->
+      <div class="demo-card">
+        <div class="demo-card-header">
+          <span class="demo-card-title">反馈系统</span>
+          <span class="demo-card-tag">Toast & Modal</span>
+        </div>
+        <div class="demo-card-body" style="flex-direction: column; gap: 20px;">
+          <div class="hdm-toast-group">
+            <div class="hdm-toast hdm-toast--success">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span class="hdm-toast-text">操作成功，样式已保存</span>
+            </div>
+            <div class="hdm-toast hdm-toast--warning">
+              <svg class="hdm-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <span class="hdm-toast-text">字体不可用，请检查字体是否已安装</span>
+            </div>
+          </div>
+          <div class="hdm-modal-demo" style="width: 100%; height: 240px;">
+            <div class="hdm-modal-backdrop">
+              <div class="hdm-modal">
+                <div class="hdm-modal-header">确认删除</div>
+                <div class="hdm-modal-body">
+                  确定要删除这个标记吗？删除后将无法恢复，对应的所有修改也将一并清除。
+                </div>
+                <div class="hdm-modal-footer">
+                  <button class="hdm-modal-btn cancel">取消</button>
+                  <button class="hdm-modal-btn confirm">确认删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-tertiary); text-align: center;">
+            成功 / 警告 / 错误 / 信息 · 四种 Toast · 3 秒自动消失
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       CTA
+       ================================================================ -->
+  <div class="cta">
+    <h2>标记一下，AI 改得比你说的还准</h2>
+    <p>Chrome 扩展，一键安装。点选元素，调好样式，导出 Diff 发给 AI —— 一次改全，零歧义。</p>
+    <a href="#" class="cta-btn">立即体验</a>
+  </div>
+
+  <!-- 页面底部 -->
+  <footer class="page-footer">
+    <p><strong>Mark2AI V2.0</strong> · 让 AI 听懂你的修改</p>
+    <p style="margin-top: 4px;">Chrome 扩展 · 纯前端零依赖 · 标记 · 编辑 · 生成 Diff 发给 AI</p>
+  </footer>
+
+</main>
+
+<script>
+/* ================================================================
+   主题切换
+   ================================================================ */
+(function() {
+  const themeDots = document.querySelectorAll('.theme-dot');
+  const bodyEl = document.body;
+
+  themeDots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      const theme = this.getAttribute('data-theme-target');
+
+      // 更新所有 dot 状态
+      themeDots.forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.theme-dot[data-theme-target="' + theme + '"]').forEach(d => d.classList.add('active'));
+
+      // 清除自定义主题 inline 变量，恢复预设主题
+      clearCustomTheme();
+
+      // 切换主题
+      bodyEl.setAttribute('data-roadshow-theme', theme);
+    });
+  });
+
+  // 设置面板主题卡片切换
+  const themeCards = document.querySelectorAll('.hdm-theme-card');
+  themeCards.forEach((card, index) => {
+    const themes = ['deep-cyan', 'gray-green', 'dusk-purple', 'warm-brown'];
+    card.addEventListener('click', function() {
+      themeCards.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+
+      const theme = themes[index];
+
+      // 清除自定义主题 inline 变量，恢复预设主题
+      clearCustomTheme();
+
+      bodyEl.setAttribute('data-roadshow-theme', theme);
+
+      // 同步顶部切换器
+      themeDots.forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.theme-dot[data-theme-target="' + theme + '"]').forEach(d => d.classList.add('active'));
+    });
+  });
+
+  // iOS 开关切换
+  const switches = document.querySelectorAll('.hdm-switch');
+  switches.forEach(sw => {
+    sw.addEventListener('click', function() {
+      this.classList.toggle('on');
+    });
+  });
+
+  // 单位切换演示
+  const unitBtns = document.querySelectorAll('.hdm-unit-btn');
+  unitBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const parent = this.closest('.hdm-unit-toggle');
+      if (!parent) return;
+      parent.querySelectorAll('.hdm-unit-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // 滑块拖动交互
+  const sliderTracks = document.querySelectorAll('.hdm-slider-track');
+  sliderTracks.forEach(track => {
+    const thumb = track.querySelector('.hdm-slider-thumb');
+    const fill = track.querySelector('.hdm-slider-fill');
+    const sliderRow = track.closest('.hdm-slider-row');
+    const valueEl = sliderRow ? sliderRow.querySelector('.hdm-slider-value') : null;
+    if (!thumb || !fill) return;
+
+    let isDragging = false;
+
+    const getSliderConfig = function() {
+      let min = 0, max = 100, unit = 'px';
+      const label = sliderRow ? sliderRow.querySelector('.hdm-slider-label') : null;
+      const labelText = label ? label.textContent : '';
+      if (labelText.includes('X') || labelText.includes('Y')) { min = -500; max = 500; }
+      else if (labelText.includes('宽度') || labelText.includes('高度')) { min = 10; max = 2000; }
+      else if (labelText.includes('字号')) { min = 8; max = 72; }
+      return { min, max, unit };
+    };
+
+    const percentToValue = function(percent) {
+      const { min, max } = getSliderConfig();
+      return Math.round(min + (max - min) * (percent / 100));
+    };
+
+    const updateSlider = function(percent) {
+      percent = Math.max(0, Math.min(100, percent));
+      thumb.style.left = percent + '%';
+      fill.style.width = percent + '%';
+      if (valueEl) {
+        const { unit } = getSliderConfig();
+        valueEl.textContent = percentToValue(percent) + unit;
+      }
+    };
+
+    const startDrag = function(e) {
+      isDragging = true;
+      e.preventDefault();
+    };
+
+    const onMove = function(e) {
+      if (!isDragging) return;
+      const rect = track.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const percent = ((clientX - rect.left) / rect.width) * 100;
+      updateSlider(percent);
+    };
+
+    const endDrag = function() { isDragging = false; };
+
+    thumb.addEventListener('mousedown', startDrag);
+    thumb.addEventListener('touchstart', startDrag);
+    track.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      const rect = track.getBoundingClientRect();
+      const percent = ((e.clientX - rect.left) / rect.width) * 100;
+      updateSlider(percent);
+    });
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+  });
+
+  // 平滑滚动
+  document.querySelectorAll('.top-nav-links a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ================ 自定义主题色 ================
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+  // 规范化并校验 HEX，返回 '#RRGGBB' 或 null
+  function normalizeHex(input) {
+    if (!input) return null;
+    let h = input.trim().replace(/^#/, '');
+    if (/^[0-9a-fA-F]{3}$/.test(h)) {
+      h = h.split('').map(function(c) { return c + c; }).join('');
+    }
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+    return '#' + h.toUpperCase();
+  }
+
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h /= 6;
+    }
+    return { h: h * 360, s: s * 100, l: l * 100 };
+  }
+
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = function(n) {
+      const k = (n + h / 30) % 12;
+      const c = l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+      return Math.round(255 * c).toString(16).padStart(2, '0');
+    };
+    return ('#' + f(0) + f(8) + f(4)).toUpperCase();
+  }
+
+  // 由单一主色派生 8 个主题变量
+  function deriveThemeVars(hex) {
+    const rgb = hexToRgb(hex);
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    const light = hslToHex(hsl.h, hsl.s, clamp(hsl.l + 11, 0, 100));
+    const dark = hslToHex(hsl.h, hsl.s, clamp(hsl.l - 10, 0, 100));
+    const softBg = hslToHex(hsl.h, Math.min(hsl.s, 40), 95);
+    return {
+      '--theme-primary': hex,
+      '--theme-primary-light': light,
+      '--theme-primary-dark': dark,
+      '--theme-gradient': 'linear-gradient(135deg, ' + light + ' 0%, ' + hex + ' 100%)',
+      '--theme-soft-bg': softBg,
+      '--theme-soft-text': dark,
+      '--theme-count-text': hex,
+      '--theme-shadow': '0 2px 8px rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.3)'
+    };
+  }
+
+  const CUSTOM_THEME_VARS = [
+    '--theme-primary', '--theme-primary-light', '--theme-primary-dark',
+    '--theme-gradient', '--theme-soft-bg', '--theme-soft-text',
+    '--theme-count-text', '--theme-shadow'
+  ];
+
+  function applyCustomTheme(vars) {
+    Object.keys(vars).forEach(function(k) { bodyEl.style.setProperty(k, vars[k]); });
+  }
+  function clearCustomTheme() {
+    CUSTOM_THEME_VARS.forEach(function(k) { bodyEl.style.removeProperty(k); });
+  }
+  function clearPresetActive() {
+    document.querySelectorAll('.theme-dot').forEach(function(d) { d.classList.remove('active'); });
+    document.querySelectorAll('.hdm-theme-card').forEach(function(c) { c.classList.remove('active'); });
+  }
+
+  // 交互绑定
+  const customInput = document.querySelector('.hdm-custom-color-input');
+  const customApply = document.querySelector('.hdm-custom-color-apply');
+  const customPreview = document.querySelector('.hdm-custom-color-preview');
+
+  function commitCustomColor() {
+    const hex = normalizeHex(customInput.value);
+    if (!hex) {
+      customInput.classList.remove('invalid');
+      void customInput.offsetWidth;       // 重启动画
+      customInput.classList.add('invalid');
+      return;
+    }
+    customInput.classList.remove('invalid');
+    const vars = deriveThemeVars(hex);
+    applyCustomTheme(vars);
+    clearPresetActive();
+    customPreview.style.background = vars['--theme-gradient'];
+    customInput.value = hex;
+  }
+
+  if (customApply) customApply.addEventListener('click', commitCustomColor);
+  if (customInput) {
+    customInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') commitCustomColor();
+    });
+    // 实时预览（仅刷新预览块，不改全局）
+    customInput.addEventListener('input', function() {
+      const hex = normalizeHex(customInput.value);
+      if (hex) {
+        const v = deriveThemeVars(hex);
+        customPreview.style.background = v['--theme-gradient'];
+        customInput.classList.remove('invalid');
+      }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

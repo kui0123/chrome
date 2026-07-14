@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Mark2AI 品牌图标预览</title>
+<style>
+  :root { --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%); }
+  [data-theme="deep-cyan"] { --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%); }
+  [data-theme="gray-green"] { --theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%); }
+  [data-theme="dusk-purple"] { --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%); }
+  [data-theme="warm-brown"] { --theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%); }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, "PingFang SC", sans-serif;
+    background: #f5f6f8; color: #0F172A; padding: 32px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  .card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+    padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .card h2 { font-size: 14px; margin: 0 0 18px; color: #334155; }
+  .row { display: flex; align-items: flex-end; gap: 36px; flex-wrap: wrap; }
+  .spec { text-align: center; }
+  .spec .label { margin-top: 10px; font-size: 12px; color: #64748b; }
+  .dark-bar {
+    display: inline-flex; gap: 24px; padding: 14px 20px;
+    background: #1f2937; border-radius: 10px; align-items: center;
+  }
+  .light-bar {
+    display: inline-flex; gap: 24px; padding: 14px 20px;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; align-items: center;
+  }
+  /* 顶部导航模拟 */
+  .nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 18px; border-radius: 10px; background: #fff;
+    border: 1px solid #e2e8f0; margin-bottom: 12px;
+  }
+  .nav .brand-text { font-weight: 700; font-size: 15px; }
+  .logo-dot-old { width: 22px; height: 22px; border-radius: 6px; background: var(--theme-gradient); }
+  .logo-dot-new { width: 22px; height: 22px; display: inline-flex; }
+  .theme-btns { margin: 8px 0 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .theme-btns button {
+    border: 1px solid #cbd5e1; background: #fff; border-radius: 8px;
+    padding: 6px 12px; font-size: 12px; cursor: pointer;
+  }
+  .theme-btns button:hover { background: #f1f5f9; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1>Mark2AI 统一品牌图标 · 预览</h1>
+  <div class="sub">固定品牌配色（Diff 绿 #10B981） · 极简线性 · 统一双端视觉</div>
+
+  <!-- 1. 各尺寸 -->
+  <div class="card">
+    <h2>① 完整版 · 各尺寸（128 / 48 / 32）</h2>
+    <div class="row">
+      <div class="spec">
+        <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g128" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g128)"/>
+          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+        <div class="label">128px</div>
+      </div>
+      <div class="spec">
+        <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g48" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g48)"/>
+          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+        <div class="label">48px</div>
+      </div>
+      <div class="spec">
+        <svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g32" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g32)"/>
+          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+        <div class="label">32px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 16px 对比 -->
+  <div class="card">
+    <h2>② 16px · 简化版 vs 完整版缩放（放大 6 倍观察）</h2>
+    <div class="row">
+      <div class="spec">
+        <!-- 简化版源 放大展示 -->
+        <svg width="96" height="96" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g16s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g16s)"/>
+          <g fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M30 50 L30 30 L50 30"/><path d="M78 30 L98 30 L98 50"/>
+            <path d="M98 78 L98 98 L78 98"/><path d="M50 98 L30 98 L30 78"/>
+          </g>
+        </svg>
+        <div class="label">简化版源（推荐）</div>
+      </div>
+      <div class="spec">
+        <svg width="16" height="16" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g16r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g16r)"/>
+          <g fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M30 50 L30 30 L50 30"/><path d="M78 30 L98 30 L98 50"/>
+            <path d="M98 78 L98 98 L78 98"/><path d="M50 98 L30 98 L30 78"/>
+          </g>
+        </svg>
+        <div class="label">实际 16px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 明暗底 & 单色 -->
+  <div class="card">
+    <h2>③ 明暗工具栏 & 单色/反白版</h2>
+    <div class="row">
+      <div class="dark-bar">
+        <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#gd)"/>
+          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+        <span style="color:#fff;font-size:13px;">深色工具栏</span>
+      </div>
+      <div class="light-bar">
+        <!-- 单色/反白版 -->
+        <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#10B981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+        <span style="font-size:13px;">单色/反白版</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 路演页 Logo 主题不变性 -->
+  <div class="card" id="navCard">
+    <h2>④ 路演页 nav Logo · 主题不变性验证</h2>
+    <div class="theme-btns">
+      <button onclick="setTheme('deep-cyan')">深青</button>
+      <button onclick="setTheme('gray-green')">灰绿</button>
+      <button onclick="setTheme('dusk-purple')">暮紫</button>
+      <button onclick="setTheme('warm-brown')">暖棕</button>
+    </div>
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">旧方案（随主题变化，会撞色）：</div>
+    <div class="nav">
+      <span class="logo-dot-old"></span>
+      <span class="brand-text">Mark2AI</span>
+    </div>
+    <div style="font-size:12px;color:#64748b;margin:16px 0 8px;">新方案（固定品牌绿，切主题不变）：</div>
+    <div class="nav">
+      <span class="logo-dot-new">
+        <svg width="22" height="22" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="gnav" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#gnav)"/>
+          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
+            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
+            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
+          </g>
+        </svg>
+      </span>
+      <span class="brand-text">Mark2AI</span>
+    </div>
+    <p style="font-size:12px;color:#64748b;">点击上方主题按钮：旧 <code>logo-dot</code> 随主题渐变改变；新方案保持固定绿。</p>
+  </div>
+
+  <script>
+    function setTheme(t) { document.getElementById('navCard').setAttribute('data-theme', t); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>主题色切换测试</title>
+  <style>
+    /* 模拟 content.css 中的主题变量 */
+    :root {
+      --hdm-theme-primary: #70649A;
+      --hdm-theme-primary-light: #8B7FB3;
+      --hdm-theme-primary-dark: #5A4F7D;
+      --hdm-theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%);
+      --hdm-theme-soft-bg: #F0EEF7;
+      --hdm-theme-soft-bg-hover: #E9E4F3;
+      --hdm-theme-soft-text: #5A4F7D;
+      --hdm-theme-count-text: #70649A;
+      --hdm-theme-shadow: 0 2px 8px rgba(112,100,154,0.3);
+      --hdm-theme-alpha-20: rgba(112, 100, 154, 0.2);
+
+      --hdm-primary: var(--hdm-theme-primary);
+      --hdm-primary-light: var(--hdm-theme-primary-light);
+      --hdm-primary-dark: var(--hdm-theme-primary-dark);
+      --hdm-primary-bg: var(--hdm-theme-soft-bg);
+      --hdm-gradient-btn-primary: var(--hdm-theme-gradient);
+      --hdm-gradient-header: var(--hdm-theme-gradient);
+
+      --hdm-text-primary: #1F2937;
+      --hdm-text-secondary: #4B5563;
+      --hdm-text-white: #FFFFFF;
+      --hdm-bg-white: #FFFFFF;
+      --hdm-bg-secondary: #F9FAFB;
+      --hdm-border: #E5E7EB;
+      --hdm-border-hover: #D1D5DB;
+      --hdm-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --hdm-font-sm: 11px;
+      --hdm-font-base: 12px;
+      --hdm-radius-xs: 4px;
+      --hdm-radius-sm: 6px;
+      --hdm-radius-md: 8px;
+      --hdm-radius-lg: 10px;
+
+      --hdm-shadow-primary-active: 0 2px 8px rgba(139, 92, 246, 0.3);
+      --hdm-primary-alpha-40: rgba(139, 92, 246, 0.4);
+      --hdm-primary-alpha-30: rgba(139, 92, 246, 0.3);
+
+      --hdm-mark-hover-bg: color-mix(in srgb, var(--hdm-theme-primary-light) 8%, transparent);
+    }
+
+    [data-theme="deep-cyan"] {
+      --hdm-theme-primary: #211E55;
+      --hdm-theme-primary-light: #3D3A75;
+      --hdm-theme-primary-dark: #15133D;
+      --hdm-theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%);
+      --hdm-theme-soft-bg: #EDECF5;
+      --hdm-theme-soft-bg-hover: #ddd9ee;
+      --hdm-theme-soft-text: #15133D;
+      --hdm-theme-count-text: #211E55;
+      --hdm-theme-shadow: 0 2px 8px rgba(33,30,85,0.3);
+      --hdm-theme-alpha-20: rgba(33, 30, 85, 0.2);
+    }
+
+    body {
+      font-family: var(--hdm-font-family);
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .test-section h3 {
+      margin-top: 0;
+    }
+
+    .theme-buttons {
+      margin-bottom: 20px;
+    }
+
+    .theme-buttons button {
+      padding: 8px 16px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      background: white;
+    }
+
+    /* 预选框测试 - 模拟 highlight-hover */
+    .test-highlight-hover {
+      padding: 20px;
+      border: 1px solid #eee;
+      margin-bottom: 10px;
+    }
+    .highlight-hover-active {
+      outline: 2px solid var(--hdm-primary-light) !important;
+      outline-offset: 2px !important;
+      background-color: var(--hdm-mark-hover-bg) !important;
+    }
+
+    /* 模拟多选工具栏 */
+    .multi-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--hdm-bg-white);
+      border: 1px solid var(--hdm-border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      all: initial !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+    }
+    .multi-btn-primary {
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 4px;
+      background: var(--hdm-gradient-btn-primary);
+      color: var(--hdm-text-white);
+      border: none;
+      cursor: pointer;
+      all: unset !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    /* 模拟滑块 */
+    .slider-track {
+      width: 200px;
+      height: 4px;
+      background: var(--hdm-border);
+      border-radius: 2px;
+      position: relative;
+      margin: 20px 0;
+    }
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      background: var(--hdm-primary);
+      border-radius: 2px;
+    }
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      background: var(--hdm-text-white);
+      border: 2px solid var(--hdm-primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 样式统计 */
+    .style-stats {
+      padding: 8px 10px;
+      background: var(--hdm-primary-bg);
+      color: var(--hdm-primary-dark);
+      font-size: var(--hdm-font-sm);
+      border-radius: var(--hdm-radius-xs);
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    /* 模拟弹窗 */
+    .modal-header {
+      padding: 14px 20px;
+      background: var(--hdm-gradient-header);
+      color: var(--hdm-text-white);
+      font-weight: 600;
+      border-radius: 8px 8px 0 0;
+    }
+    .modal-btn-confirm {
+      background: var(--hdm-gradient-btn-primary);
+      color: var(--hdm-text-white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .var-display {
+      font-family: monospace;
+      font-size: 12px;
+      background: #f0f0f0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin: 2px 0;
+    }
+  </style>
+</head>
+<body data-theme="dusk-purple">
+  <h1>主题色切换测试</h1>
+
+  <div class="theme-buttons">
+    <button onclick="setTheme('dusk-purple')">暮紫 (默认)</button>
+    <button onclick="setTheme('deep-cyan')">深海蓝</button>
+    <button onclick="applyCustom('#E74C3C')">自定义红色</button>
+    <button onclick="applyCustom('#27AE60')">自定义绿色</button>
+  </div>
+
+  <div class="test-section">
+    <h3>1. 选择元素的预选框 (highlight-hover)</h3>
+    <div class="test-highlight-hover highlight-hover-active">
+      这是一个测试元素，模拟悬停高亮
+    </div>
+    <div class="var-display">--hdm-primary-light: <span id="var-primary-light"></span></div>
+  </div>
+
+  <div class="test-section">
+    <h3>2. 多选栏的「组合标记」按钮</h3>
+    <div class="multi-toolbar">
+      <button class="multi-btn-primary">组合标记</button>
+    </div>
+    <div class="var-display">--hdm-gradient-btn-primary: <span id="var-gradient-btn"></span></div>
+  </div>
+
+  <div class="test-section">
+    <h3>3. 元素编辑 - 滑块区域</h3>
+    <div class="slider-track">
+      <div class="slider-fill"></div>
+      <div class="slider-thumb"></div>
+    </div>
+    <div class="var-display">--hdm-primary: <span id="var-primary"></span></div>
+  </div>
+
+  <div class="test-section">
+    <h3>4. 「已修改 x 个样式属性」</h3>
+    <div class="style-stats">已修改 3 个样式属性</div>
+    <div class="var-display">--hdm-primary-bg: <span id="var-primary-bg"></span></div>
+    <div class="var-display">--hdm-primary-dark: <span id="var-primary-dark"></span></div>
+  </div>
+
+  <div class="test-section">
+    <h3>5. 「保存修改」按钮</h3>
+    <button class="modal-btn-confirm">保存修改</button>
+  </div>
+
+  <div class="test-section">
+    <h3>6. 确认弹窗 - 头部 + 确定按钮</h3>
+    <div style="border-radius: 8px; overflow: hidden; width: 300px; border: 1px solid #ddd;">
+      <div class="modal-header">确认弹窗标题</div>
+      <div style="padding: 20px;">这是弹窗内容</div>
+      <div style="padding: 12px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px;">
+        <button style="padding: 6px 14px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; background: white;">取消</button>
+        <button class="modal-btn-confirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function hexToRgba(hex, alpha) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+    }
+
+    function hexToHsl(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = ((b - r) / d + 2); break;
+          case b: h = ((r - g) / d + 4); break;
+        }
+        h /= 6;
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+
+    function hslToHex(h, s, l) {
+      h = h / 360;
+      s = s / 100;
+      l = l / 100;
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        function hue2rgb(p, q, t) {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        }
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      function toHex(x) {
+        const hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+
+    function deriveColors(primaryHex) {
+      const hsl = hexToHsl(primaryHex);
+      let { h, s, l } = hsl;
+      s = Math.max(20, Math.min(s, 100));
+      l = Math.max(15, Math.min(l, 75));
+      const safePrimary = hslToHex(h, s, l);
+      const lightL = Math.min(90, l + 25);
+      const lightS = Math.max(15, s - 10);
+      const light = hslToHex(h, lightS, lightL);
+      const darkL = Math.max(10, l - 20);
+      const darkS = Math.min(95, s + 5);
+      const dark = hslToHex(h, darkS, darkL);
+      const gradient = 'linear-gradient(135deg, ' + light + ' 0%, ' + safePrimary + ' 100%)';
+      const softBgL = Math.min(95, l + 50);
+      const softBgS = Math.max(10, s - 30);
+      const softBg = hslToHex(h, softBgS, softBgL);
+      const softBgHoverL = Math.max(80, softBgL - 3);
+      const softBgHover = hslToHex(h, softBgS, softBgHoverL);
+      const alpha20 = hexToRgba(safePrimary, 0.2);
+      const shadow = '0 2px 8px ' + hexToRgba(safePrimary, 0.3);
+      return {
+        primary: safePrimary,
+        light: light,
+        dark: dark,
+        gradient: gradient,
+        softBg: softBg,
+        softBgHover: softBgHover,
+        softText: dark,
+        countText: safePrimary,
+        shadow: shadow,
+        alpha20: alpha20
+      };
+    }
+
+    function setTheme(themeId) {
+      // 清除内联样式
+      const style = document.body.style;
+      style.removeProperty('--hdm-theme-primary');
+      style.removeProperty('--hdm-theme-primary-light');
+      style.removeProperty('--hdm-theme-primary-dark');
+      style.removeProperty('--hdm-theme-gradient');
+      style.removeProperty('--hdm-theme-soft-bg');
+      style.removeProperty('--hdm-theme-soft-bg-hover');
+      style.removeProperty('--hdm-theme-soft-text');
+      style.removeProperty('--hdm-theme-count-text');
+      style.removeProperty('--hdm-theme-shadow');
+      style.removeProperty('--hdm-theme-alpha-20');
+      document.body.setAttribute('data-theme', themeId);
+      updateVarDisplay();
+    }
+
+    function applyCustom(hexColor) {
+      const colors = deriveColors(hexColor);
+      const style = document.body.style;
+      style.setProperty('--hdm-theme-primary', colors.primary);
+      style.setProperty('--hdm-theme-primary-light', colors.light);
+      style.setProperty('--hdm-theme-primary-dark', colors.dark);
+      style.setProperty('--hdm-theme-gradient', colors.gradient);
+      style.setProperty('--hdm-theme-soft-bg', colors.softBg);
+      style.setProperty('--hdm-theme-soft-bg-hover', colors.softBgHover);
+      style.setProperty('--hdm-theme-soft-text', colors.softText);
+      style.setProperty('--hdm-theme-count-text', colors.countText);
+      style.setProperty('--hdm-theme-shadow', colors.shadow);
+      style.setProperty('--hdm-theme-alpha-20', colors.alpha20);
+      document.body.setAttribute('data-theme', 'custom');
+      updateVarDisplay();
+    }
+
+    function updateVarDisplay() {
+      const styles = getComputedStyle(document.body);
+      document.getElementById('var-primary').textContent = styles.getPropertyValue('--hdm-primary').trim();
+      document.getElementById('var-primary-light').textContent = styles.getPropertyValue('--hdm-primary-light').trim();
+      document.getElementById('var-primary-dark').textContent = styles.getPropertyValue('--hdm-primary-dark').trim();
+      document.getElementById('var-primary-bg').textContent = styles.getPropertyValue('--hdm-primary-bg').trim();
+      document.getElementById('var-gradient-btn').textContent = styles.getPropertyValue('--hdm-gradient-btn-primary').trim().substring(0, 50) + '...';
+    }
+
+    updateVarDisplay();
+  </script>
+</body>
+</html>
