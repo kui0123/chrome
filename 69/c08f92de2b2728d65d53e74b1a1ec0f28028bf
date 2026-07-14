@@ -1,0 +1,14 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "69c08f92de2b2728d65d53e74b1a1ec0f28028bf",
+  "prompts": {},
+  "humans": {
+    "h_f17389cc6149cd": {
+      "author": "Developer <dev@local>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
