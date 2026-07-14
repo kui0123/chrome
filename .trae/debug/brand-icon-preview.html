@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Mark2AI 品牌图标预览</title>
+<title>Mark2AI 品牌图标预览 · R3 容器底色候选</title>
 <style>
   :root { --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%); }
-  [data-theme="deep-cyan"] { --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%); }
+  [data-theme="deep-cyan"]  { --theme-gradient: linear-gradient(135deg, #3D3A75 0%, #211E55 100%); }
   [data-theme="gray-green"] { --theme-gradient: linear-gradient(135deg, #8A9E8F 0%, #6A8372 100%); }
-  [data-theme="dusk-purple"] { --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%); }
+  [data-theme="dusk-purple"]{ --theme-gradient: linear-gradient(135deg, #8B7FB3 0%, #70649A 100%); }
   [data-theme="warm-brown"] { --theme-gradient: linear-gradient(135deg, #B89595 0%, #9E7A7A 100%); }
 
   * { box-sizing: border-box; }
@@ -27,11 +27,11 @@
   .spec .label { margin-top: 10px; font-size: 12px; color: #64748b; }
   .dark-bar {
     display: inline-flex; gap: 24px; padding: 14px 20px;
-    background: #1f2937; border-radius: 10px; align-items: center;
+    background: #1f2937; border-radius: 10px; align-items: flex-end;
   }
   .light-bar {
     display: inline-flex; gap: 24px; padding: 14px 20px;
-    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; align-items: center;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; align-items: flex-end;
   }
   /* 顶部导航模拟 */
   .nav {
@@ -43,155 +43,250 @@
   .logo-dot-old { width: 22px; height: 22px; border-radius: 6px; background: var(--theme-gradient); }
   .logo-dot-new { width: 22px; height: 22px; display: inline-flex; }
   .theme-btns { margin: 8px 0 20px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .theme-btns button {
+  .theme-btns button, .pal-btns button {
     border: 1px solid #cbd5e1; background: #fff; border-radius: 8px;
     padding: 6px 12px; font-size: 12px; cursor: pointer;
   }
-  .theme-btns button:hover { background: #f1f5f9; }
+  .theme-btns button:hover, .pal-btns button:hover { background: #f1f5f9; }
+  .pal-btns button.active { border-color: #0F172A; background: #0F172A; color: #fff; }
   code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* 候选对比 */
+  .a8-card { border-color: #0F172A; box-shadow: 0 0 0 2px rgba(15,23,42,.10); }
+  .a8-hint { font-size: 12px; color: #64748b; margin: -8px 0 18px; line-height: 1.7; }
+  .scheme { margin-bottom: 26px; padding-bottom: 22px; border-bottom: 1px dashed #e2e8f0; }
+  .scheme:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .scheme-title { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+  .scheme-title .rec { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; background:#0F172A; color:#fff; margin-left:8px; vertical-align:middle; font-weight:600;}
+  .scheme-meta { font-size: 11px; color: #94a3b8; margin-bottom: 12px; }
+  .scheme-meta code { font-size: 11px; }
+  .bars { display: flex; gap: 20px; flex-wrap: wrap; }
+  .bar { align-items: flex-end !important; gap: 22px !important; }
+  .cell { text-align: center; }
+  .cell svg { display: block; margin: 0 auto; }
+  .cell .sz { display: block; margin-top: 8px; font-size: 11px; }
+  .light-bar .sz { color: #64748b; }
+  .dark-bar .sz { color: #cbd5e1; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#4338CA; margin-left:8px; vertical-align:middle;}
+  table.eval { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.eval th, table.eval td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: top; }
+  table.eval th { background: #f8fafc; color: #334155; }
+  .swatch { display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,.1);}
 </style>
 </head>
 <body>
-  <h1>Mark2AI 统一品牌图标 · 预览</h1>
-  <div class="sub">固定品牌配色（Diff 绿 #10B981） · 极简线性 · 统一双端视觉</div>
+  <h1>Mark2AI 统一品牌图标 · 预览 <span class="badge">R3 · 容器底色候选</span></h1>
+  <div class="sub">已定：符号=标签(tag) · 朝向=斜置 45° · 形态=方块容器+白 tag 描边（App-icon 同构） ｜ 本轮待拍板：<b>容器底色（C1~C6 六选一，非绿）</b></div>
 
-  <!-- 1. 各尺寸 -->
-  <div class="card">
-    <h2>① 完整版 · 各尺寸（128 / 48 / 32）</h2>
-    <div class="row">
-      <div class="spec">
-        <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="g128" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g128)"/>
-          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-        <div class="label">128px</div>
-      </div>
-      <div class="spec">
-        <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="g48" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g48)"/>
-          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-        <div class="label">48px</div>
-      </div>
-      <div class="spec">
-        <svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="g32" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#g32)"/>
-          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-        <div class="label">32px</div>
-      </div>
-    </div>
+  <!-- ★ A8 容器底色候选对比 -->
+  <div class="card a8-card">
+    <h2>★ A8 容器底色候选对比 · 请对照拍板（朝向统一斜置 45°）</h2>
+    <p class="a8-hint">
+      形态与朝向已锁定（方块容器 + 白 tag 描边 + 斜置 45°），仅<b>容器底色</b>待定。用户否决绿色，以下 6 套固定品牌底色候选每套在
+      <b>128 / 48 / 32 / 16</b> 尺寸、<b>明底 / 暗底</b>并排渲染。<br>
+      注：生产环境 16px 采用「去打孔点」简化版（点在微尺寸易糊）；此处 16px 保留点仅为对比可辨识度。评估详见页面底部汇总表。
+    </p>
+    <div id="schemes"></div>
+    <p class="a8-hint" style="margin:18px 0 0;">
+      <b>archer 建议</b>：综合最稳 → <b>C1 深墨黑</b>（无彩色，与 4 套主题零撞色，白 tag 对比最强）；有色最稳 → <b>C2 科技蓝</b>；AI 前卫 → C3 电光靛；最醒目 → C4 暖橙 / C5 品玫红（白描边对比偏弱需兜底）；呼应「暮紫」偏好 → C6 皇家紫（与暮紫主题色相邻近）。请对照上图拍板。
+    </p>
   </div>
 
-  <!-- 2. 16px 对比 -->
-  <div class="card">
-    <h2>② 16px · 简化版 vs 完整版缩放（放大 6 倍观察）</h2>
-    <div class="row">
-      <div class="spec">
-        <!-- 简化版源 放大展示 -->
-        <svg width="96" height="96" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="g16s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g16s)"/>
-          <g fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M30 50 L30 30 L50 30"/><path d="M78 30 L98 30 L98 50"/>
-            <path d="M98 78 L98 98 L78 98"/><path d="M50 98 L30 98 L30 78"/>
-          </g>
-        </svg>
-        <div class="label">简化版源（推荐）</div>
-      </div>
-      <div class="spec">
-        <svg width="16" height="16" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="g16r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#g16r)"/>
-          <g fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M30 50 L30 30 L50 30"/><path d="M78 30 L98 30 L98 50"/>
-            <path d="M98 78 L98 98 L78 98"/><path d="M50 98 L30 98 L30 78"/>
-          </g>
-        </svg>
-        <div class="label">实际 16px</div>
-      </div>
-    </div>
-  </div>
+  <!-- 选色驱动的应用场景演示 -->
+  <div class="card" id="demoCard">
+    <h2>② 选定候选后：各尺寸 · 16px 简化版 · 明暗工具栏 · nav Logo 主题不变性</h2>
+    <div class="pal-btns" id="palBtns" style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;"></div>
 
-  <!-- 3. 明暗底 & 单色 -->
-  <div class="card">
-    <h2>③ 明暗工具栏 & 单色/反白版</h2>
-    <div class="row">
-      <div class="dark-bar">
-        <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#gd)"/>
-          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-        <span style="color:#fff;font-size:13px;">深色工具栏</span>
-      </div>
-      <div class="light-bar">
-        <!-- 单色/反白版 -->
-        <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#10B981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-        <span style="font-size:13px;">单色/反白版</span>
-      </div>
-    </div>
-  </div>
+    <div style="font-size:12px;color:#64748b;margin:6px 0 8px;">完整版各尺寸（128 / 48 / 32）：</div>
+    <div class="row" id="demoSizes"></div>
 
-  <!-- 4. 路演页 Logo 主题不变性 -->
-  <div class="card" id="navCard">
-    <h2>④ 路演页 nav Logo · 主题不变性验证</h2>
+    <div style="font-size:12px;color:#64748b;margin:20px 0 8px;">16px：简化版源（去点加粗，放大观察）vs 实际 16px vs 完整版缩放至 16（含点·不推荐）：</div>
+    <div class="row" id="demo16"></div>
+
+    <div style="font-size:12px;color:#64748b;margin:20px 0 8px;">明暗工具栏 & 单色/反白衍生版：</div>
+    <div class="row" id="demoBars"></div>
+
+    <div style="font-size:12px;color:#64748b;margin:22px 0 8px;">路演页 nav Logo · 主题不变性（切主题不变，固定品牌底色）：</div>
     <div class="theme-btns">
-      <button onclick="setTheme('deep-cyan')">深青</button>
+      <button onclick="setTheme('deep-cyan')">深藏青</button>
       <button onclick="setTheme('gray-green')">灰绿</button>
       <button onclick="setTheme('dusk-purple')">暮紫</button>
       <button onclick="setTheme('warm-brown')">暖棕</button>
+      <button onclick="setTheme('')">默认</button>
     </div>
     <div style="font-size:12px;color:#64748b;margin-bottom:8px;">旧方案（随主题变化，会撞色）：</div>
-    <div class="nav">
+    <div class="nav" id="navOldWrap">
       <span class="logo-dot-old"></span>
       <span class="brand-text">Mark2AI</span>
     </div>
-    <div style="font-size:12px;color:#64748b;margin:16px 0 8px;">新方案（固定品牌绿，切主题不变）：</div>
+    <div style="font-size:12px;color:#64748b;margin:16px 0 8px;">新方案（固定品牌底色 tag，切主题不变）：</div>
     <div class="nav">
-      <span class="logo-dot-new">
-        <svg width="22" height="22" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs><linearGradient id="gnav" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
-          <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#gnav)"/>
-          <g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M38 52 L38 38 L52 38"/><path d="M76 38 L90 38 L90 52"/>
-            <path d="M90 76 L90 90 L76 90"/><path d="M52 90 L38 90 L38 76"/>
-            <path d="M50 66 L60 76 L80 52" stroke-width="9"/>
-          </g>
-        </svg>
-      </span>
+      <span class="logo-dot-new" id="navNew"></span>
       <span class="brand-text">Mark2AI</span>
     </div>
-    <p style="font-size:12px;color:#64748b;">点击上方主题按钮：旧 <code>logo-dot</code> 随主题渐变改变；新方案保持固定绿。</p>
+  </div>
+
+  <!-- 评估汇总表 -->
+  <div class="card">
+    <h2>③ 候选评估汇总（调性 × 与 4 套主题区隔 × 扩展辨识度）</h2>
+    <table class="eval">
+      <thead>
+        <tr><th>ID</th><th>名称 / 渐变</th><th>产品调性契合</th><th>与 4 套主题区隔</th><th>白 tag 对比</th><th>综合判定</th></tr>
+      </thead>
+      <tbody id="evalBody"></tbody>
+    </table>
+    <p class="a8-hint" style="margin:14px 0 0;">
+      4 套主题均为<b>低饱和</b>：深藏青 <code>#211E55</code>（蓝紫·极暗）、灰绿 <code>#6A8372</code>、暮紫 <code>#70649A</code>、暖棕 <code>#9E7A7A</code>。
+      品牌底色只要具备「高饱和 / 近黑无彩色 / 互补色相」即可形成稳定锚点。区隔风险由低到高：C1 &lt; C4 ≈ C5 &lt; C2 &lt; C6 ≈ C3。
+    </p>
   </div>
 
   <script>
-    function setTheme(t) { document.getElementById('navCard').setAttribute('data-theme', t); }
+    // ===== 6 套容器底色候选 =====
+    const PALETTES = [
+      { id:'C1', name:'深墨黑 Graphite', from:'#334155', to:'#0F172A', mono:'#1E293B', rec:true,
+        tone:'★★★★★ 极简/专业/中性/高级，开发者工具气质',
+        sep:'★★★★★ 无彩色，与 4 套彩色主题零撞色',
+        contrast:'极强 ≈15:1', verdict:'首推（最稳）' },
+      { id:'C2', name:'科技蓝 Tech Blue', from:'#3B82F6', to:'#2563EB', mono:'#2563EB', rec:false,
+        tone:'★★★★☆ 信任/科技/理性，SaaS 经典',
+        sep:'★★★★☆ 高饱和 vs 主题低饱和；与深藏青同家族但饱和明度差显著',
+        contrast:'强 ≈4.5:1', verdict:'次推（有色最稳）' },
+      { id:'C3', name:'电光靛 Electric Indigo', from:'#6366F1', to:'#4338CA', mono:'#4F46E5', rec:false,
+        tone:'★★★★★ 现代 AI/科技感强',
+        sep:'★★★☆☆ 与暮紫/深藏青色相邻近，靠高饱和区隔',
+        contrast:'强 ≈4.5:1', verdict:'可选（AI 前卫，近暮紫/深青）' },
+      { id:'C4', name:'暖橙琥珀 Amber Orange', from:'#FB923C', to:'#EA580C', mono:'#F97316', rec:false,
+        tone:'★★★★☆ 活力/友好/醒目，工具栏最跳眼',
+        sep:'★★★★★ 暖色互补于冷色主题，区隔最强',
+        contrast:'中 ≈2.6:1（临界，需兜底）', verdict:'可选（最醒目，白对比需兜底）' },
+      { id:'C5', name:'品玫红 Rose', from:'#FB7185', to:'#E11D48', mono:'#F43F5E', rec:false,
+        tone:'★★★☆☆ 红笔标注(mark)联想，偏营销',
+        sep:'★★★★★ 红系高饱和，4 套主题无此色',
+        contrast:'中 ≈3.2:1（临界达标）', verdict:'可选（醒目，偏营销）' },
+      { id:'C6', name:'皇家紫 Royal Violet', from:'#A78BFA', to:'#7C3AED', mono:'#8B5CF6', rec:false,
+        tone:'★★★★☆ 高级/创意/品牌记忆点',
+        sep:'★★★☆☆ 与暮紫同色相，靠高饱和高明度区隔',
+        contrast:'强 ≈4.5:1', verdict:'可选（呼应偏好，近暮紫）' },
+    ];
+
+    // tag 路径（完整版：斜置 45° + 白描边 + 打孔点）
+    function svgFull(size, pal){
+      const gid = 'g_'+pal.id+'_'+size+'_'+Math.random().toString(36).slice(2,7);
+      return `<svg width="${size}" height="${size}" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${pal.from}"/><stop offset="1" stop-color="${pal.to}"/>
+        </linearGradient></defs>
+        <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#${gid})"/>
+        <g transform="rotate(-45 64 64)">
+          <path d="M56 34 L96 34 A8 8 0 0 1 104 42 L104 86 A8 8 0 0 1 96 94 L56 94 L34 64 Z" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="53" cy="64" r="5.5" fill="#fff"/>
+        </g>
+      </svg>`;
+    }
+    // 简化版（16px 源：去点、加粗）
+    function svgSimplified(size, pal){
+      const gid = 's_'+pal.id+'_'+size+'_'+Math.random().toString(36).slice(2,7);
+      return `<svg width="${size}" height="${size}" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${pal.from}"/><stop offset="1" stop-color="${pal.to}"/>
+        </linearGradient></defs>
+        <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#${gid})"/>
+        <g transform="rotate(-45 64 64)">
+          <path d="M52 34 L94 34 A10 10 0 0 1 104 44 L104 84 A10 10 0 0 1 94 94 L52 94 L30 64 Z" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>`;
+    }
+    // 单色/反白衍生版（无底，描边=mono 色）
+    function svgMono(size, pal){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g transform="rotate(-45 64 64)">
+          <path d="M56 34 L96 34 A8 8 0 0 1 104 42 L104 86 A8 8 0 0 1 96 94 L56 94 L34 64 Z" fill="none" stroke="${pal.mono}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="53" cy="64" r="5.5" fill="${pal.mono}"/>
+        </g>
+      </svg>`;
+    }
+
+    const SIZES = [128, 48, 32, 16];
+
+    // ===== 渲染候选对比区 =====
+    function renderSchemes(){
+      const box = document.getElementById('schemes');
+      box.innerHTML = PALETTES.map(pal => {
+        const cells = (barCls) => SIZES.map(s =>
+          `<div class="cell">${svgFull(s, pal)}<span class="sz">${s}px</span></div>`).join('');
+        return `<div class="scheme">
+          <div class="scheme-title">${pal.id} · ${pal.name}${pal.rec?'<span class="rec">archer 首推</span>':''}</div>
+          <div class="scheme-meta">
+            <span class="swatch" style="background:${pal.from}"></span>${pal.from}
+            → <span class="swatch" style="background:${pal.to}"></span>${pal.to}
+            &nbsp;｜&nbsp; <code>linear-gradient(135deg, ${pal.from} 0%, ${pal.to} 100%)</code>
+          </div>
+          <div class="bars">
+            <div class="light-bar bar">${cells('light')}</div>
+            <div class="dark-bar bar">${cells('dark')}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ===== 评估表 =====
+    function renderEval(){
+      document.getElementById('evalBody').innerHTML = PALETTES.map(pal =>
+        `<tr>
+          <td><b>${pal.id}</b></td>
+          <td><span class="swatch" style="background:${pal.from}"></span><span class="swatch" style="background:${pal.to}"></span> ${pal.name}<br><code>${pal.from} → ${pal.to}</code></td>
+          <td>${pal.tone}</td>
+          <td>${pal.sep}</td>
+          <td>${pal.contrast}</td>
+          <td>${pal.rec?'<b>'+pal.verdict+'</b>':pal.verdict}</td>
+        </tr>`).join('');
+    }
+
+    // ===== 选色驱动的场景演示 =====
+    let current = PALETTES[0];
+    function renderPalBtns(){
+      document.getElementById('palBtns').innerHTML = PALETTES.map(pal =>
+        `<button data-id="${pal.id}" class="${pal.id===current.id?'active':''}" onclick="selectPal('${pal.id}')">
+          <span class="swatch" style="background:${pal.to}"></span>${pal.id} ${pal.name}
+        </button>`).join('');
+    }
+    function selectPal(id){
+      current = PALETTES.find(p=>p.id===id) || PALETTES[0];
+      renderPalBtns();
+      renderDemo();
+    }
+    function renderDemo(){
+      // 各尺寸
+      document.getElementById('demoSizes').innerHTML = [128,48,32].map(s =>
+        `<div class="spec">${svgFull(s, current)}<div class="label">${s}px</div></div>`).join('');
+      // 16px 三态
+      document.getElementById('demo16').innerHTML =
+        `<div class="spec">${svgSimplified(96, current)}<div class="label">简化版源（推荐·去点加粗）</div></div>
+         <div class="spec">${svgSimplified(16, current)}<div class="label">实际 16px（简化版）</div></div>
+         <div class="spec">${svgFull(16, current)}<div class="label">完整版缩放至 16（含点·不推荐）</div></div>`;
+      // 明暗工具栏 + 单色
+      document.getElementById('demoBars').innerHTML =
+        `<div class="dark-bar" style="align-items:center;gap:12px;">
+            ${svgFull(28, current)}<span style="color:#fff;font-size:13px;">深色工具栏</span></div>
+         <div class="light-bar" style="align-items:center;gap:12px;">
+            ${svgFull(28, current)}<span style="font-size:13px;">浅色工具栏</span></div>
+         <div class="light-bar" style="align-items:center;gap:12px;">
+            ${svgMono(28, current)}<span style="font-size:13px;">单色/反白衍生版（${current.mono}）</span></div>`;
+      // nav Logo
+      document.getElementById('navNew').innerHTML = svgFull(22, current);
+    }
+
+    function setTheme(t){
+      const c = document.getElementById('demoCard');
+      if (t) c.setAttribute('data-theme', t); else c.removeAttribute('data-theme');
+    }
+
+    // init
+    renderSchemes();
+    renderEval();
+    renderPalBtns();
+    renderDemo();
   </script>
 </body>
 </html>

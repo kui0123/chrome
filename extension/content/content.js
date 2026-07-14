@@ -2240,9 +2240,9 @@
   // ================ 主题管理器 ================
   const THEME_KEY = 'htmlDiffMarker_theme';
   const PRESET_THEMES = [
-    { id: 'dusk-purple', name: '柔雾紫', color: '#70649A' },
-    { id: 'deep-cyan', name: '深海蓝', color: '#211E55' },
-    { id: 'gray-green', name: '墨绿', color: '#6A8372' },
+    { id: 'dusk-purple', name: '暮紫', color: '#70649A' },
+    { id: 'deep-cyan', name: '深藏青', color: '#211E55' },
+    { id: 'gray-green', name: '灰绿', color: '#6A8372' },
     { id: 'warm-brown', name: '暖棕', color: '#9E7A7A' }
   ];
 
