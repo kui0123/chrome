@@ -453,6 +453,59 @@ body {
   border-radius: var(--radius-full); font-weight: 500;
 }
 
+/* Step2 左面板 + 右说明两栏布局 */
+.step2-demo {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.step2-guide {
+  flex: 1;
+  min-width: 260px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.step2-guide-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.step2-guide-section ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.step2-guide-section li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding-left: 14px;
+  position: relative;
+}
+.step2-guide-section li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  background: var(--theme-primary);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+.step2-guide-section p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 /* ================================================================
    亮点特性区
    ================================================================ */
@@ -467,6 +520,7 @@ body {
   transition: all var(--transition-base);
 }
 .feature-card:hover { box-shadow: var(--shadow-md); }
+.feature-card.primary { border-left: 4px solid var(--theme-primary); }
 .feature-icon {
   flex-shrink: 0; width: 40px; height: 40px;
   border-radius: 10px; background: var(--theme-gradient);
@@ -1065,6 +1119,8 @@ body {
   .pain-grid, .diff-grid, .feature-grid, .demo-grid, .export-body {
     grid-template-columns: 1fr;
   }
+  .step2-demo { flex-direction: column; align-items: center; }
+  .step2-guide { max-width: 100%; }
   .hero h1 { font-size: 36px; }
   .section { padding: 40px 24px; }
   .top-nav { padding: 0 20px; }
@@ -1096,8 +1152,8 @@ body {
        ================================================================ -->
   <section class="hero">
     <span class="hero-tag">2026 · V2.0</span>
-    <h1>让 AI 听懂你的修改</h1>
-    <p class="tagline">不用翻代码，不用写 Prompt，点一下，改一下，一键发给 AI。</p>
+    <h1>把网页修改需求，变成 AI 能执行的 Diff</h1>
+    <p class="tagline">在任何网页上选中元素，直接改样式、文案、链接和图片；一键导出结构化 Diff 交给 AI。</p>
     <p class="sub-tagline">
       一键标记 · 调整预览 · 结构化 Diff · 精准实现
     </p>
@@ -1141,7 +1197,7 @@ body {
 
       <div class="pain-card">
         <div class="pain-icon">4</div>
-        <h3>改得多很苦</h3>
+        <h3>改得多，记不住的苦</h3>
         <p>10 个元素要调整，建个记事本一条一条写？截图圈一堆红框，最后一起反馈？累。</p>
         <div class="pain-quote">第 3 条写一半，发现前面两条又不精确了。</div>
       </div>
@@ -1164,75 +1220,43 @@ body {
     <p class="section-desc">每一个细节，都是为了让"人标记，AI 执行"这件事更顺畅。</p>
 
     <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">11</div>
+      <div class="feature-card primary">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div>
         <div>
-          <h3>11 个样式属性，精确到像素</h3>
-          <p>背景色、文本色、字体、字重、字号、内边距、外边距、圆角、边框、显示方式、透明度。拖一下滑块，精确到 px 的值直接发给 AI，不用描述"大一点""好看一点"。</p>
+          <h3>真实 DOM 上标记，所见即所得</h3>
+          <p>在任意网页上直接选中真实元素，自动生成编号徽章和 CSS 选择器。不是截图画圈，AI 知道改哪里。</p>
         </div>
       </div>
 
       <div class="feature-card">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
         <div>
-          <h3>给 AI 留评论，零歧义</h3>
-          <p>每个标记可以写一段"给 AI 的评论"，比如"这个按钮太淡了，改成主题色"。Diff 导出时一并发给 AI，不用在聊天里重复解释。</p>
+          <h3>改样式、改文案、改链接、换图片</h3>
+          <p>样式滑块、颜色、字体、位置、尺寸；双击改文案；一键改 <code>&lt;a&gt;</code> 链接；上传本地背景图或替换 <code>&lt;img&gt;</code> src。</p>
         </div>
       </div>
 
       <div class="feature-card">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3"/><path d="M12 8v8M8 12h8"/></svg></div>
         <div>
-          <h3>四套主题 + 自定义，调完即所见</h3>
-          <p>暮紫、深藏青、灰绿、暖棕，一键切换。输入 HEX 自定义主题色，实时预览效果。调好再发给 AI，不用猜 AI 会理解成什么颜色。</p>
+          <h3>页面内拖动 + 智能对齐，像设计工具一样顺手</h3>
+          <p>直接在页面上拖动元素调整位置，智能辅助线实时对齐，尺寸浮窗显示精确像素。</p>
         </div>
       </div>
 
       <div class="feature-card">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.86L17.59 12 12 18.14 6.41 12 12 5.86z"/></svg></div>
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2M8 17h8M12 13l-2 4"/></svg></div>
         <div>
-          <h3>纯前端，不上传不留痕</h3>
-          <p>所有计算在浏览器本地完成，不联网、不上传、不留痕。你的网页内容不会离开你的设备，发给 AI 的只是你选中的 Diff 报告。</p>
+          <h3>导出结构化 Diff，AI 按编号执行</h3>
+          <p>每个修改生成带编号、CSS 选择器、原始/修改后 HTML、逐行 Diff 和 JSON 的报告，删除项也单独记录。</p>
         </div>
       </div>
 
       <div class="feature-card">
-        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 16c1.66 0 2.99-1.34 2.99-3S13.66 10 12 10c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-5.3-3c0 3.73 2.95 6.79 6.69 7.31l-.69.72h-11v-2h9.03l.66-.66C5.61 16.88 2 14.08 2 10.5c0-2.48 1.51-4.63 3.7-5.67l1.58.79C5.44 6.62 4 8.66 4 10.5zm10.6 0c0-3.73-2.95-6.79-6.69-7.31l.69-.72h11v2h-9.03l-.66.66C18.39 7.12 22 9.92 22 13.5c0 2.48-1.51 4.63-3.7 5.67l-1.58-.79C18.56 17.38 20 15.34 20 13.5z"/></svg></div>
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9c2.39 0 4.57.93 6.18 2.45"/><polyline points="21 3 21 9 15 9"/></svg></div>
         <div>
-          <h3>看到好设计，一键变成代码</h3>
-          <p>看到别人的页面上某个按钮/布局做得好？直接在浏览器里选中调整，生成精确到像素的 Diff 发给 AI，让 AI 帮你实现。不用猜颜色值、不用量尺寸。</p>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">&lt;/&gt;</div>
-        <div>
-          <h3>不止改样式，改结构也行</h3>
-          <p>双击元素直接改文案；编辑面板可一键修改 <code>&lt;a&gt;</code> 链接地址；还能直接编辑元素 HTML。结构级改动会一并进入 Diff，AI 不会漏掉。</p>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">图</div>
-        <div>
-          <h3>换背景图，选张本地图就行</h3>
-          <p>上传本地图片作为元素背景，contain 居中实时预览；对 <code>&lt;img&gt;</code> 元素还能直接替换 src 图片，导出时记录来源。</p>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">存</div>
-        <div>
-          <h3>刷新页面甚至重开浏览器，标记还在</h3>
-          <p>标记与修改以 chrome.storage.local 持久化为主、sessionStorage 兜底。刷新、误触关闭甚至重开浏览器后自动恢复，不怕半路丢失。</p>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">⌥</div>
-        <div>
-          <h3>Alt + “+”，三态工具栏随时唤醒</h3>
-          <p>隐藏 → 唤醒按钮 → 完整工具栏三态切换；按 Alt + “+”（Mac 显示 ⌥ + +）秒进选择模式。唤醒按钮一点即出，不打断当前工作流。</p>
+          <h3>刷新、误关甚至重开浏览器，标记还在</h3>
+          <p>标记与修改以 chrome.storage.local 持久化，sessionStorage 兜底，工作流可中断、可恢复。</p>
         </div>
       </div>
     </div>
@@ -1269,37 +1293,37 @@ body {
       </div>
       <div class="diff-matrix-row">
         <div class="diff-matrix-cell">浏览器里直接选元素</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
       </div>
       <div class="diff-matrix-row">
         <div class="diff-matrix-cell">可视化编辑样式</div>
         <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
       </div>
       <div class="diff-matrix-row">
         <div class="diff-matrix-cell">多元素批量标记</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
       </div>
       <div class="diff-matrix-row">
         <div class="diff-matrix-cell">导出结构化 Diff</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
       </div>
       <div class="diff-matrix-row">
         <div class="diff-matrix-cell">面向 AI 协作的输出</div>
         <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
       </div>
     </div>
@@ -1349,8 +1373,8 @@ body {
     <div class="diff-kicker">
       <div class="diff-kicker-icon">✦</div>
       <div>
-        <h3>为 AI 协作而设计的网页标记助手</h3>
-        <p>别人做的是"给开发者用的调试工具"和"给设计师用的查看工具"，我们做的是"给 AI 用户的需求描述工具"。<br>在 AI 生成网页 → 人标记修改 → AI 精准执行 这条工作流里，填补中间那道"说不清楚"的 Gap。</p>
+        <h3>Mark2AI 不是调试工具，而是 AI 协作的需求翻译层。</h3>
+        <p>在 AI 生成网页 → 人标记修改 → AI 精准执行这条工作流里，填补中间那道"说不清楚"的 Gap。</p>
       </div>
     </div>
   </section>
@@ -1370,7 +1394,7 @@ body {
         <div class="workflow-step-num">1</div>
         <div class="workflow-step-content">
           <h3>一键标记，自动编号</h3>
-          <p>点击任意网页元素，自动生成编号徽章和 8 方向拖拽把手。想标几个标几个，顺序清晰。</p>
+          <p>点击任意网页元素，自动生成编号徽章、8 方向缩放把手和删除角标。多元素可组合，顺序清晰。</p>
           <div class="workflow-step-tags">
             <span class="workflow-tag">一键选中</span>
             <span class="workflow-tag">自动编号</span>
@@ -1408,149 +1432,148 @@ body {
       <div class="workflow-step">
         <div class="workflow-step-num">2</div>
         <div class="workflow-step-content">
-          <h3>滑块拖拽 + 页面内直接编辑，所见即所得</h3>
-          <p>打开编辑面板，11 个样式属性精确控制。拖滑块、双击输入、滚轮微调三种方式随意切换；也能直接在页面内拖拽元素，智能对齐参考线和尺寸浮窗实时辅助。</p>
+          <h3>页面拖动 + 面板精调，所见即所得</h3>
+          <p>先在页面上把元素拖到位，智能对齐参考线和尺寸浮窗实时辅助；再打开编辑面板精调样式、文案、链接与图片。</p>
           <div class="workflow-step-tags">
-            <span class="workflow-tag">11 个样式属性</span>
-            <span class="workflow-tag">页面内拖拽 + 对齐辅助线</span>
+            <span class="workflow-tag">样式精调</span>
+            <span class="workflow-tag">页面内拖动</span>
+            <span class="workflow-tag">智能对齐</span>
             <span class="workflow-tag">尺寸浮窗</span>
-            <span class="workflow-tag">px / % 双单位</span>
-            <span class="workflow-tag">实时预览</span>
-            <span class="workflow-tag">字体系统（预置 + 自定义 + 检测）</span>
+            <span class="workflow-tag">字体系统</span>
           </div>
-          <div class="workflow-step-demo">
-            <div style="display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
-              <div class="hdm-mark-demo hdm-drag-demo">
-                页面内拖拽示意
-                <div class="hdm-drag-target">目标</div>
-                <div class="hdm-drag-ref">参考</div>
-                <div class="hdm-align-guide h"></div>
-                <div class="hdm-align-guide v"></div>
-                <div class="hdm-size-float">↔ 120px</div>
+          <div class="workflow-step-demo step2-demo">
+            <div class="hdm-inspector" style="width: 320px; flex-shrink: 0;">
+              <div class="hdm-inspector-topline"></div>
+              <div class="hdm-inspector-header">
+                <div class="hdm-inspector-title">元素编辑</div>
               </div>
-              <div class="hdm-inspector" style="width: 340px;">
-                <div class="hdm-inspector-topline"></div>
-                <div class="hdm-inspector-header">
-                  <div class="hdm-inspector-title">元素编辑</div>
+              <div class="hdm-group">
+                <div class="hdm-group-header">
+                  <div class="hdm-group-title">位置调整</div>
+                  <button class="hdm-reset-btn">重置</button>
                 </div>
-                <div class="hdm-group">
-                  <div class="hdm-group-header">
-                    <div class="hdm-group-title">位置调整</div>
-                    <button class="hdm-reset-btn">重置</button>
+                <div class="hdm-slider-row">
+                  <div class="hdm-slider-label-row">
+                    <span class="hdm-slider-label">X（左偏移）</span>
+                    <span class="hdm-slider-value">0px</span>
                   </div>
-                  <div class="hdm-slider-row">
-                    <div class="hdm-slider-label-row">
-                      <span class="hdm-slider-label">X（左偏移）</span>
-                      <span class="hdm-slider-value">0px</span>
-                    </div>
-                    <div class="hdm-slider-track">
-                      <div class="hdm-slider-fill" style="width: 50%;"></div>
-                      <div class="hdm-slider-thumb" style="left: 50%;"></div>
-                    </div>
-                  </div>
-                  <div class="hdm-slider-row">
-                    <div class="hdm-slider-label-row">
-                      <span class="hdm-slider-label">Y（上偏移）</span>
-                      <span class="hdm-slider-value">0px</span>
-                    </div>
-                    <div class="hdm-slider-track">
-                      <div class="hdm-slider-fill" style="width: 50%;"></div>
-                      <div class="hdm-slider-thumb" style="left: 50%;"></div>
-                    </div>
+                  <div class="hdm-slider-track">
+                    <div class="hdm-slider-fill" style="width: 50%;"></div>
+                    <div class="hdm-slider-thumb" style="left: 50%;"></div>
                   </div>
                 </div>
-                <div class="hdm-group">
-                  <div class="hdm-group-header">
-                    <div class="hdm-group-title">大小调整</div>
-                    <div class="hdm-unit-toggle">
-                      <button class="hdm-unit-btn active">px</button>
-                      <button class="hdm-unit-btn">%</button>
-                      <button class="hdm-reset-btn">重置</button>
-                    </div>
+                <div class="hdm-slider-row">
+                  <div class="hdm-slider-label-row">
+                    <span class="hdm-slider-label">Y（上偏移）</span>
+                    <span class="hdm-slider-value">0px</span>
                   </div>
-                  <div class="hdm-slider-row">
-                    <div class="hdm-slider-label-row">
-                      <span class="hdm-slider-label">宽度</span>
-                      <span class="hdm-slider-value">86px</span>
-                    </div>
-                    <div class="hdm-slider-track">
-                      <div class="hdm-slider-fill" style="width: 35%;"></div>
-                      <div class="hdm-slider-thumb" style="left: 35%;"></div>
-                    </div>
+                  <div class="hdm-slider-track">
+                    <div class="hdm-slider-fill" style="width: 50%;"></div>
+                    <div class="hdm-slider-thumb" style="left: 50%;"></div>
                   </div>
-                  <div class="hdm-slider-row">
-                    <div class="hdm-slider-label-row">
-                      <span class="hdm-slider-label">高度</span>
-                      <span class="hdm-slider-value">36px</span>
-                    </div>
-                    <div class="hdm-slider-track">
-                      <div class="hdm-slider-fill" style="width: 20%;"></div>
-                      <div class="hdm-slider-thumb" style="left: 20%;"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="hdm-group">
-                  <div class="hdm-group-header">
-                    <div class="hdm-group-title">文字样式</div>
-                    <button class="hdm-reset-btn">重置</button>
-                  </div>
-                  <div class="hdm-slider-row">
-                    <div class="hdm-slider-label-row">
-                      <span class="hdm-slider-label">字号</span>
-                      <span class="hdm-slider-value">14px</span>
-                    </div>
-                    <div class="hdm-slider-track">
-                      <div class="hdm-slider-fill" style="width: 45%;"></div>
-                      <div class="hdm-slider-thumb" style="left: 45%;"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="hdm-group">
-                  <div class="hdm-group-header">
-                    <div class="hdm-group-title">样式编辑</div>
-                    <button class="hdm-reset-btn">重置全部</button>
-                  </div>
-                  <div class="hdm-prop-row">
-                    <label class="hdm-prop-label">背景颜色</label>
-                    <div class="hdm-prop-control">
-                      <div class="hdm-color-picker"></div>
-                      <input type="text" class="hdm-text-input mono" value="#70649A">
-                      <button class="hdm-prop-reset">↺</button>
-                    </div>
-                  </div>
-                  <div class="hdm-prop-row">
-                    <label class="hdm-prop-label">字体</label>
-                    <div class="hdm-prop-control">
-                      <div class="hdm-select-wrap">
-                        <select class="hdm-select">
-                          <option>继承</option>
-                          <option>系统默认</option>
-                        </select>
-                      </div>
-                      <button class="hdm-add-font-btn">+</button>
-                      <button class="hdm-prop-reset">↺</button>
-                    </div>
-                  </div>
-                  <div class="hdm-style-stats">已修改 3 个样式属性</div>
-                </div>
-                <div class="hdm-inspector-footer">
-                  <button class="hdm-footer-btn delete">删除标记</button>
-                  <button class="hdm-footer-btn save">保存修改</button>
                 </div>
               </div>
-              <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8; max-width: 220px;">
-                <p><strong style="color:var(--text-primary);">位置</strong>：X/Y 滑块，±500px 范围</p>
-                <p><strong style="color:var(--text-primary);">大小</strong>：宽/高滑块，px / % 切换</p>
-                <p><strong style="color:var(--text-primary);">文字</strong>：字号滑块，8-72px</p>
-                <p><strong style="color:var(--text-primary);">样式</strong>：颜色、字体、粗细…11 个属性</p>
-                <p><strong style="color:var(--text-primary);">交互</strong>：拖 / 点 / 滚三种方式</p>
-
-                <div class="feature-card" style="margin-top: 20px; padding: 16px; gap: 12px;">
-                  <div class="feature-icon" style="width: 32px; height: 32px; border-radius: 8px; font-size: 14px;">字</div>
-                  <div>
-                    <h3 style="font-size: 14px; margin-bottom: 4px;">字体系统：预置 + 自定义 + 检测</h3>
-                    <p style="font-size: 12px; line-height: 1.5;">十余种中英文字体一键切换；输入自定义字体名即刻加入列表；选择时实时检测可用性，绿/黄/灰三态提示，避免 AI 写出未安装字体。</p>
+              <div class="hdm-group">
+                <div class="hdm-group-header">
+                  <div class="hdm-group-title">大小调整</div>
+                  <div class="hdm-unit-toggle">
+                    <button class="hdm-unit-btn active">px</button>
+                    <button class="hdm-unit-btn">%</button>
+                    <button class="hdm-reset-btn">重置</button>
                   </div>
+                </div>
+                <div class="hdm-slider-row">
+                  <div class="hdm-slider-label-row">
+                    <span class="hdm-slider-label">宽度</span>
+                    <span class="hdm-slider-value">86px</span>
+                  </div>
+                  <div class="hdm-slider-track">
+                    <div class="hdm-slider-fill" style="width: 35%;"></div>
+                    <div class="hdm-slider-thumb" style="left: 35%;"></div>
+                  </div>
+                </div>
+                <div class="hdm-slider-row">
+                  <div class="hdm-slider-label-row">
+                    <span class="hdm-slider-label">高度</span>
+                    <span class="hdm-slider-value">36px</span>
+                  </div>
+                  <div class="hdm-slider-track">
+                    <div class="hdm-slider-fill" style="width: 20%;"></div>
+                    <div class="hdm-slider-thumb" style="left: 20%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="hdm-group">
+                <div class="hdm-group-header">
+                  <div class="hdm-group-title">文字样式</div>
+                  <button class="hdm-reset-btn">重置</button>
+                </div>
+                <div class="hdm-slider-row">
+                  <div class="hdm-slider-label-row">
+                    <span class="hdm-slider-label">字号</span>
+                    <span class="hdm-slider-value">14px</span>
+                  </div>
+                  <div class="hdm-slider-track">
+                    <div class="hdm-slider-fill" style="width: 45%;"></div>
+                    <div class="hdm-slider-thumb" style="left: 45%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="hdm-group">
+                <div class="hdm-group-header">
+                  <div class="hdm-group-title">样式编辑</div>
+                  <button class="hdm-reset-btn">重置全部</button>
+                </div>
+                <div class="hdm-prop-row">
+                  <label class="hdm-prop-label">背景颜色</label>
+                  <div class="hdm-prop-control">
+                    <div class="hdm-color-picker"></div>
+                    <input type="text" class="hdm-text-input mono" value="#70649A">
+                    <button class="hdm-prop-reset">↺</button>
+                  </div>
+                </div>
+                <div class="hdm-prop-row">
+                  <label class="hdm-prop-label">字体</label>
+                  <div class="hdm-prop-control">
+                    <div class="hdm-select-wrap">
+                      <select class="hdm-select">
+                        <option>继承</option>
+                        <option>系统默认</option>
+                      </select>
+                    </div>
+                    <button class="hdm-add-font-btn">+</button>
+                    <button class="hdm-prop-reset">↺</button>
+                  </div>
+                </div>
+                <div class="hdm-style-stats">已修改 3 个样式属性</div>
+              </div>
+              <div class="hdm-inspector-footer">
+                <button class="hdm-footer-btn delete">删除标记</button>
+                <button class="hdm-footer-btn save">保存修改</button>
+              </div>
+            </div>
+            <div class="step2-guide">
+              <div class="step2-guide-section">
+                <h4>编辑面板能力</h4>
+                <ul>
+                  <li><strong>位置 / 尺寸</strong>：X/Y、宽/高、px/% 切换</li>
+                  <li><strong>文字 / 样式</strong>：字号、字重、字体、颜色、边框、圆角</li>
+                  <li><strong>内容编辑</strong>：双击改文案、改 &lt;a&gt; 链接、编辑 HTML、换背景图 / 图片</li>
+                  <li><strong>页面内拖动</strong>：直接拖动元素，智能对齐，实时尺寸浮窗</li>
+                </ul>
+              </div>
+              <div class="step2-guide-section">
+                <h4>字体系统</h4>
+                <p>十余种中英文字体一键切换；输入自定义字体名即刻加入列表；选择时实时检测可用性，绿/黄/灰三态提示。</p>
+              </div>
+              <div class="step2-guide-section">
+                <h4>拖动时出现的辅助线与尺寸提示</h4>
+                <div class="hdm-mark-demo hdm-drag-demo" style="width: 100%; max-width: 280px; margin-top: 10px;">
+                  <div class="hdm-drag-target">目标</div>
+                  <div class="hdm-drag-ref">参考</div>
+                  <div class="hdm-align-guide h"></div>
+                  <div class="hdm-align-guide v"></div>
+                  <div class="hdm-size-float">↔ 120px</div>
                 </div>
               </div>
             </div>
@@ -1563,14 +1586,12 @@ body {
         <div class="workflow-step-num">3</div>
         <div class="workflow-step-content">
           <h3>批量管理，组合后还能整体缩放/拖拽</h3>
-          <p>标了十几个元素？多选工具栏一键搞定：组合标记、批量复制、统一删除。组合后的标记框支持整体拖拽移动，按住 Ctrl/⌘ 滚轮可对标记框整体缩放显示。底部计数实时同步，改了几个一目了然。</p>
+          <p>标了十几个元素？多选工具栏一键搞定：组合标记、批量复制、统一删除。组合后的标记框支持整体拖拽移动，按住 Ctrl/⌘ 滚轮可整体缩放显示，并同步缩放子元素。底部计数实时同步，改了几个一目了然。</p>
           <div class="workflow-step-tags">
             <span class="workflow-tag">多选批量操作</span>
-            <span class="workflow-tag">组合整体缩放/拖拽</span>
-            <span class="workflow-tag">整体缩放显示</span>
+            <span class="workflow-tag">组合标记</span>
+            <span class="workflow-tag">整体移动 / 缩放显示</span>
             <span class="workflow-tag">实时计数</span>
-            <span class="workflow-tag">拖拽移动面板</span>
-            <span class="workflow-tag">最小化收起</span>
           </div>
           <div class="workflow-step-demo">
             <div style="display: flex; gap: 32px; align-items: center; justify-content: center; flex-wrap: wrap;">
@@ -1643,24 +1664,24 @@ body {
         <div class="workflow-step-num">4</div>
         <div class="workflow-step-content">
           <h3>一键生成 Diff，删除项也进报告</h3>
-          <p>点一下「导出 Diff」，生成包含编号、CSS 选择器、标签、精确修改值、原始/修改后 HTML 的结构化报告。删除的元素会单独成节，并附带原始 HTML 与完整 JSON；AI Agent 可直接解析。<strong>只包含你标记的部分，不是整个页面源码。</strong></p>
+          <p>点一下「导出 Diff」，生成结构化报告。每个修改项包含编号、CSS 选择器、原始/修改后 HTML 和逐行 Diff；删除项单独记录原始 HTML；报告末尾附加完整 JSON，供 AI Agent 直接解析。<strong>只包含你标记的部分，不是整个页面源码。</strong></p>
           <div class="workflow-step-tags">
             <span class="workflow-tag">编号 + CSS 选择器</span>
             <span class="workflow-tag">原始 vs 修改后 HTML</span>
             <span class="workflow-tag">已删除组件</span>
             <span class="workflow-tag">逐行 Diff</span>
             <span class="workflow-tag">完整 JSON</span>
-            <span class="workflow-tag">AI Agent 零歧义</span>
+            <span class="workflow-tag">结构化 Diff</span>
           </div>
           <div class="workflow-step-demo">
             <div class="export-showcase">
               <div class="export-header">
                 <h3>Diff 导出报告（发给 AI 的版本）</h3>
-                <p>每个标记包含：编号 · CSS 选择器 · 标签 · 精确修改值 · 原始 HTML · 修改后 HTML · 逐行 Diff · 给 AI 的评论。报告末尾附加完整 JSON，供 AI Agent 直接解析。</p>
+                <p>每个修改项包含：编号 · CSS 选择器 · 标签 · 精确修改值 · 原始 HTML · 修改后 HTML · 逐行 Diff · 给 AI 的评论。删除项单独成节，报告末尾附加完整 JSON。</p>
               </div>
               <div class="export-body">
                 <div class="export-item">
-                  <h4>标记 #1 · 主按钮 <span class="badge">已修改</span></h4>
+                  <h4>修改项 #1 · 主按钮 <span class="badge">已修改</span></h4>
                   <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">选择器：<code>#btn-primary</code> · 给 AI：「这个按钮颜色太淡了，改成主题色，内边距加大到 8px，让它更明显。」</p>
                   <pre><strong>原始：</strong>
 &lt;button id="btn-primary"
@@ -1681,7 +1702,7 @@ body {
 +   确认&lt;/button&gt;</pre>
                 </div>
                 <div class="export-item">
-                  <h4>标记 #2 · 输入框 <span class="badge">已修改</span></h4>
+                  <h4>修改项 #2 · 输入框 <span class="badge">已修改</span></h4>
                   <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">选择器：<code>.form-input</code> · 修改说明：输入框圆角增大到 8px，边框颜色改为主题色</p>
                   <pre><strong>原始：</strong>
 &lt;input type="text"
@@ -1706,7 +1727,7 @@ body {
   旧版活动入口
 &lt;/div&gt;
 
-<strong>完整 JSON（节选）：</strong>
+<strong>JSON 报告（节选）：</strong>
 {
   "totalMarked": 2,
   "totalModified": 3,
