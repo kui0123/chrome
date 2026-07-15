@@ -1097,7 +1097,7 @@
       return;
     }
     // §7.1.4 弹窗数字使用过滤后的 els.length
-    showConfirm('确定删除选中的 ' + els.length + ' 个元素吗？（删除后可通过“清除所有标记”恢复）', '批量删除确认', function(ok) {
+    showConfirm('确定要删除这 ' + els.length + ' 个元素吗？删除后对应的所有修改也将一并清除。如需恢复请点击"↺"+刷新页面。', '批量删除确认', function(ok) {
       if (!ok) return;
       // §7.1.2 主流程：逐个删除 DOM 元素并写入 domChanges
       els.forEach(function(el) {
@@ -1240,7 +1240,7 @@
     insertSvgIcon(removeBtn, SVG_ICONS.close);
     removeBtn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
-      showConfirm('确定删除此标记吗？', '删除确认', function(ok) {
+      showConfirm('确定要删除这个标记吗？删除后对应的所有修改也将一并清除。如需恢复请点击"↺"+刷新页面。', '删除确认', function(ok) {
         if (ok) removeMark(entry.id);
       });
     }, true);
@@ -2254,7 +2254,7 @@
       showToast('请先在编辑面板中选择一个组件', 'warning');
       return;
     }
-    showConfirm('确定删除此组件及其 DOM 元素吗？（删除后不可恢复）', '删除确认', function(ok) {
+    showConfirm('确定要删除这个元素吗？删除后对应的所有修改也将一并清除。如需恢复请点击"↺"+刷新页面。', '删除确认', function(ok) {
       if (!ok) return;
       const el = entry._el;
       const selector = entry.selector;
@@ -2703,6 +2703,8 @@
       contentP.textContent = content;
       hdmSetStyles(contentP, {
         margin: '0',
+        paddingLeft: '16px',
+        paddingRight: '16px',
         fontSize: '13px',
         lineHeight: '1.6'
       });
@@ -2716,7 +2718,11 @@
     if (type === 'prompt') {
       const field = document.createElement('div');
       field.className = 'html-diff-marker-modal-field';
-      hdmSetStyle(field, 'marginTop', '14px');
+      hdmSetStyles(field, {
+        marginTop: '14px',
+        paddingLeft: '16px',
+        paddingRight: '16px'
+      });
       inputEl = document.createElement('input');
       inputEl.type = 'text';
       inputEl.className = 'html-diff-marker-input';
@@ -4288,7 +4294,7 @@
     removeBtn.textContent = '删除标记';
     removeBtn.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
-      showConfirm('确定删除此标记吗？', '删除确认', function(ok) {
+      showConfirm('确定要删除这个标记吗？删除后对应的所有修改也将一并清除。如需恢复请点击"↺"+刷新页面。', '删除确认', function(ok) {
         if (ok) removeMark(entry.id);
       });
     }, true);
