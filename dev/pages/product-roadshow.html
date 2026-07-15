@@ -182,8 +182,11 @@ body {
 .hero {
   text-align: center;
   padding: 80px 40px 60px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--theme-primary) 3%, #fff) 0%, color-mix(in srgb, var(--theme-primary) 6%, #f5f5f7) 100%);
   position: relative; overflow: hidden;
+  min-height: calc(100vh - 56px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
 }
 .hero::before {
   content: ''; position: absolute;
@@ -218,6 +221,12 @@ body {
   padding: 2px 8px; border-radius: 4px;
   font-family: "SF Mono", Menlo, monospace;
   color: var(--theme-primary);
+}
+.hero-audience {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px;
+  margin-top: 18px; position: relative;
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
 }
 .hero-theme-bar {
   display: flex; align-items: center; justify-content: center;
@@ -286,6 +295,47 @@ body {
 }
 
 /* ================================================================
+   受众区
+   ================================================================ */
+.audience-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  margin-top: 32px;
+}
+.audience-card {
+  background: #fff; border-radius: var(--radius-xl);
+  padding: 24px; box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
+  transition: all var(--transition-base);
+}
+.audience-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--theme-soft-bg);
+  transform: translateY(-2px);
+}
+.audience-icon {
+  font-size: 36px; margin-bottom: 12px;
+}
+.audience-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.audience-card p {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+}
+
+/* A1 Ribbon · 受众区（Hero ↔ 痛点 之间，~80px 高） */
+.audience-chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 14px; border-radius: 999px;
+  background: var(--theme-soft-bg); color: var(--theme-primary);
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+  transition: all var(--transition-base);
+}
+.audience-chip:hover {
+  background: color-mix(in srgb, var(--theme-primary) 14%, #fff);
+}
+
+/* ================================================================
    差异化对比区
    ================================================================ */
 .diff-matrix {
@@ -294,7 +344,7 @@ body {
   box-shadow: var(--shadow-sm); overflow: hidden;
 }
 .diff-matrix-row {
-  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1.1fr;
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr 1.3fr;
   border-bottom: 1px solid var(--border-lighter);
 }
 .diff-matrix-row:last-child { border-bottom: none; }
@@ -315,6 +365,9 @@ body {
   font-weight: 500; color: var(--text-primary);
   background: var(--bg-secondary);
   align-items: flex-start; text-align: left;
+}
+.diff-matrix-row:not(.header) .diff-matrix-cell {
+  min-height: 76px;
 }
 .diff-matrix-row:not(.header) .diff-matrix-cell:not(:first-child) {
   font-size: 12px;
@@ -342,6 +395,61 @@ body {
 }
 .diff-check.partial {
   background: var(--warning-bg); color: var(--warning);
+}
+
+/* Mark2AI 独占列高亮 */
+.diff-matrix-cell.our-col {
+  background: color-mix(in srgb, var(--theme-primary) 8%, #fff);
+  border-left: 2px solid var(--theme-primary);
+}
+.diff-matrix-row.header .diff-matrix-cell.our-col {
+  background: color-mix(in srgb, var(--theme-primary) 12%, var(--bg-secondary));
+}
+
+/* 独占能力行浅底（第 2 列起，避开首列 --bg-secondary） */
+.diff-matrix-row.only-ours .diff-matrix-cell:not(:first-child):not(.our-col) {
+  background: color-mix(in srgb, var(--theme-primary) 4%, #fff);
+}
+.diff-matrix-row.only-ours .diff-matrix-cell.our-col {
+  background: color-mix(in srgb, var(--theme-primary) 12%, #fff);
+}
+
+/* 独占徽章 pill（Mark2AI 对号右侧） */
+.diff-badge-only {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
+  color: var(--theme-primary);
+  background: var(--theme-soft-bg);
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 40%, transparent);
+}
+.diff-matrix-cell.our-col.has-only {
+  position: relative;
+}
+.diff-matrix-cell.our-col.has-only .diff-badge-only {
+  position: absolute;
+  left: calc(50% + 18px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* 首列能力名下副标（M1 微文案） */
+.diff-matrix-cell-note {
+  display: block; margin-top: 2px;
+  font-size: 11px; color: var(--text-tertiary);
+  font-weight: 400; line-height: 1.5;
+}
+
+.diff-legend {
+  margin-top: 20px;
+  display: flex; gap: 24px; justify-content: flex-end;
+  font-size: 12px;
+}
+.diff-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--text-secondary);
 }
 
 .diff-card-grid {
@@ -407,9 +515,10 @@ body {
 
 @media (max-width: 900px) {
   .diff-card-grid { grid-template-columns: 1fr; }
-  .diff-matrix-row { grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; font-size: 11px; }
+  .diff-matrix-row { grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr; font-size: 11px; }
   .diff-matrix-cell { padding: 10px 12px; font-size: 11px; }
   .diff-kicker { flex-direction: column; text-align: center; }
+  .audience-grid { grid-template-columns: 1fr; }
 }
 
 /* ================================================================
@@ -1191,6 +1300,9 @@ body {
     <p class="sub-tagline">
       一键标记 · 调整预览 · 结构化 Diff · 精准实现
     </p>
+    <p class="hero-audience" contenteditable="false" style="">
+      <span class="audience-chip">Vibe Coder</span> | <span class="audience-chip">产品·设计·运营</span> | <span class="audience-chip">无代码创作者</span>
+    </p>
     <div class="hero-theme-bar">
       <div class="theme-dot active" data-theme-target="dusk-purple" title="暮紫"></div>
       <div class="theme-dot" data-theme-target="deep-cyan" title="深藏青"></div>
@@ -1258,7 +1370,7 @@ body {
         <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div>
         <div>
           <h3>真实 DOM 上标记，所见即所得</h3>
-          <p>在任意网页上直接选中真实元素，自动生成编号徽章和 CSS 选择器。不是截图画圈，AI 知道改哪里。</p>
+          <p>在<strong style="color: var(--theme-primary);">任意网页</strong>上直接选中真实元素，自动生成编号徽章和 CSS 选择器。不是截图画圈，AI 知道改哪里。</p>
         </div>
       </div>
 
@@ -1315,7 +1427,7 @@ body {
     <!-- 竞品矩阵 -->
     <div class="diff-matrix">
       <div class="diff-matrix-row header">
-        <div class="diff-matrix-cell">能力</div>
+        <div class="diff-matrix-cell" style="font-size: 17px !important;">能力</div>
         <div class="diff-matrix-cell">
           <span class="diff-matrix-col-title">AI IDE</span>
           <span class="diff-matrix-col-sub">Trae · Cursor</span>
@@ -1325,48 +1437,79 @@ body {
           <span class="diff-matrix-col-sub">CleanShot · 系统</span>
         </div>
         <div class="diff-matrix-cell">
-          <span class="diff-matrix-col-title">设计工具</span>
-          <span class="diff-matrix-col-sub">VisBug · CSS Peeper</span>
+          <span class="diff-matrix-col-title">浏览器编辑扩展</span>
+          <span class="diff-matrix-col-sub">VisBug · DevTools</span>
         </div>
         <div class="diff-matrix-cell">
-          <span class="diff-matrix-col-title" style="color:var(--theme-primary);">Mark2AI</span>
-          <span class="diff-matrix-col-sub our">我们</span>
+          <span class="diff-matrix-col-title">手写描述</span>
+          <span class="diff-matrix-col-sub">记事本 · 聊天框</span>
+        </div>
+        <div class="diff-matrix-cell our-col">
+          <span class="diff-matrix-col-title" style="color: var(--theme-primary); font-size: 15px !important;">Mark2AI</span>
         </div>
       </div>
       <div class="diff-matrix-row">
-        <div class="diff-matrix-cell">浏览器里直接选元素</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell">
+          任意网页可标记（含线上/无源码）
+          <span class="diff-matrix-cell-note">无需为特定站点适配 · 打开即用</span>
+        </div>
         <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
         <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+        <div class="diff-matrix-cell our-col"><span class="diff-check yes">✓</span></div>
       </div>
       <div class="diff-matrix-row">
-        <div class="diff-matrix-cell">可视化编辑样式</div>
-        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell">标记有编号、可批量</div>
         <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
-      </div>
-      <div class="diff-matrix-row">
-        <div class="diff-matrix-cell">多元素批量标记</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
-      </div>
-      <div class="diff-matrix-row">
-        <div class="diff-matrix-cell">导出结构化 Diff</div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
-      </div>
-      <div class="diff-matrix-row">
-        <div class="diff-matrix-cell">面向 AI 协作的输出</div>
         <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
         <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
         <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
-        <div class="diff-matrix-cell"><span class="diff-check yes">✓</span></div>
+        <div class="diff-matrix-cell our-col"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell">可视化拖拽 &amp; 精确样式</div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell our-col"><span class="diff-check yes">✓</span></div>
+      </div>
+      <div class="diff-matrix-row only-ours">
+        <div class="diff-matrix-cell">
+          导出结构化 Diff（含 CSS 选择器 + 前后 HTML）
+        </div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell our-col has-only"><span class="diff-check yes">✓</span><span class="diff-badge-only">独占</span></div>
+      </div>
+      <div class="diff-matrix-row only-ours">
+        <div class="diff-matrix-cell">
+          跨会话 / 刷新 / 重启持久化
+        </div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell our-col has-only"><span class="diff-check yes">✓</span><span class="diff-badge-only">独占</span></div>
+      </div>
+      <div class="diff-matrix-row">
+        <div class="diff-matrix-cell" contenteditable="false" style="">调整超链接 &amp; 上传预览图</div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell our-col has-only"><span class="diff-check yes">✓</span><span class="diff-badge-only">独占</span></div>
+      </div>
+      <div class="diff-matrix-row only-ours">
+        <div class="diff-matrix-cell" contenteditable="false" style="left: 0px !important; top: -1px !important;">捕获任意元素的设计代码</div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check partial">△</span></div>
+        <div class="diff-matrix-cell"><span class="diff-check no">✗</span></div>
+        <div class="diff-matrix-cell our-col has-only"><span class="diff-check yes">✓</span><span class="diff-badge-only">独占</span></div>
       </div>
     </div>
 
@@ -1377,8 +1520,8 @@ body {
         <div class="diff-card-icon">💻</div>
         <div class="diff-card-body">
           <div class="diff-card-vs">VS AI IDE · Trae / Cursor / Bolt.new</div>
-          <h3>只能操作自己的项目，还不能拖拽</h3>
-          <p class="solution"><strong>别人的网站、线上页面、本地 HTML，甚至打不开源码的页面，都能标记。</strong>不仅能选，还能直接拖拽调整位置和大小。</p>
+          <h3>只能操作自己的项目，且需要配置</h3>
+          <p class="solution"><strong class="" contenteditable="false" style="">别人的网站、线上页面、本地 HTML —— 装上扩展打开即用。</strong>不仅能选，还能拖拽调整位置和大小。</p>
         </div>
       </div>
 
@@ -1394,7 +1537,7 @@ body {
       <div class="diff-card">
         <div class="diff-card-icon">🔧</div>
         <div class="diff-card-body">
-          <div class="diff-card-vs">VS 浏览器调试 · VisBug / DevTools</div>
+          <div class="diff-card-vs">VS 浏览器编辑扩展 · VisBug / DevTools</div>
           <h3>能调样式，但调完就没了</h3>
           <p class="solution"><strong>标记有编号、编辑有记录、一键导出 Diff。</strong>不是调试工具，是需求描述工具。</p>
         </div>
@@ -1918,7 +2061,7 @@ body {
   <div class="cta">
     <h2>标记一下，AI 改得比你说的还准</h2>
     <p>Chrome 扩展，一键安装。点选元素，调好样式，导出 Diff 发给 AI —— 一次改全，零歧义。</p>
-    <a href="#" class="cta-btn">立即体验</a>
+    <a href="/chrome/Mark2AI.zip" class="cta-btn" download="Mark2AI.zip">立即体验</a>
   </div>
 
   <!-- 页面底部 -->
