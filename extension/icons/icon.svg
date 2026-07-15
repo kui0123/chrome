@@ -1,0 +1,21 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mark2AI">
+  <defs>
+    <!-- C1 深墨黑 Graphite / Ink（135° 浅→深，固定品牌色，不随主题变化） -->
+    <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#334155"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <!-- 品牌底：圆角方块 + C1 深墨黑渐变 -->
+  <rect x="6" y="6" width="116" height="116" rx="30" fill="url(#brandGrad)"/>
+  <!-- 极简线性符号：斜置 45° 标签牌 tag -->
+  <g transform="rotate(-45 64 64)">
+    <!-- 标签牌轮廓：右端圆角矩形、左端收成尖角 -->
+    <path d="M56 34 L96 34 A8 8 0 0 1 104 42 L104 86 A8 8 0 0 1 96 94 L56 94 L34 64 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 打孔圆点（靠近尖角） -->
+    <circle cx="53" cy="64" r="5.5" fill="#FFFFFF"/>
+  </g>
+</svg>

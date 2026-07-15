@@ -4491,7 +4491,7 @@
     const descWrap = document.createElement('div');
     descWrap.className = 'html-diff-marker-field-row';
     const descLabel = document.createElement('label');
-    descLabel.textContent = '修改说明（给 AI Agent 看）';
+    descLabel.textContent = '修改说明';
     descWrap.appendChild(descLabel);
     const descTa = document.createElement('textarea');
     descTa.rows = 3;
@@ -4819,7 +4819,7 @@
     out += '\n';
     out += '---\n\n';
     out += '## 给 AI Agent 的指令\n\n';
-    out += '请根据以下每个组件的 "原始 HTML" 和 "修改后的 HTML/样式"，分析差异并理解设计意图，对项目中相应组件进行同样风格的代码修改。\n\n';
+    out += '请根据以下每个组件的 "原始 HTML" 和 "修改后的 HTML/样式" 逐一执行代码修改。在开始修改前，请先仔细阅读提供的修改说明，充分理解设计意图后再进行操作。执行过程中，如果发现不确认的修改内容，或者当前修改与项目中其他设计存在冲突，请立即停止修改并先与用户确认相关问题，得到明确答复后再继续执行修改操作。确保每一处修改都准确无误，符合设计要求，不会影响项目其他部分的正常功能。\n\n';
     out += '---\n\n';
     d.items.forEach(item => {
       out += '## ' + (item.tag ? item.tag + ' - ' : '') + '组件 #' + item.index + '\n\n';
@@ -4827,7 +4827,7 @@
       out += '- **CSS 选择器**: `' + item.selector + '`\n';
       out += '- **状态**: ' + (item.hasChange ? '**已修改**' : '仅标记，无修改') + '\n';
       if (item.note) out += '- **组件标签**: ' + item.note + '\n';
-      if (item.description) out += '- **修改说明（给 AI Agent 看）**: ' + item.description + '\n';
+      if (item.description) out += '- **修改说明**: ' + item.description + '\n';
       if (item.hrefChange && item.hrefChange.modified !== undefined && item.hrefChange.modified !== item.hrefChange.original) {
         out += '- **href 变更**: `' + (item.hrefChange.original || '(空)') + '` → `' + item.hrefChange.modified + '`\n';
       } else if (item.hrefChange && item.hrefChange.modified !== undefined && item.hrefChange.modified !== '') {
