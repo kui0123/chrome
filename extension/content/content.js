@@ -1002,37 +1002,60 @@
   }
 
   function batchRemoveMarks() {
-    const els = state.multiSelectedEls;
-    if (els.length === 0) {
-      showToast('请先选择要删除标记的元素', 'warning');
+    // §7.1.1 防御性拷贝，避免引用被 clearMultiSelect 影响
+    const rawEls = state.multiSelectedEls.slice();
+    if (rawEls.length === 0) {
+      showToast('请先选择要删除的元素', 'warning');
       return;
     }
-    const count = els.length;
-    showConfirm('确定删除选中的 ' + count + ' 个标记吗？', '批量删除确认', function(ok) {
+    // §7.1.1 前置分流：过滤掉属于任何 group 的成员元素
+    const skippedGroupEls = [];
+    const els = rawEls.filter(function(el) {
+      const entry = state.markedElements.find(m => m._el === el && m.type !== 'group');
+      if (entry && isEntryInGroup(entry.id)) {
+        skippedGroupEls.push(el);
+        return false;
+      }
+      return true;
+    });
+    // 全跳过：不弹 confirm，直接 toast 提示
+    if (els.length === 0 && skippedGroupEls.length > 0) {
+      showToast('选中的元素均为组合成员，请先在组合面板中操作', 'warning');
+      return;
+    }
+    if (els.length === 0) {
+      showToast('请先选择要删除的元素', 'warning');
+      return;
+    }
+    // §7.1.4 弹窗数字使用过滤后的 els.length
+    showConfirm('确定删除选中的 ' + els.length + ' 个元素吗？（删除后可通过“清除所有标记”恢复）', '批量删除确认', function(ok) {
       if (!ok) return;
-      const ids = [];
+      // §7.1.2 主流程：逐个删除 DOM 元素并写入 domChanges
       els.forEach(function(el) {
-        let entry = state.markedElements.find(m => m._el === el && m.type !== 'group');
-        // 如果元素未标记，先标记再删除
-        if (!entry) {
-          const selector = buildSelector(el);
-          entry = {
-            id: uid(), selector: selector, tag: el.tagName.toLowerCase(),
-            note: elementInfo(el),
-            originalHTML: getOuterHTML(el), modifiedHTML: null,
-            originalStyles: null, modifiedStyles: {},
-            originalHref: el.tagName === 'A' ? el.getAttribute('href') : undefined,
-            modifiedHref: undefined,
-            _el: el
-          };
-          state.markedElements.push(entry);
-          applyMarkVisual(entry);
+        const entry = state.markedElements.find(m => m._el === el && m.type !== 'group');
+        // 在 removeChild 之前计算删除元数据
+        stripMarkerChildren(el);
+        const deletedHTML = el.outerHTML;
+        const selector = entry ? entry.selector : buildSelector(el);
+        const parentSelector = el.parentNode ? buildSelector(el.parentNode) : null;
+        const nextSiblingSelector = el.nextSibling && el.nextSibling.nodeType === 1 ? buildSelector(el.nextSibling) : null;
+        state.domChanges.push({ type: 'delete', selector: selector, deletedHTML: deletedHTML, parentSelector: parentSelector, nextSiblingSelector: nextSiblingSelector });
+        if (entry) {
+          state.markedElements = state.markedElements.filter(m => m.id !== entry.id);
+          if (state.currentEditId === entry.id) closeInspector();
         }
-        if (entry) ids.push(entry.id);
+        if (el.parentNode) el.parentNode.removeChild(el);
       });
-      ids.forEach(function(id) { removeMark(id); });
+      // §7.1.3 末尾收尾（顺序不可颠倒）
+      saveState();
       clearMultiSelect();
-      showToast('已删除 ' + ids.length + ' 个标记', 'success');
+      updateToolbarCounts();
+      // toast 文案（三态）
+      if (skippedGroupEls.length === 0) {
+        showToast('已删除 ' + els.length + ' 个元素', 'success');
+      } else {
+        showToast('已删除 ' + els.length + ' 个元素，另有 ' + skippedGroupEls.length + ' 个组合成员已跳过', 'warning');
+      }
     });
   }
 
