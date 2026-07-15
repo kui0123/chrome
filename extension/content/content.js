@@ -7,6 +7,7 @@
   // ================ 常量与状态 ================
   const STATE_KEY = 'htmlDiffMarker_' + location.href;
   const POS_KEY = 'htmlDiffMarkerPos_' + location.href;
+  const INSPECTOR_STATE_KEY = 'htmlDiffMarker_inspectorState_' + location.href;
   const FONT_OPTIONS = [
     { value: '', label: '(默认字体)' },
     { value: '', label: '── 中文字体 ──', disabled: true },
@@ -113,6 +114,37 @@
     }
   }
 
+  function loadInspectorState() {
+    try {
+      const raw = sessionStorage.getItem(INSPECTOR_STATE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return {};
+      return {
+        pos: parsed.pos || null,
+        size: parsed.size || null,
+        collapsed: !!parsed.collapsed
+      };
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveInspectorState(patch) {
+    try {
+      const current = loadInspectorState();
+      const next = {
+        pos: current.pos || null,
+        size: current.size || null,
+        collapsed: !!current.collapsed
+      };
+      if (patch && Object.prototype.hasOwnProperty.call(patch, 'pos')) next.pos = patch.pos;
+      if (patch && Object.prototype.hasOwnProperty.call(patch, 'size')) next.size = patch.size;
+      if (patch && Object.prototype.hasOwnProperty.call(patch, 'collapsed')) next.collapsed = !!patch.collapsed;
+      sessionStorage.setItem(INSPECTOR_STATE_KEY, JSON.stringify(next));
+    } catch (e) {}
+  }
+
   // ---------- 字体预览检测 ----------
   // 检测字体是否可用（三态：success/info/warning）
   function checkFontAvailable(fontFamily) {
@@ -191,6 +223,43 @@
         chrome.storage.local.set({ htmlDiffMarker_customFonts: customFonts });
       }
     } catch (e) { /* 忽略持久化错误 */ }
+    return true;
+  }
+
+  // 删除自定义字体，并尽量只影响当前正在编辑的元素。
+  function removeCustomFont(fontValue, currentEntry) {
+    if (!fontValue) return false;
+    const beforeLen = customFonts.length;
+    customFonts = customFonts.filter(function(f) { return f.value !== fontValue; });
+    if (customFonts.length === beforeLen) return false;
+
+    try {
+      if (chrome && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ htmlDiffMarker_customFonts: customFonts });
+      }
+    } catch (e) { /* 忽略持久化错误 */ }
+
+    let currentCleared = false;
+    if (currentEntry && currentEntry.modifiedStyles && currentEntry.modifiedStyles.fontFamily === fontValue) {
+      applyStyleChange(currentEntry, 'fontFamily', '');
+      applyMarkVisual(currentEntry);
+      currentCleared = true;
+    }
+
+    const otherRefs = state.markedElements.filter(function(m) {
+      return (!currentEntry || m.id !== currentEntry.id) &&
+        m.modifiedStyles &&
+        m.modifiedStyles.fontFamily === fontValue;
+    }).length;
+
+    if (otherRefs > 0) {
+      showToast('自定义字体已删除；' + otherRefs + ' 个其他标记仍保留该字体值', 'warning');
+    } else if (currentCleared) {
+      showToast('自定义字体已删除，并已清理当前元素字体', 'success');
+    } else {
+      showToast('自定义字体已删除', 'success');
+    }
+    saveState();
     return true;
   }
 
@@ -3377,6 +3446,7 @@
       const rect = state.inspectorEl.getBoundingClientRect();
       if (rect && rect.left > 0 && rect.top > 0) {
         state.inspectorPos = { left: rect.left, top: rect.top };
+        saveInspectorState({ pos: state.inspectorPos });
       }
       state.inspectorEl.remove();
       state.inspectorEl = null;
@@ -3414,7 +3484,10 @@
   }
 
   function openInspector(id) {
-    const savedPos = state.inspectorPos;
+    const savedInspectorState = loadInspectorState();
+    const savedPos = savedInspectorState.pos || state.inspectorPos;
+    const savedSize = savedInspectorState.size || state.inspectorSize;
+    const savedCollapsed = !!savedInspectorState.collapsed;
     closeInspector();
     const entry = state.markedElements.find(m => m.id === id);
     if (!entry) return;
@@ -3462,16 +3535,19 @@
         savedInlineWidth = panel.style.getPropertyValue('width') || '';
         panel.style.removeProperty('height');
         panel.style.removeProperty('width');
+        saveInspectorState({ collapsed: true });
       } else {
         // 展开时优先从持久化的 state.inspectorSize 恢复高度
         // 局部变量 savedInlineHeight 仅用于同一次打开内的折叠/展开快速恢复
         let restoreHeight = savedInlineHeight;
         let restoreWidth = savedInlineWidth;
-        if (!restoreHeight && state.inspectorSize && state.inspectorSize.height) {
-          restoreHeight = state.inspectorSize.height + 'px';
+        const storedState = loadInspectorState();
+        const storedSize = storedState.size || state.inspectorSize;
+        if (!restoreHeight && storedSize && storedSize.height) {
+          restoreHeight = storedSize.height + 'px';
         }
-        if (!restoreWidth && state.inspectorSize && state.inspectorSize.width) {
-          restoreWidth = state.inspectorSize.width + 'px';
+        if (!restoreWidth && storedSize && storedSize.width) {
+          restoreWidth = storedSize.width + 'px';
         }
         if (restoreHeight) {
           panel.style.setProperty('height', restoreHeight, 'important');
@@ -3479,6 +3555,7 @@
         if (restoreWidth) {
           panel.style.setProperty('width', restoreWidth, 'important');
         }
+        saveInspectorState({ collapsed: false });
       }
     }, true);
     headerBtns.appendChild(collapseBtn);
@@ -3870,6 +3947,12 @@
           if (sp.key === 'fontFamily' && fontHintEl) {
             updateFontHint(fontHintEl, this.value);
           }
+          const removeBtn = propControl.querySelector('.html-diff-marker-remove-font-btn');
+          if (removeBtn) {
+            const selectedValue = this.value;
+            const isCustomFont = customFonts.some(function(f) { return f.value === selectedValue; });
+            hdmSetStyle(removeBtn, 'display', isCustomFont ? 'inline-flex' : 'none');
+          }
         });
         selWrap.appendChild(sel);
         const arrow = document.createElement('span');
@@ -3900,6 +3983,26 @@
             });
           }, true);
           propControl.appendChild(addFontBtn);
+
+          const removeFontBtn = document.createElement('button');
+          removeFontBtn.className = 'html-diff-marker-btn--icon html-diff-marker-remove-font-btn';
+          removeFontBtn.textContent = '−';
+          removeFontBtn.setAttribute('title', '删除当前自定义字体');
+          const selectedIsCustomFont = customFonts.some(function(f) { return f.value === sel.value; });
+          hdmSetStyle(removeFontBtn, 'display', selectedIsCustomFont ? 'inline-flex' : 'none');
+          removeFontBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            const currentFont = sel.value;
+            const isCustomFont = customFonts.some(function(f) { return f.value === currentFont; });
+            if (!isCustomFont) {
+              showToast('只能删除自定义字体', 'warning');
+              return;
+            }
+            if (removeCustomFont(currentFont, entry)) {
+              openInspector(entry.id);
+            }
+          }, true);
+          propControl.appendChild(removeFontBtn);
         }
 
         propRow.appendChild(propControl);
@@ -4238,9 +4341,17 @@
         document.body.style.cursor = '';
         const rect = panel.getBoundingClientRect();
         state.inspectorSize = { width: rect.width, height: rect.height };
+        if (!panel.classList.contains('html-diff-marker-collapsed')) {
+          saveInspectorState({ size: state.inspectorSize });
+        }
       }
     }, true);
     panel.appendChild(resizeHandle);
+
+    if (savedCollapsed) {
+      panel.classList.add('html-diff-marker-collapsed');
+      insertSvgIcon(collapseBtn.querySelector('.collapse-icon'), SVG_ICONS.plus);
+    }
 
     document.body.appendChild(panel);
     state.inspectorEl = panel;
@@ -4257,10 +4368,10 @@
     }
 
     // 恢复面板大小
-    if (state.inspectorSize && state.inspectorSize.width && state.inspectorSize.height) {
+    if (!savedCollapsed && savedSize && savedSize.width && savedSize.height) {
       const sizeStyles = {
-        width: state.inspectorSize.width + 'px',
-        height: state.inspectorSize.height + 'px'
+        width: savedSize.width + 'px',
+        height: savedSize.height + 'px'
       };
       // 仅在已有自定义位置时清除 bottom/right，避免覆盖默认 CSS 位置
       if (savedPos && savedPos.left !== undefined && savedPos.top !== undefined) {
@@ -4273,13 +4384,16 @@
     // 面板可拖拽
     makeDraggable(panel, header, function(l, t) {
       state.inspectorPos = { left: l, top: t };
+      saveInspectorState({ pos: state.inspectorPos });
     });
     panel.addEventListener('click', function(e) { e.stopPropagation(); }, false);
   }
 
   // ---------- 组合编辑面板 ----------
   function openGroupInspector(groupId) {
-    const savedPos = state.inspectorPos;
+    const savedInspectorState = loadInspectorState();
+    const savedPos = savedInspectorState.pos || state.inspectorPos;
+    const savedCollapsed = !!savedInspectorState.collapsed;
     closeInspector();
     const groupEntry = state.markedElements.find(m => m.id === groupId);
     if (!groupEntry || groupEntry.type !== 'group') return;
@@ -4315,6 +4429,7 @@
         groupSavedInlineWidth = panel.style.getPropertyValue('width') || '';
         panel.style.removeProperty('height');
         panel.style.removeProperty('width');
+        saveInspectorState({ collapsed: true });
       } else {
         // 展开时优先从持久化的 state.inspectorSize 恢复高度
         // 局部变量 groupSavedInlineHeight 仅用于同一次打开内的折叠/展开快速恢复
@@ -4332,6 +4447,7 @@
         if (restoreWidth) {
           panel.style.setProperty('width', restoreWidth, 'important');
         }
+        saveInspectorState({ collapsed: false });
       }
     }, true);
     btnGroup.appendChild(collapseBtn);
@@ -4540,6 +4656,11 @@
     footer.appendChild(saveBtn);
     panel.appendChild(footer);
 
+    if (savedCollapsed) {
+      panel.classList.add('html-diff-marker-collapsed');
+      insertSvgIcon(collapseBtn.querySelector('.collapse-icon'), SVG_ICONS.plus);
+    }
+
     document.body.appendChild(panel);
     state.inspectorEl = panel;
 
@@ -4565,6 +4686,7 @@
     }
     makeDraggable(panel, header, function(l, t) {
       state.inspectorPos = { left: l, top: t };
+      saveInspectorState({ pos: state.inspectorPos });
     });
     panel.addEventListener('click', function(e) { e.stopPropagation(); }, false);
   }
