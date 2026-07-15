@@ -18,3 +18,4 @@ build/
 # 大体积开发资源（可选排除，按需开关）
 # dev/tests/test-screenshots/
 # design/首页设计.zip
+*.mp4
