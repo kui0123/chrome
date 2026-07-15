@@ -1,0 +1,37 @@
+.trae/bugs/BugReport-多选删除功能失效-弹窗后页面无变化.md
+  s_b49501acb996f6::t_b3637c8d63ec3d 50,74,154-227,297
+  s_b49501acb996f6::t_7c4119fe2e3184 239-240
+  s_b49501acb996f6::t_09b2c13b3f154d 250-264
+  s_b49501acb996f6::t_ec86d0ffa991d8 47-49
+  s_b49501acb996f6::t_3fd30c519e1d9c 51-53,71-73
+  s_b49501acb996f6::t_b2bf8c41232780 75-77,151-153
+  s_b49501acb996f6::t_d87229885316f1 228-230,236-238
+  s_b49501acb996f6::t_fda49607b12d22 241-243,247-249
+  s_b49501acb996f6::t_55ec4c9ec1248f 265-267,294-296
+  s_b49501acb996f6::t_abd4fc3d3452e4 298-300
+extension/content/content.js
+  s_b49501acb996f6::t_b82a42f2b54117 1005-1025,1027,1030-1031,1033,1035-1045,1047,1049-1050,1052-1058
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9ac5ea8ca44558045620b111092c72925a982d3d",
+  "prompts": {},
+  "humans": {
+    "h_f17389cc6149cd": {
+      "author": "Developer <dev@local>"
+    }
+  },
+  "sessions": {
+    "s_b49501acb996f6": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a56e0698ace6c16847f2241",
+        "model": "openrouter-2o__max"
+      },
+      "human_author": "Developer <dev@local>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
