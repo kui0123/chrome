@@ -2313,8 +2313,8 @@
       if (!preset) themeId = 'dusk-purple';
       this.currentTheme = themeId;
       this.customColor = null;
-      // 清除 body 上的自定义主题内联变量，让 CSS 类选择器的预设主题生效
-      const style = document.body.style;
+      // 清除 documentElement 上的自定义主题内联变量，让 CSS 类选择器的预设主题生效
+      const style = document.documentElement.style;
       style.removeProperty('--hdm-theme-primary');
       style.removeProperty('--hdm-theme-primary-light');
       style.removeProperty('--hdm-theme-primary-dark');
@@ -2325,7 +2325,7 @@
       style.removeProperty('--hdm-theme-count-text');
       style.removeProperty('--hdm-theme-shadow');
       style.removeProperty('--hdm-theme-alpha-20');
-      document.body.setAttribute('data-theme', themeId);
+      document.documentElement.setAttribute('data-theme', themeId);
       this._saveToStorage({ type: 'preset', themeId: themeId });
     },
 
@@ -2336,17 +2336,17 @@
       hexColor = hexColor.toUpperCase();
       this.currentTheme = 'custom';
       this.customColor = hexColor;
-      // 计算衍生色并应用到 body 的 CSS 变量
+      // 计算衍生色并应用到 documentElement 的 CSS 变量
       const colors = deriveColors(hexColor);
       this._applyCustomColors(colors);
-      document.body.setAttribute('data-theme', 'custom');
+      document.documentElement.setAttribute('data-theme', 'custom');
       this._saveToStorage({ type: 'custom', color: hexColor });
       return true;
     },
 
     // 应用自定义颜色的 CSS 变量
     _applyCustomColors: function(colors) {
-      const style = document.body.style;
+      const style = document.documentElement.style;
       style.setProperty('--hdm-theme-primary', colors.primary);
       style.setProperty('--hdm-theme-primary-light', colors.light);
       style.setProperty('--hdm-theme-primary-dark', colors.dark);
