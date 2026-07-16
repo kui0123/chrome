@@ -1778,7 +1778,7 @@ body {
         <div class="workflow-step-num">3</div>
         <div class="workflow-step-content">
           <h3>批量管理，组合后还能整体缩放/拖拽</h3>
-          <p>标了十几个元素？多选工具栏一键搞定：组合标记、批量复制、统一删除。组合后的标记框支持整体拖拽移动，按住 Ctrl/⌘ 滚轮可整体缩放显示，并同步缩放子元素。底部计数实时同步，改了几个一目了然。</p>
+          <p>标了十几个元素？多选工具栏一键搞定：组合标记、批量复制、统一删除。组合后的标记框支持整体拖拽移动。底部计数实时同步，改了几个一目了然。</p>
           <div class="workflow-step-tags">
             <span class="workflow-tag">多选批量操作</span>
             <span class="workflow-tag">组合标记</span>
@@ -2409,6 +2409,9 @@ body {
   var decayRafId = null;          // 速度衰减 rAF ID
   var isProgrammaticScroll = false; // 程序化滚动标志（导航点击/键盘/吸附动画）
   var isScrollbarDragging = false; // 滚动条拖动标志
+  var isScrollbarDragCandidate = false; // 滚动条拖动候选状态（mousedown 时标记，mousemove 确认）
+  var dragStartX = 0;             // mousedown 时鼠标 X 坐标
+  var dragStartY = 0;             // mousedown 时鼠标 Y 坐标
   var reducedMotion = false;      // 是否减少动画
   // v6 新增：导航程序化滚动兜底定时器
   // 用于防止 handleNavClick 设置 isProgrammaticScroll 后，
@@ -2448,7 +2451,7 @@ body {
       var rect = el.getBoundingClientRect();
       var offsetTop = rect.top + window.pageYOffset;
       var height = rect.height;
-      var centerY = offsetTop + height / 2 - window.innerHeight / 2 + CONFIG.navHeight / 2;
+      var centerY = offsetTop + height / 2 - window.innerHeight / 2 - CONFIG.navHeight / 2;
       centerY = Math.max(0, centerY);
       sections.push({
         el: el,
@@ -2597,6 +2600,7 @@ body {
       rafId = null;
     }
     isSnapping = false;
+    isHighVelocity = false;
     // 清除程序化滚动标志（导航/键盘/吸附动画均可能设置）
     isProgrammaticScroll = false;
     // v5 新增：重置高速意图标志
@@ -2967,15 +2971,30 @@ body {
   function handleMouseDown(e) {
     if (e.clientX >= window.innerWidth - CONFIG.scrollbarDetectWidth ||
         e.clientY >= window.innerHeight - CONFIG.scrollbarDetectWidth) {
+      isScrollbarDragCandidate = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+    }
+  }
+
+  function handleMouseMove(e) {
+    if (!isScrollbarDragCandidate || isScrollbarDragging) {
+      return;
+    }
+    var dx = Math.abs(e.clientX - dragStartX);
+    var dy = Math.abs(e.clientY - dragStartY);
+    if (dx > 5 || dy > 5) {
       isScrollbarDragging = true;
+      isScrollbarDragCandidate = false;
     }
   }
 
   function handleMouseUp() {
+    isScrollbarDragCandidate = false;
     if (isScrollbarDragging) {
       setTimeout(function() {
         isScrollbarDragging = false;
-      }, CONFIG.scrollEndDelay + 50);
+      }, 100);
     }
   }
 
@@ -3005,6 +3024,7 @@ body {
 
     // 滚动条拖动检测
     window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
 
     // 顶部导航点击集成
@@ -3022,6 +3042,8 @@ body {
       isHighVelocity = false;
       hasHighVelocityIntent = false; // v5 新增
       velocity = 0;
+      lastScrollY = window.pageYOffset;
+      lastScrollTime = performance.now();
       startSectionIndex = -1;
       isScrollbarDragging = false;
       isProgrammaticScroll = false;

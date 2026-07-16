@@ -652,7 +652,7 @@
       if (!dragging) return;
       e.preventDefault(); e.stopPropagation();
       const nx = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, origX + (e.clientX - startX)));
-      const ny = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, origY + (e.clientY - startY)));
+      const ny = Math.max(8, Math.min(window.innerHeight - el.offsetHeight, origY + (e.clientY - startY)));
       hdmSetStyle(el, 'left', nx + 'px');
       hdmSetStyle(el, 'top', ny + 'px');
       if (onPos) onPos(nx, ny);
@@ -2545,8 +2545,14 @@
           });
           break;
         case 'path':
-          if (el.getAttribute('d') !== null)
-            el.style.setProperty('d', 'path("' + el.getAttribute('d') + '")', 'important');
+          if (el.getAttribute('d') !== null) {
+            var dValue = el.getAttribute('d');
+            var escapedD = dValue
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, ' ');
+            el.style.setProperty('d', 'path("' + escapedD + '")', 'important');
+          }
           break;
         case 'line':
           ['x1', 'y1', 'x2', 'y2'].forEach(function(a) {
@@ -3151,20 +3157,49 @@
       const toolbarRect = toolbarEl.getBoundingClientRect();
       const panelWidth = 300;
       let left = toolbarRect.left;
-      let top = toolbarRect.bottom;
       // 边界检测
       if (left < 8) left = 8;
       if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
-      // 如果下方空间不足，则显示在工具栏上方
-      if (top + 420 > window.innerHeight - 8) {
-        top = toolbarRect.top - 420;
+
+      // 临时禁用动画以准确测量面板高度（防动画干扰）
+      const prevAnimation = panel.style.animation;
+      panel.style.animation = 'none';
+      // 触发 reflow 确保获取准确高度
+      const panelHeight = panel.offsetHeight;
+      panel.style.animation = prevAnimation;
+
+      // 计算上下可用空间
+      const spaceBelow = window.innerHeight - toolbarRect.bottom - 8;
+      const spaceAbove = toolbarRect.top - 8;
+
+      let top;
+      let maxHeight = null;
+
+      if (spaceBelow >= panelHeight) {
+        // 下方够放，优先放下方
+        top = toolbarRect.bottom;
+      } else if (spaceAbove >= panelHeight) {
+        // 上方够放，放上方
+        top = toolbarRect.top - panelHeight;
+      } else {
+        // 上下都不够，优先放下方并限高
+        top = toolbarRect.bottom;
+        maxHeight = spaceBelow;
       }
-      hdmSetStyles(panel, {
+
+      // 确保 top 值不小于 8px
+      if (top < 8) top = 8;
+
+      const panelStyles = {
         position: 'fixed',
         left: left + 'px',
         top: top + 'px',
         transform: 'none'
-      });
+      };
+      if (maxHeight !== null) {
+        panelStyles.maxHeight = maxHeight + 'px';
+      }
+      hdmSetStyles(panel, panelStyles);
     } else {
       hdmSetStyles(panel, {
         position: 'fixed',
@@ -4317,7 +4352,7 @@
     const resizeHandle = document.createElement('div');
     resizeHandle.className = 'html-diff-marker-resize-handle-se';
     resizeHandle.setAttribute('title', '拖拽调整面板大小');
-    let resizing = false, rStartX = 0, rStartY = 0, rStartW = 0, rStartH = 0;
+    let resizing = false, rStartX = 0, rStartY = 0, rStartW = 0, rStartH = 0, rStartTop = 0, rStartLeft = 0;
     resizeHandle.addEventListener('mousedown', function(e) {
       e.preventDefault(); e.stopPropagation();
       if (e.button !== 0) return;
@@ -4325,6 +4360,7 @@
       rStartX = e.clientX; rStartY = e.clientY;
       const rect = panel.getBoundingClientRect();
       rStartW = rect.width; rStartH = rect.height;
+      rStartTop = rect.top; rStartLeft = rect.left;
       document.body.style.userSelect = 'none';
       document.body.style.cursor = 'nwse-resize';
     }, true);
@@ -4336,6 +4372,8 @@
       hdmSetStyles(panel, {
         width: newW + 'px',
         height: newH + 'px',
+        left: rStartLeft + 'px',
+        top: rStartTop + 'px',
         right: 'auto',
         bottom: 'auto'
       });
