@@ -2201,17 +2201,6 @@ body {
     document.addEventListener('touchend', endDrag);
   });
 
-  // 平滑滚动
-  document.querySelectorAll('.top-nav-links a').forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
-      }
-    });
-  });
-
   // ================ 自定义主题色 ================
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
@@ -2335,21 +2324,25 @@ body {
 
 <script>
 /* ================================================================
-   滚动锚定 · 大幅滑动吸附到模块中心（混合滚动模式 v6）
+   滚动锚定 · 高速跨模块后吸附到导航栏下方的模块起点
    ================================================================ */
 (function() {
   'use strict';
 
   // ===== 配置参数 =====
   var CONFIG = {
-    // 高速阈值：超过此值判定为"大幅滚动"，可能触发吸附 (px/ms)
+    // 连续有效样本达到此速度后，锁存本次会话的高速资格 (px/ms)
     velocityHighThreshold: 1.5,
-    // 低速回落阈值：低于此值判定为"低速滚动"，退出高速态 (px/ms)
+    // 低速状态仅用于实时观测，不会清除已经锁存的高速资格 (px/ms)
     velocityLowThreshold: 0.6,
-    // 速度衰减系数（每帧乘以该值，越接近1衰减越慢）
-    velocityDecay: 0.92,
-    // 滚动停止判定：距上次 scroll 事件超过此时间认为滚动停止，开始衰减 (ms)
-    velocityStopThreshold: 16,
+    // 有效样本的最小位移 (px)
+    validSampleDistance: 0.5,
+    // 锁存高速资格所需的连续高速样本数
+    requiredHighSampleCount: 2,
+    // 自动吸附所需的会话最小净位移 (px)
+    minSessionDistance: 120,
+    // 间隙方向上下文的有效时间 (ms)
+    directionValidityDuration: 120,
     // 滚动结束检测：连续多少 ms 无位移判定为停止（首轮延迟）
     scrollEndDelay: 120,
     // 稳定检测重试间隔 (ms)
@@ -2358,24 +2351,14 @@ body {
     stableMaxRetries: 10,
     // 吸附动画时长 (ms)
     snapDuration: 500,
-    // 最小吸附距离：当前位置离目标中心超过此距离才吸附（避免微小移动）
-    minSnapDistance: 40,
-    // 顶部导航高度（用于精确计算视口中心）
-    navHeight: 56,
-    // 原有导航偏移量（与现有导航逻辑一致：target.offsetTop - 70）
-    navScrollOffset: 70,
+    // 锚点到达容差 (px)
+    anchorTolerance: 2,
+    // 顶部导航高度读取失败时的回退值 (px)
+    fallbackNavHeight: 56,
     // resize 防抖延迟 (ms)
     resizeDebounce: 150,
-    // 方向吸附权重：方向上的模块距离乘以该系数，鼓励方向一致的模块
-    directionBias: 0.7,
     // 滚动条检测宽度 (px)
-    scrollbarDetectWidth: 20,
-    // v6 新增：导航点击位置预判阈值 (px)
-    // 目标位置与当前位置差异小于此值时，不设置程序化滚动标志
-    navPositionThreshold: 10,
-    // v6 新增：导航程序化滚动兜底超时 (ms)
-    // 设置 isProgrammaticScroll 后，若超过此时间位置未变化，强制清除标志
-    navProgrammaticFallbackTimeout: 2000
+    scrollbarDetectWidth: 20
   };
 
   // ===== 锚定模块选择器列表（按从上到下顺序，共 7 个） =====
@@ -2390,35 +2373,35 @@ body {
   ];
 
   // ===== 状态变量 =====
-  var sections = [];              // 模块位置缓存
-  var lastScrollY = 0;            // 上一次滚动位置（用于稳定检测）
-  var lastScrollTime = 0;         // 上一次滚动时间戳
-  var lastVelocityUpdateTime = 0; // 最后一次 velocity 更新时间（衰减判定）
-  var velocity = 0;               // 当前瞬时速度（低通滤波后）
-  var isSnapping = false;         // 是否正在执行吸附动画
-  var isHighVelocity = false;     // 当前滚动是否为高速态（滞回，受衰减影响）
-  // v5 新增：高速滚动意图标志（与 isHighVelocity 分离，不受衰减影响）
-  // 表示"本轮滚动中用户曾经快速滚动过"，仅在明确节点重置
-  var hasHighVelocityIntent = false;
-  var scrollDirection = 0;        // 滚动方向：1 向下，-1 向上，0 未知
-  var startSectionIndex = -1;     // 高速滚动开始时所在模块索引
-  var scrollStableTimer = null;   // 滚动稳定检测定时器
-  var stableRetryCount = 0;       // 稳定检测重试计数
-  var resizeTimer = null;         // resize 防抖定时器（模块级作用域）
-  var rafId = null;               // 动画 rAF ID
-  var decayRafId = null;          // 速度衰减 rAF ID
-  var isProgrammaticScroll = false; // 程序化滚动标志（导航点击/键盘/吸附动画）
-  var isScrollbarDragging = false; // 滚动条拖动标志
+  var sections = [];
+  var navHeight = CONFIG.fallbackNavHeight;
+  var maxScrollY = 0;
+  var lastScrollY = window.pageYOffset;
+  var currentSampleSpeed = 0;
+  var isLowVelocity = true;
+  var isSnapping = false;
+  var isProgrammaticScroll = false;
+  var isScrollbarDragging = false;
   var isScrollbarDragCandidate = false; // 滚动条拖动候选状态（mousedown 时标记，mousemove 确认）
-  var dragStartX = 0;             // mousedown 时鼠标 X 坐标
-  var dragStartY = 0;             // mousedown 时鼠标 Y 坐标
-  var reducedMotion = false;      // 是否减少动画
-  // v6 新增：导航程序化滚动兜底定时器
-  // 用于防止 handleNavClick 设置 isProgrammaticScroll 后，
-  // 因目标位置与当前位置相近导致无 scroll 事件，标志永久泄漏
-  var navProgrammaticTimer = null;
-  // v6 新增：设置程序化标志时的滚动位置（用于兜底检测）
-  var navProgrammaticStartY = 0;
+  var dragStartX = 0;
+  var dragStartY = 0;
+  var reducedMotion = false;
+  var scrollStableTimer = null;
+  var stableRetryCount = 0;
+  var resizeTimer = null;
+  var rafId = null;
+  var animationToken = 0;
+
+  // 当前非程序化用户滚动会话
+  var sessionActive = false;
+  var sessionStartY = 0;
+  var sessionStartSectionIndex = -1;
+  var sampleLastY = 0;
+  var sampleLastTime = 0;
+  var consecutiveHighSampleCount = 0;
+  var hasQualifiedHighVelocity = false;
+  var scrollDirection = 0;
+  var directionTime = 0;
 
   // ===== 工具函数：缓动函数 =====
   function easeOutCubic(t) {
@@ -2442,134 +2425,195 @@ body {
     }
   }
 
-  // ===== 模块注册与位置缓存 =====
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getActualNavHeight() {
+    var nav = document.querySelector('.top-nav');
+    if (!nav) return CONFIG.fallbackNavHeight;
+    var height = nav.getBoundingClientRect().height;
+    return height > 0 ? height : CONFIG.fallbackNavHeight;
+  }
+
+  // ===== 模块注册与导航栏下方起点缓存 =====
   function cacheSections() {
     sections = [];
+    navHeight = getActualNavHeight();
+    maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
     for (var i = 0; i < SECTION_SELECTORS.length; i++) {
       var el = document.querySelector(SECTION_SELECTORS[i]);
       if (!el) continue;
       var rect = el.getBoundingClientRect();
       var offsetTop = rect.top + window.pageYOffset;
       var height = rect.height;
-      var centerY = offsetTop + height / 2 - window.innerHeight / 2 - CONFIG.navHeight / 2;
-      centerY = Math.max(0, centerY);
+      var rawAnchorY = offsetTop - navHeight;
       sections.push({
         el: el,
         index: i,
         top: offsetTop,
         bottom: offsetTop + height,
         height: height,
-        center: centerY,
+        rawAnchorY: rawAnchorY,
+        anchorY: clamp(rawAnchorY, 0, maxScrollY),
+        isBottomClamped: rawAnchorY > maxScrollY,
         selector: SECTION_SELECTORS[i]
       });
     }
     sections.sort(function(a, b) { return a.top - b.top; });
   }
 
-  // ===== 获取当前视口中心所在的模块索引 =====
-  function getCurrentSectionIndex(scrollY) {
+  // ===== 按导航栏下方锚定线解析模块，间隙方向只读取显式上下文 =====
+  function resolveSectionAtAnchor(scrollY, direction, directionTimestamp, now) {
     if (sections.length === 0) return -1;
-    var viewportCenter = scrollY + window.innerHeight / 2;
+    var anchorLineY = scrollY + navHeight + 1;
+
+    if (anchorLineY < sections[0].top) return 0;
+
     for (var i = 0; i < sections.length; i++) {
-      if (viewportCenter >= sections[i].top && viewportCenter <= sections[i].bottom) {
+      if (anchorLineY >= sections[i].top && anchorLineY < sections[i].bottom) {
         return i;
       }
-    }
-    var nearestIdx = 0;
-    var minDist = Infinity;
-    for (var j = 0; j < sections.length; j++) {
-      var sectionCenter = sections[j].top + sections[j].height / 2;
-      var dist = Math.abs(viewportCenter - sectionCenter);
-      if (dist < minDist) {
-        minDist = dist;
-        nearestIdx = j;
+
+      if (i < sections.length - 1 &&
+          anchorLineY >= sections[i].bottom &&
+          anchorLineY < sections[i + 1].top) {
+        var directionIsValid = (direction === 1 || direction === -1) &&
+          directionTimestamp > 0 &&
+          now - directionTimestamp <= CONFIG.directionValidityDuration;
+
+        if (directionIsValid) {
+          return direction > 0 ? i + 1 : i;
+        }
+
+        var previousDistance = anchorLineY - sections[i].bottom;
+        var nextDistance = sections[i + 1].top - anchorLineY;
+        return previousDistance < nextDistance ? i : i + 1;
       }
     }
-    return nearestIdx;
+
+    return sections.length - 1;
   }
 
-  // ===== 选择吸附目标模块（方向优先策略） =====
-  function selectTargetSection(scrollY, direction) {
-    if (sections.length === 0) return null;
+  // 分页键在间隙中只按当前按键方向选择紧邻模块，不读取滚动残留方向。
+  function resolvePageBaseIndex(scrollY, key) {
+    if (sections.length === 0) return -1;
+    var anchorLineY = scrollY + navHeight + 1;
 
-    var currentIdx = getCurrentSectionIndex(scrollY);
-    if (currentIdx === -1) return null;
+    if (anchorLineY < sections[0].top) return 0;
 
-    var targetIdx = currentIdx;
-
-    if (direction > 0) {
-      var viewportCenter = scrollY + window.innerHeight / 2;
-      for (var i = currentIdx; i < sections.length; i++) {
-        var sectionCenter = sections[i].top + sections[i].height / 2;
-        if (sectionCenter > viewportCenter + CONFIG.minSnapDistance) {
-          targetIdx = i;
-          break;
-        }
+    for (var i = 0; i < sections.length; i++) {
+      if (anchorLineY >= sections[i].top && anchorLineY < sections[i].bottom) {
+        return i;
       }
-    } else if (direction < 0) {
-      var viewportCenterUp = scrollY + window.innerHeight / 2;
-      for (var j = currentIdx; j >= 0; j--) {
-        var sectionCenterUp = sections[j].top + sections[j].height / 2;
-        if (sectionCenterUp < viewportCenterUp - CONFIG.minSnapDistance) {
-          targetIdx = j;
-          break;
+      if (i < sections.length - 1 &&
+          anchorLineY >= sections[i].bottom &&
+          anchorLineY < sections[i + 1].top) {
+        if (key === 'PageDown') {
+          return i;
         }
+        return i + 1;
       }
     }
 
-    targetIdx = Math.max(0, Math.min(sections.length - 1, targetIdx));
-    return sections[targetIdx];
+    return sections.length - 1;
   }
 
-  // ===== 清除导航程序化兜底定时器 =====
-  // v6 新增：统一的兜底定时器清除函数
-  function clearNavProgrammaticFallback() {
-    if (navProgrammaticTimer) {
-      clearTimeout(navProgrammaticTimer);
-      navProgrammaticTimer = null;
+  function findSectionByElement(targetEl) {
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].el === targetEl) {
+        return sections[i];
+      }
+    }
+    return null;
+  }
+
+  function clearScrollStableTimer() {
+    if (scrollStableTimer) {
+      clearTimeout(scrollStableTimer);
+      scrollStableTimer = null;
+    }
+    stableRetryCount = 0;
+  }
+
+  function resetUserScrollSession() {
+    sessionActive = false;
+    sessionStartY = 0;
+    sessionStartSectionIndex = -1;
+    sampleLastY = 0;
+    sampleLastTime = 0;
+    consecutiveHighSampleCount = 0;
+    hasQualifiedHighVelocity = false;
+    currentSampleSpeed = 0;
+    isLowVelocity = true;
+    scrollDirection = 0;
+    directionTime = 0;
+  }
+
+  function startUserScrollSession(currentY, timestamp) {
+    sessionActive = true;
+    sessionStartY = currentY;
+    sessionStartSectionIndex = resolveSectionAtAnchor(currentY, 0, 0, timestamp);
+    sampleLastY = currentY;
+    sampleLastTime = timestamp;
+    consecutiveHighSampleCount = 0;
+    hasQualifiedHighVelocity = false;
+    currentSampleSpeed = 0;
+    isLowVelocity = true;
+    scrollDirection = 0;
+    directionTime = 0;
+  }
+
+  function prepareProgrammaticScroll() {
+    clearScrollStableTimer();
+    resetUserScrollSession();
+    lastScrollY = window.pageYOffset;
+  }
+
+  function finishProgrammaticScroll(token, onComplete) {
+    if (token !== animationToken) return;
+    rafId = null;
+    isSnapping = false;
+    isProgrammaticScroll = false;
+    lastScrollY = window.pageYOffset;
+    if (typeof onComplete === 'function') {
+      onComplete();
     }
   }
 
   // ===== 平滑滚动动画（支持打断 + 完成回调） =====
-  // v5 修订：isProgrammaticScroll 设置移入函数内部，确保设置-清除严格配对
-  // v6 修订：reducedMotion 路径补齐 isSnapping 状态管理
   function smoothScrollTo(targetY, duration, onComplete) {
-    if (isSnapping) return;
-
-    if (reducedMotion) {
-      // v6 修订：reducedMotion 路径也设置 isSnapping，与主路径保持一致
-      // 确保状态机完整性，防止连续快速触发导致的状态不一致
-      isSnapping = true;
-      isProgrammaticScroll = true;
-      window.scrollTo(0, targetY);
-      isProgrammaticScroll = false;
-      isSnapping = false;
-      if (typeof onComplete === 'function') {
-        onComplete();
-      }
-      return;
-    }
-
-    isSnapping = true;
-    // v5 新增：程序化标志在 isSnapping 之后设置，
-    // 确保若因 isSnapping 守卫提前返回，标志不会被泄漏
-    isProgrammaticScroll = true;
+    if (isSnapping) return false;
 
     var startY = window.pageYOffset;
     var distance = targetY - startY;
 
-    if (Math.abs(distance) < CONFIG.minSnapDistance) {
-      isSnapping = false;
-      isProgrammaticScroll = false;
+    if (Math.abs(distance) <= CONFIG.anchorTolerance) {
+      lastScrollY = startY;
       if (typeof onComplete === 'function') {
         onComplete();
       }
-      return;
+      return false;
+    }
+
+    var token = ++animationToken;
+    isSnapping = true;
+    isProgrammaticScroll = true;
+
+    // reduced-motion 直接定位，并延后一帧清理程序化状态以隔离滚动事件。
+    if (reducedMotion) {
+      window.scrollTo(0, targetY);
+      rafId = requestAnimationFrame(function() {
+        finishProgrammaticScroll(token, onComplete);
+      });
+      return true;
     }
 
     var startTime = null;
 
     function step(timestamp) {
+      if (token !== animationToken) return;
       if (!startTime) startTime = timestamp;
       var elapsed = timestamp - startTime;
       var progress = Math.min(elapsed / duration, 1);
@@ -2581,355 +2625,217 @@ body {
       if (progress < 1) {
         rafId = requestAnimationFrame(step);
       } else {
-        isSnapping = false;
-        isProgrammaticScroll = false;
-        rafId = null;
-        if (typeof onComplete === 'function') {
-          onComplete();
-        }
+        rafId = requestAnimationFrame(function() {
+          finishProgrammaticScroll(token, onComplete);
+        });
       }
     }
 
     rafId = requestAnimationFrame(step);
+    return true;
   }
 
-  // ===== 打断当前吸附动画（同步清除全部状态） =====
+  // ===== 打断当前吸附或程序化滚动，由用户立即接管 =====
   function cancelSnap() {
+    animationToken++;
     if (rafId) {
       cancelAnimationFrame(rafId);
       rafId = null;
     }
     isSnapping = false;
-    isHighVelocity = false;
-    // 清除程序化滚动标志（导航/键盘/吸附动画均可能设置）
     isProgrammaticScroll = false;
-    // v5 新增：重置高速意图标志
-    hasHighVelocityIntent = false;
-    // 重置稳定检测状态
-    stableRetryCount = 0;
-    if (scrollStableTimer) {
-      clearTimeout(scrollStableTimer);
-      scrollStableTimer = null;
-    }
-    // v6 新增：清除导航兜底定时器
-    clearNavProgrammaticFallback();
+    clearScrollStableTimer();
+    resetUserScrollSession();
+    lastScrollY = window.pageYOffset;
   }
 
-  // ===== 滚动速度计算 =====
-  function updateVelocity(currentY, timestamp) {
-    if (lastScrollTime > 0) {
-      var dy = currentY - lastScrollY;
-      var dt = timestamp - lastScrollTime;
-      if (dt > 0) {
-        var rawVelocity = Math.abs(dy) / dt;
-        velocity = velocity * 0.6 + rawVelocity * 0.4;
-        if (dy > 0.5) scrollDirection = 1;
-        else if (dy < -0.5) scrollDirection = -1;
-      }
-    }
-    lastScrollY = currentY;
-    lastScrollTime = timestamp;
-    lastVelocityUpdateTime = timestamp;
-  }
+  // ===== 记录同一会话内的原始有效速度样本 =====
+  function updateUserScrollSample(currentY, timestamp) {
+    var deltaY = currentY - sampleLastY;
+    var deltaTime = timestamp - sampleLastTime;
 
-  // ===== 速度衰减循环（v5 补充：不修改 hasHighVelocityIntent） =====
-  function velocityDecayLoop() {
-    if (document.hidden) {
-      decayRafId = requestAnimationFrame(velocityDecayLoop);
-      return;
-    }
+    if (deltaTime > 0 && Math.abs(deltaY) > CONFIG.validSampleDistance) {
+      currentSampleSpeed = Math.abs(deltaY / deltaTime);
+      isLowVelocity = currentSampleSpeed <= CONFIG.velocityLowThreshold;
+      scrollDirection = deltaY > 0 ? 1 : -1;
+      directionTime = timestamp;
 
-    var now = performance.now();
-    if (now - lastVelocityUpdateTime >= CONFIG.velocityStopThreshold) {
-      if (velocity > 0.01) {
-        velocity *= CONFIG.velocityDecay;
-        if (velocity < 0.01) {
-          velocity = 0;
-        }
-        // 衰减中仅修改实时速度状态 isHighVelocity
-        // v5 明确：不修改 hasHighVelocityIntent！
-        // 高速意图标志仅在 onScrollEnd / cancelSnap /
-        // 程序化滚动启动 / pageshow 等明确节点重置
-        if (isHighVelocity && velocity < CONFIG.velocityLowThreshold) {
-          isHighVelocity = false;
+      if (!hasQualifiedHighVelocity) {
+        if (currentSampleSpeed >= CONFIG.velocityHighThreshold) {
+          consecutiveHighSampleCount++;
+          if (consecutiveHighSampleCount >= CONFIG.requiredHighSampleCount) {
+            hasQualifiedHighVelocity = true;
+          }
+        } else {
+          consecutiveHighSampleCount = 0;
         }
       }
     }
 
-    decayRafId = requestAnimationFrame(velocityDecayLoop);
+    if (deltaTime > 0) {
+      sampleLastY = currentY;
+      sampleLastTime = timestamp;
+    }
   }
 
-  // ===== 滚动结束处理（v5 修订：用 hasHighVelocityIntent 判定吸附） =====
+  // ===== 滚动结束处理：原子快照后立即清空全局会话 =====
   function onScrollEnd() {
-    // 拖动滚动条时不触发吸附
-    if (isScrollbarDragging) {
-      return;
-    }
+    if (isScrollbarDragging || isProgrammaticScroll || !sessionActive) return;
 
-    // 程序化滚动（导航/键盘/吸附动画）不触发吸附
-    if (isProgrammaticScroll) {
-      isProgrammaticScroll = false;
-      // v5 新增：程序化滚动结束时也重置高速意图
-      hasHighVelocityIntent = false;
-      // v6 新增：滚动结束时清除导航兜底定时器
-      clearNavProgrammaticFallback();
-      return;
-    }
-
-    // v5 修订：用 hasHighVelocityIntent 替代 isHighVelocity 进行吸附判定
-    // 原因：isHighVelocity 受衰减循环影响，在等待衰减的过程中会被置为 false，
-    // 导致用户快速滚动的意图丢失，吸附实际永不触发。
-    // hasHighVelocityIntent 不受衰减影响，准确反映"用户曾快速滚动"的意图。
-    if (!hasHighVelocityIntent) {
-      return;
-    }
-
-    var currentY = window.pageYOffset;
-
-    // 边界检查：顶部/底部附近不吸附
-    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (currentY <= 5 || currentY >= maxScroll - 5) {
-      // v5: 边界处也重置高速意图
-      hasHighVelocityIntent = false;
-      return;
-    }
-
-    var currentSectionIdx = getCurrentSectionIndex(currentY);
-
-    // 跨模块才吸附
-    if (startSectionIndex === currentSectionIdx && startSectionIndex !== -1) {
-      // v5: 模块内不吸附时也重置高速意图
-      hasHighVelocityIntent = false;
-      return;
-    }
-
-    var targetSection = selectTargetSection(currentY, scrollDirection);
-    if (!targetSection) {
-      hasHighVelocityIntent = false;
-      return;
-    }
-
-    var targetY = targetSection.center;
-
-    if (Math.abs(targetY - currentY) < CONFIG.minSnapDistance) {
-      hasHighVelocityIntent = false;
-      return;
-    }
-
-    // 执行吸附（v5: isProgrammaticScroll 已移入 smoothScrollTo 内部设置）
-    // 完成回调中重置高速意图
-    smoothScrollTo(targetY, CONFIG.snapDuration, function() {
-      hasHighVelocityIntent = false;
+    var endY = window.pageYOffset;
+    var endTime = performance.now();
+    var snapshotDirection = scrollDirection;
+    var snapshotDirectionTime = directionTime;
+    var endSectionIndex = resolveSectionAtAnchor(
+      endY,
+      snapshotDirection,
+      snapshotDirectionTime,
+      endTime
+    );
+    var snapSnapshot = Object.freeze({
+      qualified: hasQualifiedHighVelocity,
+      sessionStartY: sessionStartY,
+      sessionStartSectionIndex: sessionStartSectionIndex,
+      endY: endY,
+      endSectionIndex: endSectionIndex,
+      direction: snapshotDirection,
+      directionTime: snapshotDirectionTime
     });
+
+    resetUserScrollSession();
+    lastScrollY = endY;
+
+    var snapEligible = snapSnapshot.qualified &&
+      Math.abs(snapSnapshot.endY - snapSnapshot.sessionStartY) >= CONFIG.minSessionDistance &&
+      snapSnapshot.endSectionIndex !== snapSnapshot.sessionStartSectionIndex;
+
+    if (!snapEligible ||
+        snapSnapshot.endSectionIndex < 0 ||
+        snapSnapshot.endSectionIndex >= sections.length) {
+      return;
+    }
+
+    var targetSection = sections[snapSnapshot.endSectionIndex];
+    var targetY = targetSection.anchorY;
+    if (Math.abs(targetY - snapSnapshot.endY) <= CONFIG.anchorTolerance) {
+      return;
+    }
+
+    smoothScrollTo(targetY, CONFIG.snapDuration);
   }
 
-  // ===== 滚动稳定检测（沿用 v4 轮询重试模式） =====
+  // ===== 滚动稳定检测 =====
   function handleScrollStable() {
-    var currentY = window.pageYOffset;
+    scrollStableTimer = null;
+    if (isScrollbarDragging || isProgrammaticScroll || !sessionActive) {
+      stableRetryCount = 0;
+      return;
+    }
 
-    // 位置是否稳定
+    var currentY = window.pageYOffset;
     var positionStable = Math.abs(currentY - lastScrollY) < 1;
 
     if (!positionStable) {
-      // 位置还在变化，重置重试计数，结束
-      stableRetryCount = 0;
-      return;
+      lastScrollY = currentY;
+      if (stableRetryCount < CONFIG.stableMaxRetries) {
+        stableRetryCount++;
+        scrollStableTimer = setTimeout(handleScrollStable, CONFIG.stableRetryInterval);
+        return;
+      }
     }
 
-    // 位置已稳定，检查速度
-    if (velocity < 0.1) {
-      // 速度也足够低，确认滚动结束
-      stableRetryCount = 0;
-      onScrollEnd();
-      return;
-    }
-
-    // 位置稳定但速度还没降下来 → 重试
-    if (stableRetryCount < CONFIG.stableMaxRetries) {
-      stableRetryCount++;
-      scrollStableTimer = setTimeout(handleScrollStable, CONFIG.stableRetryInterval);
-    } else {
-      // 达到最大重试次数，仍判定为滚动结束
-      // （位置已稳定 120 + 20*10 = 320ms，速度必然极低）
-      stableRetryCount = 0;
-      onScrollEnd();
-    }
+    stableRetryCount = 0;
+    onScrollEnd();
   }
 
   // ===== 滚动事件处理 =====
   function handleScroll() {
-    // 拖动滚动条时跳过全部逻辑
-    if (isScrollbarDragging) {
-      return;
-    }
-
     var currentY = window.pageYOffset;
-    var now = performance.now();
 
-    // 程序化滚动期间，跳过速度计算和状态更新
-    // 仅更新位置追踪 + 重置稳定检测定时器
-    if (isProgrammaticScroll) {
+    if (isScrollbarDragging || isProgrammaticScroll) {
       lastScrollY = currentY;
-      // 重置稳定检测（确保滚动过程中不会误触发）
-      if (scrollStableTimer) {
-        clearTimeout(scrollStableTimer);
-      }
-      scrollStableTimer = setTimeout(handleScrollStable, CONFIG.scrollEndDelay);
-
-      // v6 新增：程序化滚动中位置发生变化，清除兜底定时器
-      // （说明浏览器确实在滚动，兜底不需要了）
-      if (navProgrammaticTimer && Math.abs(currentY - navProgrammaticStartY) > 1) {
-        clearNavProgrammaticFallback();
-      }
-
       return;
     }
 
-    // 更新速度（同时更新 lastVelocityUpdateTime，重置衰减计时）
-    updateVelocity(currentY, now);
-
-    // 滞回速度状态机
-    if (velocity > CONFIG.velocityHighThreshold) {
-      if (!isHighVelocity) {
-        isHighVelocity = true;
-        // v5 新增：同时设置高速意图标志
-        hasHighVelocityIntent = true;
-        startSectionIndex = getCurrentSectionIndex(currentY);
-      }
-    } else if (velocity < CONFIG.velocityLowThreshold) {
-      isHighVelocity = false;
-      // v5 注意：不重置 hasHighVelocityIntent！
-      // 意图标志在 onScrollEnd 中才重置
+    var now = performance.now();
+    if (!sessionActive) {
+      startUserScrollSession(currentY, now);
+    } else {
+      updateUserScrollSample(currentY, now);
     }
 
-    // 清除之前的稳定检测
-    if (scrollStableTimer) {
-      clearTimeout(scrollStableTimer);
-    }
+    lastScrollY = currentY;
+    clearScrollStableTimer();
     stableRetryCount = 0;
-
-    // 设置新的稳定检测定时器
     scrollStableTimer = setTimeout(handleScrollStable, CONFIG.scrollEndDelay);
   }
 
-  // ===== 主动滚动打断检测（v5 修订：增加程序化滚动接管） =====
-  function handleWheel(e) {
+  // ===== 主动输入打断动画 =====
+  function handleWheel() {
     if (isSnapping) {
-      // 吸附动画中 → 打断动画，清除全部状态
       cancelSnap();
-    } else if (isProgrammaticScroll) {
-      // v5 新增：程序化滚动中（如导航点击平滑跳转）用户主动滚轮
-      // → 用户要接管滚动，清除程序化标志，恢复正常速度检测
-      isProgrammaticScroll = false;
-      // 重置稳定检测状态
-      stableRetryCount = 0;
-      if (scrollStableTimer) {
-        clearTimeout(scrollStableTimer);
-        scrollStableTimer = null;
-      }
-      // v6 新增：清除导航兜底定时器
-      clearNavProgrammaticFallback();
-      // 注意：不重置 hasHighVelocityIntent，
-      // 因为用户的滚轮操作可能本身就是快速滚动，
-      // 会在 handleScroll 中重新评估
     }
   }
 
   function handleTouchStart() {
     if (isSnapping) {
-      // 吸附动画中 → 打断动画，清除全部状态
       cancelSnap();
-    } else if (isProgrammaticScroll) {
-      // v5 新增：程序化滚动中用户主动触屏
-      // → 用户要接管滚动，清除程序化标志
-      isProgrammaticScroll = false;
-      stableRetryCount = 0;
-      if (scrollStableTimer) {
-        clearTimeout(scrollStableTimer);
-        scrollStableTimer = null;
-      }
-      // v6 新增：清除导航兜底定时器
-      clearNavProgrammaticFallback();
     }
   }
 
-  // ===== 顶部导航点击集成（v6 修订：目标位置预判 + 兜底定时器） =====
+  function handlePointerDown(e) {
+    var isValidPointer = e.isPrimary !== false &&
+      (e.pointerType !== 'mouse' || e.button === 0);
+    if (isSnapping && isValidPointer) {
+      cancelSnap();
+    }
+  }
+
+  // ===== 顶部导航使用与自动吸附相同的 anchorY =====
   function handleNavClick(e) {
-    // v6 新增：先计算目标位置，判断是否真的会发生滚动
-    var targetY = null;
-    var href = e.currentTarget.getAttribute('href');
-    if (href && href.charAt(0) === '#') {
-      var targetEl = document.querySelector(href);
-      if (targetEl) {
-        // 与现有导航逻辑一致：target.offsetTop - 70
-        targetY = targetEl.offsetTop - CONFIG.navScrollOffset;
-        targetY = Math.max(0, targetY);
-      }
+    e.preventDefault();
+    if (isSnapping) {
+      cancelSnap();
+    } else {
+      prepareProgrammaticScroll();
     }
 
-    var currentY = window.pageYOffset;
+    var href = e.currentTarget.getAttribute('href');
+    if (!href || href.charAt(0) !== '#') return;
+    if (sections.length === 0) cacheSections();
 
-    // v6 新增：目标位置预判
-    // 如果目标位置与当前位置差异很小，浏览器不会触发 scroll 事件，
-    // onScrollEnd 永不触发，isProgrammaticScroll 会永久泄漏。
-    // 因此：差异小于阈值时，不设置程序化标志，从根源避免泄漏。
-    if (targetY !== null && Math.abs(targetY - currentY) < CONFIG.navPositionThreshold) {
-      // 目标就在附近，不会有实质性滚动
-      // 不设置任何标志，直接返回
+    var targetEl = document.querySelector(href);
+    var targetSection = targetEl ? findSectionByElement(targetEl) : null;
+    if (!targetSection) return;
+
+    var currentY = window.pageYOffset;
+    if (Math.abs(targetSection.anchorY - currentY) <= CONFIG.anchorTolerance) {
+      lastScrollY = currentY;
       return;
     }
 
-    // 清除之前的兜底定时器（如果有）
-    clearNavProgrammaticFallback();
-
-    // 点击导航链接时设置程序化滚动标志
-    // 不阻止默认行为，不影响原有导航逻辑
-    isProgrammaticScroll = true;
-    isHighVelocity = false;
-    // v5 新增：重置高速滚动意图
-    // 原因：用户点击导航表示明确的导航意图，不是"快速滚动"
-    // 若不重置，onScrollEnd 清除 isProgrammaticScroll 后，
-    // hasHighVelocityIntent 仍为 true，可能误触发后续吸附
-    hasHighVelocityIntent = false;
-    // 重置稳定检测状态
-    stableRetryCount = 0;
-    if (scrollStableTimer) {
-      clearTimeout(scrollStableTimer);
-      scrollStableTimer = null;
-    }
-
-    // v6 新增：记录设置时的位置，启动兜底定时器
-    // 作为最后防线：若 2000ms 后位置仍未变化，强制清除标志
-    navProgrammaticStartY = currentY;
-    navProgrammaticTimer = setTimeout(function() {
-      var nowY = window.pageYOffset;
-      if (isProgrammaticScroll && Math.abs(nowY - navProgrammaticStartY) < 1) {
-        // 2 秒后位置几乎没变，说明滚动没有真正发生（或已结束但未检测到）
-        // 强制清除所有相关状态，防止永久泄漏
-        isProgrammaticScroll = false;
-        hasHighVelocityIntent = false;
-        stableRetryCount = 0;
-        if (scrollStableTimer) {
-          clearTimeout(scrollStableTimer);
-          scrollStableTimer = null;
-        }
-      }
-      navProgrammaticTimer = null;
-    }, CONFIG.navProgrammaticFallbackTimeout);
+    smoothScrollTo(targetSection.anchorY, CONFIG.snapDuration);
   }
 
   // ===== 窗口大小变化时重新计算模块位置 =====
   function handleResize() {
+    if (isSnapping) {
+      cancelSnap();
+    } else {
+      clearScrollStableTimer();
+      resetUserScrollSession();
+    }
     if (resizeTimer) {
       clearTimeout(resizeTimer);
     }
     resizeTimer = setTimeout(function() {
       cacheSections();
+      lastScrollY = window.pageYOffset;
+      resizeTimer = null;
     }, CONFIG.resizeDebounce);
   }
 
   // ===== 键盘导航支持（PageUp / PageDown） =====
-  // v5 修订：移除外部的 isProgrammaticScroll 设置，移入 smoothScrollTo 内部
   function handleKeydown(e) {
     if (e.key !== 'PageDown' && e.key !== 'PageUp') return;
 
@@ -2940,8 +2846,15 @@ body {
 
     e.preventDefault();
 
+    if (isSnapping) {
+      cancelSnap();
+    } else {
+      prepareProgrammaticScroll();
+    }
+    if (sections.length === 0) cacheSections();
+
     var currentY = window.pageYOffset;
-    var currentIdx = getCurrentSectionIndex(currentY);
+    var currentIdx = resolvePageBaseIndex(currentY, e.key);
     var targetIdx = currentIdx;
 
     if (e.key === 'PageDown') {
@@ -2953,24 +2866,19 @@ body {
     if (targetIdx < 0 || targetIdx >= sections.length) return;
     if (targetIdx === currentIdx) return;
 
-    // v5 修订：不再在此处设置 isProgrammaticScroll
-    // 改由 smoothScrollTo 内部设置（确保设置-清除配对）
-    // 但需要重置高速意图，因为键盘导航是程序化的
-    hasHighVelocityIntent = false;
-
-    var targetY = sections[targetIdx].center;
-
-    // v5: smoothScrollTo 内部会设置并清除 isProgrammaticScroll
-    smoothScrollTo(targetY, CONFIG.snapDuration, function() {
-      // 完成回调（如需额外逻辑可在此添加）
-      // isProgrammaticScroll 已在 smoothScrollTo 内部清除
-    });
+    smoothScrollTo(sections[targetIdx].anchorY, CONFIG.snapDuration);
   }
 
   // ===== 检测滚动条拖动 =====
   function handleMouseDown(e) {
     if (e.clientX >= window.innerWidth - CONFIG.scrollbarDetectWidth ||
         e.clientY >= window.innerHeight - CONFIG.scrollbarDetectWidth) {
+      if (isSnapping) {
+        cancelSnap();
+      } else {
+        clearScrollStableTimer();
+        resetUserScrollSession();
+      }
       isScrollbarDragCandidate = true;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
@@ -2986,6 +2894,8 @@ body {
     if (dx > 5 || dy > 5) {
       isScrollbarDragging = true;
       isScrollbarDragCandidate = false;
+      clearScrollStableTimer();
+      resetUserScrollSession();
     }
   }
 
@@ -2994,68 +2904,64 @@ body {
     if (isScrollbarDragging) {
       setTimeout(function() {
         isScrollbarDragging = false;
+        resetUserScrollSession();
+        lastScrollY = window.pageYOffset;
       }, 100);
     }
+  }
+
+  function refreshLayoutState() {
+    clearScrollStableTimer();
+    resetUserScrollSession();
+    cacheSections();
+    lastScrollY = window.pageYOffset;
   }
 
   // ===== 初始化 =====
   function init() {
     checkReducedMotion();
 
-    // 仅在 load 事件触发 cacheSections（确保图片/字体加载后尺寸准确）
     if (document.readyState === 'complete') {
-      cacheSections();
+      refreshLayoutState();
     } else {
-      window.addEventListener('load', cacheSections);
+      window.addEventListener('load', refreshLayoutState);
     }
 
-    // 滚动监听（被动模式，性能优化）
     window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // 打断动画 / 接管程序化滚动的事件
     window.addEventListener('wheel', handleWheel, { passive: true });
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
-
-    // 窗口大小变化
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
     window.addEventListener('resize', handleResize);
-
-    // 键盘支持
     window.addEventListener('keydown', handleKeydown);
-
-    // 滚动条拖动检测
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
 
-    // 顶部导航点击集成
-    // 监听所有导航链接点击，设置程序化滚动标志
     var navLinks = document.querySelectorAll('.top-nav-links a');
     for (var i = 0; i < navLinks.length; i++) {
       navLinks[i].addEventListener('click', handleNavClick);
     }
 
-    // 启动速度衰减循环
-    velocityDecayLoop();
-
-    // 浏览器前进/后退导致的滚动恢复
     window.addEventListener('pageshow', function() {
-      isHighVelocity = false;
-      hasHighVelocityIntent = false; // v5 新增
-      velocity = 0;
-      lastScrollY = window.pageYOffset;
-      lastScrollTime = performance.now();
-      startSectionIndex = -1;
+      if (isSnapping) {
+        cancelSnap();
+      }
       isScrollbarDragging = false;
+      isScrollbarDragCandidate = false;
       isProgrammaticScroll = false;
-      stableRetryCount = 0;
-      // v6 新增：清除导航兜底定时器
-      clearNavProgrammaticFallback();
+      refreshLayoutState();
     });
 
-    // 页面可见性变化
     document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) {
-        lastVelocityUpdateTime = performance.now();
+      if (document.hidden) {
+        if (isSnapping) {
+          cancelSnap();
+        } else {
+          clearScrollStableTimer();
+          resetUserScrollSession();
+        }
+      } else {
+        lastScrollY = window.pageYOffset;
       }
     });
   }
