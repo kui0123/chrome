@@ -2343,6 +2343,8 @@ body {
     minSessionDistance: 120,
     // 间隙方向上下文的有效时间 (ms)
     directionValidityDuration: 120,
+    // 连续滚轮输入超过此间隔后视为用户开启了新的接管会话 (ms)
+    wheelSessionGap: 80,
     // 滚动结束检测：连续多少 ms 无位移判定为停止（首轮延迟）
     scrollEndDelay: 120,
     // 稳定检测重试间隔 (ms)
@@ -2391,6 +2393,10 @@ body {
   var resizeTimer = null;
   var rafId = null;
   var animationToken = 0;
+  var lastWheelInputTime = 0;
+  var scrollBehaviorOverrideActive = false;
+  var originalInlineScrollBehavior = '';
+  var originalInlineScrollBehaviorPriority = '';
 
   // 当前非程序化用户滚动会话
   var sessionActive = false;
@@ -2465,7 +2471,7 @@ body {
   }
 
   // ===== 按导航栏下方锚定线解析模块，间隙方向只读取显式上下文 =====
-  function resolveSectionAtAnchor(scrollY, direction, directionTimestamp, now) {
+  function resolveSectionAtAnchor(scrollY, direction, directionTimestamp, now, preserveSessionDirection) {
     if (sections.length === 0) return -1;
     var anchorLineY = scrollY + navHeight + 1;
 
@@ -2481,7 +2487,8 @@ body {
           anchorLineY < sections[i + 1].top) {
         var directionIsValid = (direction === 1 || direction === -1) &&
           directionTimestamp > 0 &&
-          now - directionTimestamp <= CONFIG.directionValidityDuration;
+          (preserveSessionDirection ||
+            now - directionTimestamp <= CONFIG.directionValidityDuration);
 
         if (directionIsValid) {
           return direction > 0 ? i + 1 : i;
@@ -2551,10 +2558,10 @@ body {
     directionTime = 0;
   }
 
-  function startUserScrollSession(currentY, timestamp) {
+  function startUserScrollSession(startY, currentY, timestamp) {
     sessionActive = true;
-    sessionStartY = currentY;
-    sessionStartSectionIndex = resolveSectionAtAnchor(currentY, 0, 0, timestamp);
+    sessionStartY = startY;
+    sessionStartSectionIndex = resolveSectionAtAnchor(startY, 0, 0, timestamp, false);
     sampleLastY = currentY;
     sampleLastTime = timestamp;
     consecutiveHighSampleCount = 0;
@@ -2571,11 +2578,42 @@ body {
     lastScrollY = window.pageYOffset;
   }
 
+  // 自定义 rAF 或 reduced-motion 定位期间禁用 CSS 平滑滚动，退出时恢复原内联状态。
+  function enableImmediateScrollBehavior() {
+    if (scrollBehaviorOverrideActive) return;
+
+    var rootStyle = document.documentElement.style;
+    originalInlineScrollBehavior = rootStyle.getPropertyValue('scroll-behavior');
+    originalInlineScrollBehaviorPriority = rootStyle.getPropertyPriority('scroll-behavior');
+    rootStyle.setProperty('scroll-behavior', 'auto', 'important');
+    scrollBehaviorOverrideActive = true;
+  }
+
+  function restoreScrollBehavior() {
+    if (!scrollBehaviorOverrideActive) return;
+
+    var rootStyle = document.documentElement.style;
+    if (originalInlineScrollBehavior) {
+      rootStyle.setProperty(
+        'scroll-behavior',
+        originalInlineScrollBehavior,
+        originalInlineScrollBehaviorPriority
+      );
+    } else {
+      rootStyle.removeProperty('scroll-behavior');
+    }
+
+    scrollBehaviorOverrideActive = false;
+    originalInlineScrollBehavior = '';
+    originalInlineScrollBehaviorPriority = '';
+  }
+
   function finishProgrammaticScroll(token, onComplete) {
     if (token !== animationToken) return;
     rafId = null;
     isSnapping = false;
     isProgrammaticScroll = false;
+    restoreScrollBehavior();
     lastScrollY = window.pageYOffset;
     if (typeof onComplete === 'function') {
       onComplete();
@@ -2600,6 +2638,7 @@ body {
     var token = ++animationToken;
     isSnapping = true;
     isProgrammaticScroll = true;
+    enableImmediateScrollBehavior();
 
     // reduced-motion 直接定位，并延后一帧清理程序化状态以隔离滚动事件。
     if (reducedMotion) {
@@ -2644,6 +2683,7 @@ body {
     }
     isSnapping = false;
     isProgrammaticScroll = false;
+    restoreScrollBehavior();
     clearScrollStableTimer();
     resetUserScrollSession();
     lastScrollY = window.pageYOffset;
@@ -2690,7 +2730,8 @@ body {
       endY,
       snapshotDirection,
       snapshotDirectionTime,
-      endTime
+      endTime,
+      true
     );
     var snapSnapshot = Object.freeze({
       qualified: hasQualifiedHighVelocity,
@@ -2759,7 +2800,7 @@ body {
 
     var now = performance.now();
     if (!sessionActive) {
-      startUserScrollSession(currentY, now);
+      startUserScrollSession(lastScrollY, currentY, now);
     } else {
       updateUserScrollSample(currentY, now);
     }
@@ -2770,24 +2811,42 @@ body {
     scrollStableTimer = setTimeout(handleScrollStable, CONFIG.scrollEndDelay);
   }
 
-  // ===== 主动输入打断动画 =====
-  function handleWheel() {
+  // ===== 主动输入接管：取消动画或清理尚未结算的旧会话 =====
+  function handleUserTakeover() {
     if (isSnapping) {
       cancelSnap();
+      return;
+    }
+
+    if (sessionActive || isProgrammaticScroll) {
+      clearScrollStableTimer();
+      isProgrammaticScroll = false;
+      resetUserScrollSession();
+      lastScrollY = window.pageYOffset;
     }
   }
 
-  function handleTouchStart() {
-    if (isSnapping) {
-      cancelSnap();
+  function handleWheel() {
+    var now = performance.now();
+    var startsNewInputSession = lastWheelInputTime === 0 ||
+      now - lastWheelInputTime > CONFIG.wheelSessionGap;
+
+    if (isSnapping || isProgrammaticScroll ||
+        (sessionActive && startsNewInputSession)) {
+      handleUserTakeover();
     }
+    lastWheelInputTime = now;
+  }
+
+  function handleTouchStart() {
+    handleUserTakeover();
   }
 
   function handlePointerDown(e) {
     var isValidPointer = e.isPrimary !== false &&
       (e.pointerType !== 'mouse' || e.button === 0);
-    if (isSnapping && isValidPointer) {
-      cancelSnap();
+    if (isValidPointer) {
+      handleUserTakeover();
     }
   }
 
@@ -2946,6 +3005,7 @@ body {
       if (isSnapping) {
         cancelSnap();
       }
+      restoreScrollBehavior();
       isScrollbarDragging = false;
       isScrollbarDragCandidate = false;
       isProgrammaticScroll = false;
@@ -2960,6 +3020,7 @@ body {
           clearScrollStableTimer();
           resetUserScrollSession();
         }
+        restoreScrollBehavior();
       } else {
         lastScrollY = window.pageYOffset;
       }
